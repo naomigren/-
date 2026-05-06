@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>阿姜的德语城堡</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Noto+Serif+SC:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;0,500;1,400&display=swap');
+
+:root {
+  --mb1:#7d93a3;--mb2:#95aab8;--mb3:#adbfcb;--mb4:#c8d4dc;--mb5:#dfe7ec;--mb6:#edf2f5;
+  --md:#4a6478;--mi:#344858;--mw:#8a9eaa;
+  --paper:#faf9f8;--pl:#cdd8e0;
+  --gold:#c8b070;--gold2:#d4c490;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{height:100%;}
+body{
+  background:var(--mb5);font-family:'Noto Serif SC',serif;
+  color:var(--mi);min-height:100%;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+body::before{
+  content:'';position:fixed;top:-20%;left:-15%;
+  width:55vw;height:55vw;
+  background:radial-gradient(ellipse,rgba(125,147,163,0.2) 0%,transparent 70%);
+  border-radius:50%;pointer-events:none;z-index:0;
+}
+
+.container{
+  position:relative;z-index:1;max-width:520px;
+  margin:0 auto;padding:20px 16px 40px;
+}
+
+/* Header */
+.header{
+  text-align:center;padding:28px 20px 20px;
+  background:var(--paper);border-radius:16px;
+  box-shadow:0 2px 12px rgba(74,100,120,0.06);
+  margin-bottom:20px;position:relative;overflow:hidden;
+}
+.header::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--mb4),var(--mb1),var(--mb4));
+}
+.header h1{
+  font-family:'Playfair Display',serif;font-weight:400;
+  font-size:1.5rem;color:var(--md);letter-spacing:3px;margin-bottom:2px;
+}
+.header .sub{
+  font-family:'Caveat',cursive;font-size:0.85rem;color:var(--mw);letter-spacing:1px;
+}
+.header .goal{
+  font-size:0.72rem;color:var(--mb2);margin-top:4px;
+  font-family:'Noto Serif SC',serif;letter-spacing:0.5px;
+}
+
+/* Flight path */
+.flight-wrap{
+  margin:18px 0 14px;position:relative;
+  height:36px;background:var(--mb6);border-radius:18px;
+  overflow:hidden;border:1px solid var(--mb4);
+}
+.flight-fill{
+  position:absolute;top:0;left:0;height:100%;
+  background:linear-gradient(90deg,var(--mb3),var(--mb1));
+  border-radius:18px;transition:width 1s cubic-bezier(0.4,0,0.2,1);
+  opacity:0.3;
+}
+.flight-plane{
+  position:absolute;top:50%;transform:translateY(-50%);
+  font-size:1.2rem;transition:left 1s cubic-bezier(0.4,0,0.2,1);
+  filter:drop-shadow(0 2px 4px rgba(74,100,120,0.3));
+  z-index:2;
+}
+.flight-label{
+  position:absolute;top:50%;transform:translateY(-50%);
+  font-family:'Caveat',cursive;font-size:0.7rem;color:var(--mw);
+  z-index:1;
+}
+.flight-label.start{left:10px;}
+.flight-label.end{right:10px;}
+
+.stats-row{
+  display:flex;justify-content:center;gap:24px;
+  margin-top:10px;font-size:0.75rem;color:var(--mw);
+}
+.stats-row b{color:var(--md);font-size:0.95rem;font-family:'Playfair Display',serif;}
+
+.chart-wrap{
+  margin-top:14px;height:160px;position:relative;
+  background:var(--mb6);border-radius:10px;padding:8px;
+}
+
+/* Grid */
+.section-label{
+  font-family:'Caveat',cursive;font-size:1rem;
+  color:var(--mw);text-align:center;margin:20px 0 12px;letter-spacing:1px;
+}
+.grid{
+  display:grid;grid-template-columns:repeat(10,1fr);
+  gap:5px;max-width:520px;margin:0 auto;
+}
+.day{
+  aspect-ratio:1;background:var(--paper);
+  border:1.5px solid var(--mb4);border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Caveat',cursive;font-size:0.8rem;color:var(--mw);
+  cursor:pointer;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+  position:relative;overflow:hidden;
+}
+.day:hover{
+  transform:translateY(-2px);
+  box-shadow:0 4px 12px rgba(74,100,120,0.1);
+  border-color:var(--mb2);
+}
+.day.active{
+  background:linear-gradient(135deg,var(--mb1),var(--mb2));
+  color:white;border-color:var(--mb1);
+  box-shadow:0 2px 8px rgba(125,147,163,0.3);
+}
+.day.active::after{
+  content:'✓';position:absolute;font-size:0.5rem;top:2px;right:3px;opacity:0.7;
+}
+.day.medal{border-color:var(--gold);border-width:2px;}
+.day.medal::before{
+  content:'🏅';position:absolute;top:-4px;right:-4px;font-size:0.5rem;
+}
+.day.milestone{border-color:var(--gold);border-width:2px;}
+.day.milestone.active{
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  border-color:var(--gold);
+  box-shadow:0 2px 12px rgba(200,176,112,0.35);
+}
+
+/* Cards */
+.card{
+  background:var(--paper);border-radius:16px;
+  box-shadow:0 2px 12px rgba(74,100,120,0.06);
+  padding:20px;margin-top:20px;position:relative;overflow:hidden;
+}
+.card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--mb4),var(--mb2),var(--mb4));
+}
+.card h3{
+  font-family:'Playfair Display',serif;font-weight:400;
+  font-size:0.95rem;color:var(--md);margin-bottom:12px;letter-spacing:1px;
+}
+
+/* Rewards */
+.reward-row{
+  display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:0.8rem;
+}
+.reward-label{
+  font-family:'Caveat',cursive;font-size:0.95rem;
+  color:var(--gold);white-space:nowrap;min-width:40px;
+}
+.reward-input{
+  flex:1;padding:7px 10px;border:1px solid var(--mb4);border-radius:8px;
+  font-family:'Noto Serif SC',serif;font-size:0.8rem;
+  color:var(--mi);background:var(--mb6);outline:none;transition:border-color 0.2s;
+}
+.reward-input:focus{border-color:var(--mb1);}
+
+/* Rescue button */
+.btn-rescue{
+  margin-top:14px;background:var(--mb3);color:var(--mi);
+  border:none;padding:10px 20px;border-radius:10px;
+  cursor:pointer;font-family:'Noto Serif SC',serif;
+  font-size:0.78rem;letter-spacing:1px;
+  transition:background 0.2s,transform 0.1s;width:100%;
+}
+.btn-rescue:hover{background:var(--mb2);color:white;}
+.btn-rescue:active{transform:scale(0.98);}
+
+/* Rescue toast (nicer than alert) */
+.rescue-popup{
+  display:none;position:fixed;top:50%;left:50%;
+  transform:translate(-50%,-50%) scale(0.95);
+  background:var(--paper);padding:28px 24px;border-radius:16px;
+  width:85%;max-width:340px;z-index:100;
+  box-shadow:0 8px 40px rgba(52,72,88,0.15);
+  text-align:center;animation:panelIn 0.3s ease forwards;
+}
+.rescue-popup .rescue-text{
+  font-family:'Noto Serif SC',serif;font-size:0.9rem;
+  line-height:1.8;color:var(--mi);margin:12px 0;
+}
+.rescue-popup .rescue-close{
+  background:var(--mb1);color:white;border:none;
+  padding:8px 24px;border-radius:8px;cursor:pointer;
+  font-family:'Noto Serif SC',serif;font-size:0.78rem;
+  margin-top:8px;
+}
+
+/* Archive */
+.archive-section{
+  margin-top:20px;background:var(--paper);
+  border-radius:16px;padding:16px 20px;
+  box-shadow:0 2px 12px rgba(74,100,120,0.06);
+}
+.archive-section h3{
+  font-family:'Caveat',cursive;font-size:0.85rem;
+  color:var(--mw);margin-bottom:8px;font-weight:400;
+}
+.archive-section textarea{
+  width:100%;padding:6px 8px;border:1px solid var(--mb4);
+  border-radius:6px;font-family:monospace;font-size:0.6rem;
+  color:var(--mi);background:var(--mb6);resize:none;height:40px;outline:none;
+}
+.archive-btns{display:flex;gap:8px;margin-top:8px;}
+.ar-btn{
+  flex:1;background:var(--mb1);color:white;border:none;
+  padding:8px;border-radius:8px;cursor:pointer;
+  font-family:'Noto Serif SC',serif;font-size:0.72rem;
+  letter-spacing:1px;transition:background 0.15s;
+}
+.ar-btn:hover{background:var(--md);}
+.ar-btn.secondary{background:var(--mb4);color:var(--mi);}
+
+/* Panel */
+.overlay{
+  display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+  background:rgba(52,72,88,0.25);backdrop-filter:blur(4px);
+  z-index:90;animation:fadeIn 0.2s ease;
+}
+.panel{
+  display:none;position:fixed;top:50%;left:50%;
+  transform:translate(-50%,-50%) scale(0.95);
+  background:var(--paper);padding:24px;border-radius:16px;
+  width:88%;max-width:380px;z-index:100;
+  box-shadow:0 8px 40px rgba(52,72,88,0.15);
+  animation:panelIn 0.3s ease forwards;
+}
+@keyframes panelIn{from{transform:translate(-50%,-50%) scale(0.92);opacity:0}to{transform:translate(-50%,-50%) scale(1);opacity:1}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+.panel::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--mb2),var(--md),var(--mb2));
+  border-radius:16px 16px 0 0;
+}
+.panel h3{
+  font-family:'Playfair Display',serif;font-weight:400;
+  font-size:1.05rem;color:var(--md);margin-bottom:16px;
+  text-align:center;letter-spacing:1px;
+}
+.panel label{
+  display:block;font-size:0.78rem;color:var(--mw);
+  margin:12px 0 4px;font-family:'Caveat',cursive;font-size:0.9rem;
+}
+.panel input[type="number"],
+.panel textarea{
+  width:100%;padding:8px 10px;border:1px solid var(--mb4);border-radius:8px;
+  font-family:'Noto Serif SC',serif;font-size:0.85rem;
+  color:var(--mi);background:var(--mb6);outline:none;transition:border-color 0.2s;
+}
+.panel input:focus,.panel textarea:focus{border-color:var(--mb1);}
+
+.range-wrap{display:flex;align-items:center;gap:10px;margin-top:6px;}
+.range-wrap input[type="range"]{
+  flex:1;-webkit-appearance:none;appearance:none;
+  height:6px;background:var(--mb4);border-radius:3px;outline:none;
+}
+.range-wrap input[type="range"]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:18px;height:18px;
+  background:var(--mb1);border-radius:50%;cursor:pointer;
+  box-shadow:0 2px 6px rgba(74,100,120,0.3);
+}
+.range-val{
+  font-family:'Playfair Display',serif;font-size:1rem;
+  color:var(--md);min-width:24px;text-align:right;
+}
+
+/* LSRW skills */
+.skills-row{
+  display:flex;justify-content:center;gap:12px;margin:14px 0;
+}
+.skill-btn{
+  width:52px;height:52px;border-radius:14px;
+  background:var(--mb6);border:2px solid var(--mb4);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  cursor:pointer;transition:all 0.3s;font-size:1.2rem;
+  gap:2px;
+}
+.skill-btn span{font-size:0.5rem;color:var(--mw);font-family:'Caveat',cursive;}
+.skill-btn.on{
+  background:linear-gradient(135deg,var(--mb1),var(--mb2));
+  border-color:var(--mb1);
+  box-shadow:0 2px 10px rgba(125,147,163,0.35);
+  transform:scale(1.05);
+}
+.skill-btn.on span{color:white;}
+
+.btn-save{
+  width:100%;background:var(--mb1);color:white;border:none;
+  padding:12px;border-radius:10px;cursor:pointer;
+  font-family:'Noto Serif SC',serif;font-size:0.85rem;
+  letter-spacing:3px;margin-top:16px;
+  transition:background 0.2s,transform 0.1s;
+}
+.btn-save:hover{background:var(--md);}
+.btn-save:active{transform:scale(0.98);}
+
+/* Particles */
+#particles{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  pointer-events:none;z-index:200;
+}
+
+.toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  background:var(--md);color:white;padding:8px 22px;
+  border-radius:20px;font-size:0.78rem;opacity:0;
+  pointer-events:none;transition:opacity 0.3s;z-index:300;
+  font-family:'Noto Serif SC',serif;letter-spacing:1px;
+}
+.toast.show{opacity:1;}
+
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--mb3);border-radius:2px;}
+
+@media(max-width:400px){
+  .grid{grid-template-columns:repeat(9,1fr);gap:4px;}
+  .day{font-size:0.7rem;border-radius:8px;}
+  .skill-btn{width:46px;height:46px;}
+}
+</style>
+</head>
+<body>
+
+<canvas id="particles"></canvas>
+
+<div class="container">
+  <div class="header">
+    <h1>德语城堡 🏰</h1>
+    <div class="sub">Der Weg nach Deutschland</div>
+    <div class="goal">Ziel: Anästhesietechnische Assistentin</div>
+
+    <div class="flight-wrap">
+      <div class="flight-fill" id="flightFill"></div>
+      <span class="flight-label start">南京</span>
+      <span class="flight-label end">Deutschland</span>
+      <span class="flight-plane" id="plane">✈️</span>
+    </div>
+
+    <div class="stats-row">
+      <span>累计词汇 <b id="totalW">0</b></span>
+      <span>梦想进度 <b id="progress">0</b>%</span>
+    </div>
+
+    <div class="chart-wrap">
+      <canvas id="deChart"></canvas>
+    </div>
+  </div>
+
+  <div class="section-label">✧ 90天征程 ✧</div>
+  <div class="grid" id="grid"></div>
+
+  <div class="card">
+    <h3>🎁 梦想奖赏</h3>
+    <div class="reward-row"><span class="reward-label">D30</span><input class="reward-input" type="text" id="r30" placeholder="梦想第一步..."></div>
+    <div class="reward-row"><span class="reward-label">D60</span><input class="reward-input" type="text" id="r60" placeholder="渐入佳境..."></div>
+    <div class="reward-row"><span class="reward-label">D90</span><input class="reward-input" type="text" id="r90" placeholder="去德国的行囊！"></div>
+    <button class="btn-rescue" onclick="rescue()">😫 语法太难了？点我</button>
+  </div>
+
+  <div class="archive-section">
+    <h3>📦 城堡存档</h3>
+    <textarea id="codeBox" readonly placeholder="存档码"></textarea>
+    <div class="archive-btns">
+      <button class="ar-btn" onclick="copyCode()">复制存档</button>
+      <button class="ar-btn secondary" onclick="importCode()">恢复存档</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay" onclick="closePanel()"></div>
+<div class="panel" id="panel">
+  <h3 id="panelDate">第 X 天</h3>
+  <label>📝 今日新词数</label>
+  <input type="number" id="wordIn" placeholder="多少个新词">
+  <label>📊 自信度</label>
+  <div class="range-wrap">
+    <input type="range" id="confIn" min="1" max="10" value="5">
+    <span class="range-val" id="confVal">5</span>
+  </div>
+  <label>🎯 能力训练</label>
+  <div class="skills-row">
+    <div class="skill-btn" id="sk_l" onclick="toggleSkill('l')">🎧<span>听</span></div>
+    <div class="skill-btn" id="sk_s" onclick="toggleSkill('s')">🗣️<span>说</span></div>
+    <div class="skill-btn" id="sk_r" onclick="toggleSkill('r')">📖<span>读</span></div>
+    <div class="skill-btn" id="sk_w" onclick="toggleSkill('w')">✍️<span>写</span></div>
+  </div>
+  <button class="btn-save" onclick="saveDay()">打卡完成</button>
+</div>
+
+<!-- Rescue popup instead of ugly alert -->
+<div class="overlay" id="rescueOverlay" onclick="closeRescue()" style="display:none;"></div>
+<div class="rescue-popup" id="rescuePopup">
+  <div style="font-size:1.4rem;">💌</div>
+  <div class="rescue-text" id="rescueText"></div>
+  <button class="rescue-close" onclick="closeRescue()">Danke ♡</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let currentDay=0;
+let deData=JSON.parse(localStorage.getItem('ajiang_de_v1')||'{}');
+let chart;
+const pCanvas=document.getElementById('particles');
+const pCtx=pCanvas.getContext('2d');
+let particles=[];
+
+const rescues=[
+  "德语名词有阴阳中性确实很烦，但每记住一个就离德国近一步。",
+  "考证的路很长，但你已经在路上了——很多人连第一步都没迈出。",
+  "刚才那个句子没听懂？没关系，休息五分钟，再听一遍。",
+  "想想你穿上苔藓绿手术服的样子，这点语法算什么。",
+  "Du schaffst das! 你一定可以的。",
+  "德语的框架结构确实反人类，但你的大脑正在悄悄重新布线。",
+  "每一个Konjugation都是通往手术室的一块砖。",
+  "Eines Tages wirst du in Deutschland stehen und lächeln."
+];
+
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
+
+// Particles
+function initParticles(){pCanvas.width=window.innerWidth;pCanvas.height=window.innerHeight;}
+function spawnParticles(x,y){
+  const colors=['#95aab8','#adbfcb','#c8b070','#d4c490','#7d93a3'];
+  for(let i=0;i<18;i++){
+    const angle=Math.random()*Math.PI*2;
+    const speed=1.5+Math.random()*3;
+    particles.push({
+      x,y,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed-1,
+      size:3+Math.random()*5,
+      color:colors[Math.floor(Math.random()*colors.length)],
+      life:1,decay:0.015+Math.random()*0.015,
+      type:Math.random()>0.5?'circle':'star'
+    });
+  }
+}
+function drawParticles(){
+  pCtx.clearRect(0,0,pCanvas.width,pCanvas.height);
+  particles=particles.filter(p=>p.life>0);
+  particles.forEach(p=>{
+    p.x+=p.vx;p.y+=p.vy;p.vy+=0.05;p.vx*=0.99;p.life-=p.decay;
+    pCtx.globalAlpha=p.life;pCtx.fillStyle=p.color;
+    if(p.type==='star'){
+      pCtx.save();pCtx.translate(p.x,p.y);pCtx.rotate(p.vx);
+      pCtx.font=`${p.size*2}px serif`;pCtx.fillText('✦',0,0);
+      pCtx.restore();
+    }else{
+      pCtx.beginPath();pCtx.arc(p.x,p.y,p.size*0.5,0,Math.PI*2);pCtx.fill();
+    }
+  });
+  pCtx.globalAlpha=1;
+  if(particles.length>0)requestAnimationFrame(drawParticles);
+}
+
+function init(){
+  initParticles();
+  document.getElementById('r30').value=deData.r30||"";
+  document.getElementById('r60').value=deData.r60||"";
+  document.getElementById('r90').value=deData.r90||"";
+  renderGrid();updateStats();initChart();
+  document.getElementById('confIn').oninput=function(){
+    document.getElementById('confVal').innerText=this.value;
+  };
+  ['r30','r60','r90'].forEach(id=>{
+    document.getElementById(id).addEventListener('input',saveAll);
+  });
+}
+
+function renderGrid(){
+  const grid=document.getElementById('grid');grid.innerHTML='';
+  const milestones=[10,20,30,45,60,75,90];
+  for(let i=1;i<=90;i++){
+    const div=document.createElement('div');
+    const isActive=deData[i]?.checked;
+    const hasMedal=deData[i]?.l&&deData[i]?.s&&deData[i]?.r&&deData[i]?.w;
+    const isMilestone=milestones.includes(i);
+    div.className=`day${isActive?' active':''}${hasMedal?' medal':''}${isMilestone?' milestone':''}`;
+    div.innerText=i;
+    div.onclick=()=>openPanel(i);
+    grid.appendChild(div);
+  }
+}
+
+function openPanel(day){
+  currentDay=day;
+  document.getElementById('panelDate').innerText=`第 ${day} 天 · 德语修行`;
+  document.getElementById('wordIn').value=deData[day]?.words||"";
+  document.getElementById('confIn').value=deData[day]?.conf||5;
+  document.getElementById('confVal').innerText=deData[day]?.conf||5;
+  ['l','s','r','w'].forEach(k=>{
+    document.getElementById('sk_'+k).classList.toggle('on',!!deData[day]?.[k]);
+  });
+  document.getElementById('overlay').style.display='block';
+  document.getElementById('panel').style.display='block';
+}
+
+function toggleSkill(k){
+  deData[currentDay]=deData[currentDay]||{};
+  deData[currentDay][k]=!deData[currentDay][k];
+  document.getElementById('sk_'+k).classList.toggle('on',deData[currentDay][k]);
+}
+
+function saveDay(){
+  const wasNew=!deData[currentDay]?.checked;
+  deData[currentDay]=deData[currentDay]||{};
+  deData[currentDay].checked=true;
+  deData[currentDay].words=parseInt(document.getElementById('wordIn').value)||0;
+  deData[currentDay].conf=parseInt(document.getElementById('confIn').value);
+  // preserve skill toggles
+  ['l','s','r','w'].forEach(k=>{
+    deData[currentDay][k]=document.getElementById('sk_'+k).classList.contains('on');
+  });
+  closePanel();renderGrid();updateStats();updateChart();saveAll();
+
+  if(wasNew){
+    const dayEl=document.querySelectorAll('.day')[currentDay-1];
+    if(dayEl){
+      const rect=dayEl.getBoundingClientRect();
+      spawnParticles(rect.left+rect.width/2,rect.top+rect.height/2);
+      requestAnimationFrame(drawParticles);
+    }
+    toast(`🏰 第 ${currentDay} 天打卡成功`);
+  }else{
+    toast('已更新记录');
+  }
+}
+
+function closePanel(){
+  document.getElementById('overlay').style.display='none';
+  document.getElementById('panel').style.display='none';
+}
+
+function saveAll(){
+  deData.r30=document.getElementById('r30').value;
+  deData.r60=document.getElementById('r60').value;
+  deData.r90=document.getElementById('r90').value;
+  localStorage.setItem('ajiang_de_v1',JSON.stringify(deData));
+  document.getElementById('codeBox').value=btoa(unescape(encodeURIComponent(JSON.stringify(deData))));
+}
+
+function updateStats(){
+  const entries=Object.keys(deData).filter(k=>!isNaN(k)&&deData[k].checked);
+  const count=entries.length;
+  let totalW=0;
+  entries.forEach(k=>{totalW+=(deData[k].words||0);});
+  const pct=Math.floor(count/90*100);
+  document.getElementById('totalW').innerText=totalW;
+  document.getElementById('progress').innerText=pct;
+  // plane position
+  const planePos=Math.min(pct,92);
+  document.getElementById('plane').style.left=planePos+'%';
+  document.getElementById('flightFill').style.width=planePos+'%';
+}
+
+function initChart(){
+  const ctx=document.getElementById('deChart').getContext('2d');
+  Chart.defaults.font.family="'Noto Serif SC',serif";
+  Chart.defaults.font.size=10;
+  Chart.defaults.color='#8a9eaa';
+  chart=new Chart(ctx,{
+    type:'line',
+    data:{labels:[],datasets:[
+      {label:'累计词汇',data:[],borderColor:'#7d93a3',backgroundColor:'rgba(125,147,163,0.12)',fill:true,tension:0.4,pointRadius:3,pointBackgroundColor:'#7d93a3',borderWidth:2,yAxisID:'y'},
+      {label:'自信度',data:[],borderColor:'#c8b070',borderDash:[4,4],tension:0.4,pointRadius:2,pointBackgroundColor:'#c8b070',borderWidth:1.5,yAxisID:'y1'}
+    ]},
+    options:{
+      maintainAspectRatio:false,
+      plugins:{legend:{labels:{boxWidth:12,padding:10,font:{size:10}}}},
+      scales:{
+        y:{type:'linear',display:true,position:'left',grid:{color:'rgba(173,191,203,0.2)'},title:{display:true,text:'词汇',font:{size:10}}},
+        y1:{type:'linear',display:true,position:'right',min:0,max:10,grid:{drawOnChartArea:false},title:{display:true,text:'自信',font:{size:10}}}
+      }
+    }
+  });
+  updateChart();
+}
+
+function updateChart(){
+  let labels=[],wData=[],cData=[],running=0;
+  for(let i=1;i<=90;i++){
+    if(deData[i]?.checked){
+      labels.push('D'+i);
+      running+=(deData[i].words||0);
+      wData.push(running);
+      cData.push(deData[i].conf||0);
+    }
+  }
+  chart.data.labels=labels;
+  chart.data.datasets[0].data=wData;
+  chart.data.datasets[1].data=cData;
+  chart.update();
+}
+
+function rescue(){
+  const msg=rescues[Math.floor(Math.random()*rescues.length)];
+  document.getElementById('rescueText').textContent=msg;
+  document.getElementById('rescueOverlay').style.display='block';
+  document.getElementById('rescuePopup').style.display='block';
+}
+function closeRescue(){
+  document.getElementById('rescueOverlay').style.display='none';
+  document.getElementById('rescuePopup').style.display='none';
+}
+
+function copyCode(){
+  saveAll();
+  const code=document.getElementById('codeBox').value;
+  if(!code){toast('没有数据');return;}
+  navigator.clipboard.writeText(code).then(()=>toast('存档已复制')).catch(()=>{
+    document.getElementById('codeBox').select();document.execCommand('copy');toast('存档已复制');
+  });
+}
+
+function importCode(){
+  const code=prompt('请粘贴存档码：');
+  if(!code)return;
+  try{
+    deData=JSON.parse(decodeURIComponent(escape(atob(code))));
+    localStorage.setItem('ajiang_de_v1',JSON.stringify(deData));
+    init();toast('恢复成功');
+  }catch(e){toast('存档码有误');}
+}
+
+window.addEventListener('resize',initParticles);
+init();
+</script>
+</body>
+</html>
