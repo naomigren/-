@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>阿姜的蜕变宫殿</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.1.0/dist/chartjs-plugin-annotation.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Noto+Serif+SC:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;0,500;1,400&display=swap');
+:root{
+  --mp1:#c48e93;--mp2:#d6a6aa;--mp3:#e0bfc2;--mp4:#ecd4d6;--mp5:#f2e5e7;--mp6:#f9f0f1;
+  --md:#8a5a60;--mi:#5a3a40;--mw:#b08a8e;
+  --paper:#fdfaf9;--pl:#e8d0d3;
+  --gold:#c8b070;--gold2:#d4c490;
+  --green:#7a9a6a;--green-bg:#e8f0e8;--green-border:#cde0cd;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{height:100%;}
+body{background:var(--mp5);font-family:'Noto Serif SC',serif;color:var(--mi);min-height:100%;padding-bottom:env(safe-area-inset-bottom);}
+
+/* Flower canvas background */
+#flowerBg{position:fixed;top:0;left:0;width:100%;height:220px;pointer-events:none;z-index:0;}
+#particles{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:200;}
+
+.container{position:relative;z-index:1;max-width:520px;margin:0 auto;padding:12px 16px 40px;}
+
+/* Header */
+.header{text-align:center;padding:24px 20px 18px;background:rgba(253,250,249,0.85);backdrop-filter:blur(8px);border-radius:16px;box-shadow:0 2px 12px rgba(138,90,96,0.06);margin-bottom:16px;margin-top:100px;position:relative;overflow:hidden;}
+.header::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--mp4),var(--mp1),var(--mp4));}
+.header h1{font-family:'Playfair Display',serif;font-weight:400;font-size:1.4rem;color:var(--md);letter-spacing:2px;margin-bottom:2px;}
+.header .sub{font-family:'Caveat',cursive;font-size:0.85rem;color:var(--mw);letter-spacing:1px;}
+.header .goal-text{font-size:0.72rem;color:var(--mp2);margin-top:4px;}
+.stats-row{display:flex;justify-content:center;gap:20px;margin-top:10px;font-size:0.75rem;color:var(--mw);}
+.stats-row b{color:var(--md);font-size:0.95rem;font-family:'Playfair Display',serif;}
+.chart-wrap{margin-top:12px;height:160px;position:relative;background:var(--mp6);border-radius:10px;padding:8px;}
+
+/* Weather btn */
+.weather-btn{position:fixed;top:12px;right:12px;z-index:10;background:rgba(253,250,249,0.7);backdrop-filter:blur(6px);border:1px solid var(--mp4);color:var(--mw);padding:4px 10px;border-radius:16px;font-size:0.65rem;cursor:pointer;font-family:'Noto Serif SC',serif;}
+
+/* Grid */
+.section-label{font-family:'Caveat',cursive;font-size:1rem;color:var(--mw);text-align:center;margin:16px 0 10px;letter-spacing:1px;}
+.grid{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;max-width:520px;margin:0 auto;}
+.day{aspect-ratio:1;background:var(--paper);border:1.5px solid var(--mp4);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Caveat',cursive;font-size:0.75rem;color:var(--mw);cursor:pointer;transition:all 0.3s;position:relative;overflow:hidden;}
+.day:hover{transform:translateY(-2px);box-shadow:0 3px 10px rgba(138,90,96,0.1);}
+.day.active{background:linear-gradient(135deg,var(--mp1),var(--mp2));color:white;border-color:var(--mp1);box-shadow:0 2px 8px rgba(196,142,147,0.3);}
+.day.active::after{content:'✓';position:absolute;font-size:0.45rem;top:1px;right:2px;opacity:0.7;}
+.day.has-meals::before{content:'🍽';position:absolute;bottom:1px;right:1px;font-size:0.35rem;}
+.day.milestone{border-color:var(--gold);border-width:2px;}
+.day.milestone.active{background:linear-gradient(135deg,var(--gold),var(--gold2));border-color:var(--gold);}
+.day.reward-cell{border-style:dashed;border-color:var(--mp3);}
+
+/* Cards */
+.card{background:var(--paper);border-radius:16px;box-shadow:0 2px 12px rgba(138,90,96,0.06);padding:18px;margin-top:16px;position:relative;overflow:hidden;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--mp4),var(--mp2),var(--mp4));}
+.card h3{font-family:'Playfair Display',serif;font-weight:400;font-size:0.95rem;color:var(--md);margin-bottom:10px;letter-spacing:1px;}
+
+/* Rewards */
+.reward-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:0.8rem;}
+.reward-label{font-family:'Caveat',cursive;font-size:0.9rem;color:var(--gold);min-width:38px;}
+.reward-input{flex:1;padding:6px 10px;border:1px solid var(--mp4);border-radius:8px;font-family:'Noto Serif SC',serif;font-size:0.78rem;color:var(--mi);background:var(--mp6);outline:none;}
+.reward-input:focus{border-color:var(--mp1);}
+.btn-whisper{width:100%;margin-top:10px;background:var(--mp3);color:var(--mi);border:none;padding:10px;border-radius:10px;cursor:pointer;font-family:'Noto Serif SC',serif;font-size:0.78rem;transition:background 0.2s;}
+.btn-whisper:hover{background:var(--mp2);color:white;}
+
+/* Vision board */
+.vision-board{text-align:left;}
+.vision-item{background:var(--mp6);border-radius:12px;padding:12px 14px;margin-bottom:10px;position:relative;}
+.vision-item p{font-size:0.82rem;color:var(--mi);line-height:1.6;}
+.vision-item img{width:100%;border-radius:10px;margin-top:6px;max-height:200px;object-fit:cover;}
+.vision-item .del-v{position:absolute;top:6px;right:8px;background:none;border:none;color:var(--mp3);font-size:0.9rem;cursor:pointer;padding:0;margin:0;}
+.vision-item .del-v:hover{color:var(--mp1);}
+.vision-add{display:flex;flex-direction:column;gap:8px;margin-top:10px;}
+.vision-add textarea{width:100%;padding:8px;border:1px solid var(--mp4);border-radius:8px;font-family:'Noto Serif SC',serif;font-size:0.78rem;color:var(--mi);resize:none;height:40px;outline:none;}
+.vision-add textarea:focus{border-color:var(--mp1);}
+.img-upload-row{display:flex;align-items:center;gap:8px;}
+.img-upload-row label{font-size:0.75rem;color:var(--mp1);cursor:pointer;border:1px dashed var(--mp2);padding:4px 12px;border-radius:8px;}
+.img-upload-row span{font-size:0.68rem;color:var(--mw);}
+.img-upload-row input[type="file"]{display:none;}
+.btn-vision{background:var(--mp2);color:white;border:none;padding:8px 16px;border-radius:8px;cursor:pointer;font-family:'Noto Serif SC',serif;font-size:0.75rem;}
+
+/* Archive */
+.archive-section{margin-top:16px;background:var(--paper);border-radius:16px;padding:14px 18px;box-shadow:0 2px 12px rgba(138,90,96,0.06);}
+.archive-section h3{font-family:'Caveat',cursive;font-size:0.82rem;color:var(--mw);margin-bottom:6px;font-weight:400;}
+.archive-section textarea{width:100%;padding:5px 7px;border:1px solid var(--mp4);border-radius:6px;font-family:monospace;font-size:0.55rem;color:var(--mi);background:var(--mp6);resize:none;height:36px;outline:none;}
+.archive-btns{display:flex;gap:6px;margin-top:6px;}
+.ar-btn{flex:1;background:var(--mp1);color:white;border:none;padding:7px;border-radius:8px;cursor:pointer;font-family:'Noto Serif SC',serif;font-size:0.68rem;transition:background 0.15s;}
+.ar-btn:hover{background:var(--md);}
+.ar-btn.sec{background:var(--mp4);color:var(--mi);}
+
+/* Panel */
+.overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(90,58,64,0.2);backdrop-filter:blur(4px);z-index:90;}
+.panel{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--paper);padding:22px 20px;border-radius:16px;width:90%;max-width:400px;z-index:100;box-shadow:0 8px 40px rgba(90,58,64,0.15);max-height:85vh;overflow-y:auto;animation:panelIn 0.3s ease;}
+@keyframes panelIn{from{transform:translate(-50%,-50%) scale(0.93);opacity:0}to{transform:translate(-50%,-50%) scale(1);opacity:1}}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--mp2),var(--md),var(--mp2));border-radius:16px 16px 0 0;}
+.panel-close{position:absolute;top:10px;right:14px;background:none;border:none;font-size:1.1rem;color:var(--mp3);cursor:pointer;}
+.panel-close:hover{color:var(--mp1);}
+.panel h3{font-family:'Playfair Display',serif;font-weight:400;font-size:1rem;color:var(--md);margin-bottom:14px;text-align:center;}
+.panel label,.panel .field-label{display:block;font-family:'Caveat',cursive;font-size:0.88rem;color:var(--mw);margin:10px 0 4px;}
+.panel input[type="number"],.panel textarea{width:100%;padding:7px 10px;border:1px solid var(--mp4);border-radius:8px;font-family:'Noto Serif SC',serif;font-size:0.82rem;color:var(--mi);background:var(--mp6);outline:none;}
+.panel input:focus,.panel textarea:focus{border-color:var(--mp1);}
+
+/* Mood */
+.mood-row{display:flex;gap:8px;margin:6px 0 10px;font-size:1.3rem;}
+.mood-btn{cursor:pointer;transition:transform 0.15s;padding:2px;}
+.mood-btn:hover{transform:scale(1.2);}
+.mood-btn.selected{transform:scale(1.3);filter:drop-shadow(0 2px 4px rgba(196,142,147,0.4));}
+
+/* Water */
+.water-row{display:flex;gap:4px;margin:6px 0 10px;}
+.water-cup{font-size:1.1rem;cursor:pointer;opacity:0.25;transition:opacity 0.2s,transform 0.15s;}
+.water-cup.filled{opacity:1;}
+.water-cup:hover{transform:scale(1.15);}
+
+/* Meals */
+.meal-section{text-align:left;margin:10px 0;padding:10px;background:var(--mp6);border-radius:12px;}
+.meal-section h4{font-size:0.78rem;color:var(--mp1);margin-bottom:6px;font-family:'Caveat',cursive;font-size:0.88rem;}
+.meal-item-row{display:flex;gap:5px;align-items:center;margin-bottom:4px;}
+.meal-item-row input[type="text"]{flex:1;padding:5px 8px;border:1px solid var(--mp4);border-radius:6px;font-size:0.75rem;background:white;outline:none;color:var(--mi);}
+.meal-item-row input[type="number"]{width:52px;padding:5px 6px;border:1px solid var(--mp4);border-radius:6px;font-size:0.75rem;text-align:center;background:white;outline:none;color:var(--mi);}
+.meal-item-row .unit{font-size:0.6rem;color:var(--mw);white-space:nowrap;}
+.meal-item-row .rm{background:none;border:none;color:var(--mp3);font-size:0.85rem;cursor:pointer;padding:0 3px;margin:0;}
+.meal-item-row .rm:hover{color:var(--mp1);}
+.add-meal-btn{background:none;border:1px dashed var(--mp2);color:var(--mp2);padding:3px 10px;font-size:0.68rem;border-radius:8px;cursor:pointer;margin-top:2px;font-family:'Noto Serif SC',serif;}
+.meal-total{font-size:0.72rem;color:var(--mp1);text-align:right;margin-top:4px;font-family:'Caveat',cursive;font-size:0.8rem;}
+
+/* Exercise */
+.exercise-section{text-align:left;margin:10px 0;padding:10px;background:var(--green-bg);border-radius:12px;}
+.exercise-section h4{font-size:0.78rem;color:var(--green);margin-bottom:6px;font-family:'Caveat',cursive;font-size:0.88rem;}
+.exercise-item-row{display:flex;gap:5px;align-items:center;margin-bottom:4px;}
+.exercise-item-row input[type="text"]{flex:1;padding:5px 8px;border:1px solid var(--green-border);border-radius:6px;font-size:0.75rem;background:white;outline:none;color:var(--mi);}
+.exercise-item-row input[type="number"]{width:42px;padding:5px 4px;border:1px solid var(--green-border);border-radius:6px;font-size:0.75rem;text-align:center;background:white;outline:none;color:var(--mi);}
+.exercise-item-row .unit{font-size:0.6rem;color:var(--mw);white-space:nowrap;}
+.add-ex-btn{background:none;border:1px dashed var(--green);color:var(--green);padding:3px 10px;font-size:0.68rem;border-radius:8px;cursor:pointer;margin-top:2px;font-family:'Noto Serif SC',serif;}
+.exercise-total{font-size:0.72rem;color:var(--green);text-align:right;margin-top:4px;font-family:'Caveat',cursive;font-size:0.8rem;}
+
+/* Day total */
+.day-total-cal{font-size:0.82rem;color:var(--md);font-weight:400;margin:10px 0;padding:10px;background:var(--mp6);border-radius:10px;text-align:center;font-family:'Noto Serif SC',serif;}
+.day-total-cal strong{color:var(--mp1);}
+
+.btn-save{width:100%;background:var(--mp1);color:white;border:none;padding:12px;border-radius:10px;cursor:pointer;font-family:'Noto Serif SC',serif;font-size:0.85rem;letter-spacing:3px;margin-top:10px;transition:background 0.2s;}
+.btn-save:hover{background:var(--md);}
+
+/* Whisper popup */
+.whisper-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(90,58,64,0.2);backdrop-filter:blur(4px);z-index:300;}
+.whisper-popup{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--paper);padding:28px 24px;border-radius:16px;width:82%;max-width:320px;z-index:310;box-shadow:0 8px 40px rgba(90,58,64,0.18);text-align:center;animation:panelIn 0.3s ease;}
+.whisper-popup .wh-icon{font-size:1.6rem;margin-bottom:8px;}
+.whisper-popup .wh-text{font-family:'Noto Serif SC',serif;font-size:0.88rem;line-height:1.8;color:var(--mi);margin-bottom:14px;}
+.whisper-popup .wh-close{background:var(--mp1);color:white;border:none;padding:7px 22px;border-radius:8px;cursor:pointer;font-family:'Noto Serif SC',serif;font-size:0.75rem;}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--md);color:white;padding:8px 22px;border-radius:20px;font-size:0.75rem;opacity:0;pointer-events:none;transition:opacity 0.3s;z-index:400;font-family:'Noto Serif SC',serif;}
+.toast.show{opacity:1;}
+
+::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-thumb{background:var(--mp3);border-radius:2px;}
+@media(max-width:400px){.grid{grid-template-columns:repeat(9,1fr);gap:3px;}.day{font-size:0.65rem;}.header{margin-top:80px;}}
+</style>
+</head>
+<body>
+
+<canvas id="flowerBg"></canvas>
+<canvas id="particles"></canvas>
+<button class="weather-btn" id="btnWeather" onclick="cycleWeather()">☀️ 自动</button>
+
+<div class="container">
+  <div class="header">
+    <h1>蜕变宫殿</h1>
+    <div class="sub">瘦身 · 自律 · 爱自己 🌸</div>
+    <div class="goal-text">4月15日启动 | 目标 45kg</div>
+    <div class="stats-row">
+      <span>已坚持 <b id="statDays">0</b> 天</span>
+      <span>当前 <b id="statWeight">58</b> kg</span>
+    </div>
+    <div class="chart-wrap"><canvas id="weightChart"></canvas></div>
+  </div>
+
+  <div class="section-label">✧ 90天蜕变之路 ✧</div>
+  <div class="grid" id="grid"></div>
+
+  <div class="card">
+    <h3>🎁 奖赏阁</h3>
+    <div class="reward-row"><span class="reward-label">D30</span><input class="reward-input" type="text" id="r30" placeholder="梦想第一步..."></div>
+    <div class="reward-row"><span class="reward-label">D60</span><input class="reward-input" type="text" id="r60" placeholder="渐入佳境..."></div>
+    <div class="reward-row"><span class="reward-label">D90</span><input class="reward-input" type="text" id="r90" placeholder="终极蜕变！"></div>
+    <button class="btn-whisper" onclick="showWhisper()">💌 听听碎碎念</button>
+  </div>
+
+  <div class="card">
+    <h3>✨ 瘦下来以后...</h3>
+    <div class="vision-board" id="visionBoard"></div>
+    <div class="vision-add">
+      <textarea id="visionText" placeholder="写下你瘦下来后想做的事..."></textarea>
+      <div class="img-upload-row">
+        <label for="visionImg">📷 添加图片</label>
+        <span id="visionImgName">未选择</span>
+        <input type="file" id="visionImg" accept="image/*" onchange="onVisionImgSelected(this)">
+      </div>
+      <button class="btn-vision" onclick="addVisionItem()">添加到愿景墙 ✨</button>
+    </div>
+  </div>
+
+  <div class="archive-section">
+    <h3>📦 宫殿存档</h3>
+    <textarea id="codeBox" readonly placeholder="存档码"></textarea>
+    <div class="archive-btns">
+      <button class="ar-btn" onclick="generateCode()">生成</button>
+      <button class="ar-btn" onclick="copyCode()">复制</button>
+      <button class="ar-btn sec" onclick="importCode()">恢复</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay" onclick="closePanel()"></div>
+<div class="panel" id="panel">
+  <button class="panel-close" onclick="closePanel()">×</button>
+  <h3 id="panelDate">第 X 天</h3>
+  <label>⚖️ 今日体重 (kg)</label>
+  <input type="number" id="inputWeight" step="0.1" placeholder="kg">
+  <label>💭 心情</label>
+  <div class="mood-row" id="moodRow">
+    <span class="mood-btn" onclick="setMood('😊')">😊</span>
+    <span class="mood-btn" onclick="setMood('😐')">😐</span>
+    <span class="mood-btn" onclick="setMood('😫')">😫</span>
+    <span class="mood-btn" onclick="setMood('🥰')">🥰</span>
+    <span class="mood-btn" onclick="setMood('😤')">😤</span>
+  </div>
+  <label>💧 饮水 <span id="waterCount">0</span>/8</label>
+  <div class="water-row" id="waterRow"></div>
+  <div id="exerciseContainer"></div>
+  <div id="mealsContainer"></div>
+  <div class="day-total-cal" id="dayTotalCal">净摄入 0 kcal</div>
+  <button class="btn-save" onclick="saveDay()">完成打卡 ✅</button>
+</div>
+
+<div class="whisper-overlay" id="whisperOverlay" onclick="closeWhisper()"></div>
+<div class="whisper-popup" id="whisperPopup">
+  <div class="wh-icon">🌸</div>
+  <div class="wh-text" id="whisperText"></div>
+  <button class="wh-close" onclick="closeWhisper()">嗯 ♡</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let currentDay=0,data={},rewards={r30:'',r60:'',r90:''},visionItems=[],chart,pendingVisionImg=null;
+const STORAGE_KEY='ajiang_palace_v4';
+const mealLabels=[{key:'breakfast',icon:'🌅',name:'早餐'},{key:'lunch',icon:'☀️',name:'午餐'},{key:'dinner',icon:'🌙',name:'晚餐'},{key:'snack',icon:'🍬',name:'加餐'}];
+
+const whispers=[
+  "今天也在努力变好呢，这本身就很美。",
+  "每掉秤0.1kg，都是你对自己的承诺在兑现。",
+  "肚子饿了就喝点温水，撑过去就是胜利。",
+  "想想穿上苔藓绿手术服的自己，这点坚持算什么。",
+  "你的身体正在悄悄改变，只是镜子还没来得及告诉你。",
+  "不开心了就来这里看看，你已经走了这么远了。",
+  "有人正在为你骄傲。就是现在。",
+  "你比昨天的自己更接近目标了，这是事实。"
+];
+
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
+function esc(s){const d=document.createElement('div');d.appendChild(document.createTextNode(s));return d.innerHTML;}
+
+// ===== FLOWER BACKGROUND =====
+const fCanvas=document.getElementById('flowerBg');
+const fCtx=fCanvas.getContext('2d');
+let flowers=[];
+let weather='auto',windStr=0,windTgt=1;
+const weatherModes=['auto','day','night','rain'];
+let weatherIdx=0;
+
+function getCurrentWeather(){
+  if(weather!=='auto')return weather;
+  const h=new Date().getHours();
+  if(h>=22||h<6)return'night';
+  return'day';
+}
+
+function initFlowerCanvas(){
+  fCanvas.width=window.innerWidth*2;fCanvas.height=440;
+  fCanvas.style.width=window.innerWidth+'px';fCanvas.style.height='220px';
+  fCtx.scale(2,2);
+  if(flowers.length===0){
+    for(let i=0;i<12;i++){
+      flowers.push({
+        x:30+Math.random()*(window.innerWidth-60),
+        stemLen:50+Math.random()*60,
+        petalCount:5+Math.floor(Math.random()*3),
+        petalLen:8+Math.random()*8,
+        petalWid:5+Math.random()*4,
+        color:['#d6a6aa','#e0bfc2','#c48e93','#ecd4d6','#b08a8e'][Math.floor(Math.random()*5)],
+        phase:Math.random()*Math.PI*2,
+        swaySpeed:0.5+Math.random()*1,
+        swayAmt:0.02+Math.random()*0.04,
+        leafSide:Math.random()>0.5?1:-1
+      });
+    }
+  }
+}
+
+function drawFlowerBg(time){
+  const w=getCurrentWeather();
+  const W=window.innerWidth,H=220;
+  fCtx.clearRect(0,0,W,H);
+
+  // sky
+  const skyColors={day:['#f2e5e7','#f9f0f1'],night:['#1a1520','#2a2030'],rain:['#8a8a90','#a0a0a5']};
+  const cols=skyColors[w]||skyColors.day;
+  const sg=fCtx.createLinearGradient(0,0,0,H);
+  sg.addColorStop(0,cols[0]);sg.addColorStop(1,cols[1]);
+  fCtx.fillStyle=sg;fCtx.fillRect(0,0,W,H);
+
+  // stars at night
+  if(w==='night'){
+    for(let i=0;i<20;i++){
+      const sx=Math.sin(i*127.1+time*0.0003)*W*0.5+W*0.5;
+      const sy=Math.sin(i*311.7)*H*0.4+H*0.2;
+      const tw=Math.sin(time*0.002+i*5)*0.3+0.5;
+      fCtx.fillStyle=`rgba(220,210,230,${tw})`;
+      fCtx.beginPath();fCtx.arc(sx,sy,0.8,0,Math.PI*2);fCtx.fill();
+    }
+  }
+
+  // hanging flowers (wind bells)
+  const sway=Math.sin(time*0.001)*windStr;
+  flowers.forEach(f=>{
+    const sw=Math.sin(time*0.001*f.swaySpeed+f.phase)*f.swayAmt*windStr;
+    const topX=f.x,topY=0;
+    const botX=topX+sw*f.stemLen*0.6;
+    const botY=f.stemLen;
+    const nightAlpha=w==='night'?0.4:1;
+
+    // stem
+    fCtx.save();fCtx.globalAlpha=nightAlpha;
+    fCtx.strokeStyle='#7a8a6a';fCtx.lineWidth=1.2;
+    fCtx.beginPath();fCtx.moveTo(topX,topY);
+    fCtx.quadraticCurveTo(topX+sw*f.stemLen*0.3,botY*0.5,botX,botY);
+    fCtx.stroke();
+
+    // leaf
+    const lx=topX+sw*f.stemLen*0.15,ly=botY*0.4;
+    fCtx.fillStyle='#8a9a6a';
+    fCtx.beginPath();
+    fCtx.ellipse(lx+f.leafSide*8,ly,9,3,f.leafSide*0.4+sw,0,Math.PI*2);
+    fCtx.fill();
+
+    // flower head
+    fCtx.save();fCtx.translate(botX,botY);fCtx.rotate(sw*1.5);
+    for(let i=0;i<f.petalCount;i++){
+      const a=(Math.PI*2/f.petalCount)*i+Math.PI*0.5;
+      fCtx.save();fCtx.rotate(a);
+      fCtx.fillStyle=f.color;fCtx.globalAlpha=0.75*nightAlpha;
+      fCtx.beginPath();
+      // drooping bell shape
+      fCtx.moveTo(0,0);
+      fCtx.quadraticCurveTo(-f.petalWid*0.4,f.petalLen*0.6,0,f.petalLen);
+      fCtx.quadraticCurveTo(f.petalWid*0.4,f.petalLen*0.6,0,0);
+      fCtx.fill();
+      fCtx.globalAlpha=nightAlpha;
+      fCtx.restore();
+    }
+    // center
+    fCtx.fillStyle='rgba(200,176,112,0.6)';
+    fCtx.beginPath();fCtx.arc(0,2,2.5,0,Math.PI*2);fCtx.fill();
+    fCtx.restore();
+
+    // rain drops on flower
+    if(w==='rain'&&Math.random()<0.03){
+      fCtx.fillStyle='rgba(180,200,220,0.5)';
+      fCtx.beginPath();fCtx.ellipse(botX+Math.random()*6-3,botY+Math.random()*4,1,2.5,0,0,Math.PI*2);fCtx.fill();
+    }
+
+    fCtx.restore();
+  });
+
+  // rain
+  if(w==='rain'){
+    fCtx.strokeStyle='rgba(180,200,220,0.25)';fCtx.lineWidth=0.8;
+    for(let i=0;i<30;i++){
+      const rx=Math.random()*W,ry=Math.random()*H;
+      fCtx.beginPath();fCtx.moveTo(rx,ry);fCtx.lineTo(rx+windStr*0.5,ry+8);fCtx.stroke();
+    }
+  }
+
+  // fireflies at night
+  if(w==='night'){
+    for(let i=0;i<6;i++){
+      const fx=Math.sin(time*0.0008*((i+1)*0.7)+i*3)*W*0.3+W*0.5;
+      const fy=Math.sin(time*0.0006*((i+1)*0.5)+i*7)*H*0.3+H*0.5;
+      const glow=Math.sin(time*0.003+i*4)*0.3+0.5;
+      const g=fCtx.createRadialGradient(fx,fy,0,fx,fy,6);
+      g.addColorStop(0,`rgba(220,200,160,${glow*0.7})`);
+      g.addColorStop(1,'rgba(220,200,160,0)');
+      fCtx.fillStyle=g;fCtx.beginPath();fCtx.arc(fx,fy,6,0,Math.PI*2);fCtx.fill();
+    }
+  }
+
+  windStr+=(windTgt-windStr)*0.02;
+  requestAnimationFrame(drawFlowerBg);
+}
+
+// Auto wind gusts
+setInterval(()=>{windTgt=1+Math.random()*4;setTimeout(()=>{windTgt=1;},2000+Math.random()*2000);},6000);
+
+function cycleWeather(){
+  weatherIdx=(weatherIdx+1)%weatherModes.length;
+  weather=weatherModes[weatherIdx];
+  const labels={auto:'🔄 自动',day:'☀️ 白天',night:'🌙 夜晚',rain:'🌧️ 下雨'};
+  document.getElementById('btnWeather').textContent=labels[weather];
+  toast(labels[weather]);
+}
+
+// ===== PARTICLES =====
+const pCanvas=document.getElementById('particles');
+const pCtx=pCanvas.getContext('2d');
+let parts=[];
+function initParticles(){pCanvas.width=window.innerWidth;pCanvas.height=window.innerHeight;}
+function spawnPetals(x,y){
+  for(let i=0;i<14;i++){
+    const a=Math.random()*Math.PI*2,sp=1+Math.random()*2.5;
+    parts.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-0.5,size:4+Math.random()*6,color:['#d6a6aa','#e0bfc2','#ecd4d6','#c8b070'][Math.floor(Math.random()*4)],life:1,decay:0.012+Math.random()*0.012,rot:Math.random()*Math.PI*2,rv:0.02+Math.random()*0.04});
+  }
+}
+function drawParts(){
+  pCtx.clearRect(0,0,pCanvas.width,pCanvas.height);
+  parts=parts.filter(p=>p.life>0);
+  parts.forEach(p=>{
+    p.x+=p.vx;p.y+=p.vy;p.vy+=0.03;p.vx*=0.995;p.life-=p.decay;p.rot+=p.rv;
+    pCtx.save();pCtx.globalAlpha=p.life;pCtx.translate(p.x,p.y);pCtx.rotate(p.rot);
+    pCtx.fillStyle=p.color;
+    // petal shape
+    pCtx.beginPath();
+    pCtx.moveTo(0,-p.size*0.5);
+    pCtx.quadraticCurveTo(p.size*0.3,0,0,p.size*0.5);
+    pCtx.quadraticCurveTo(-p.size*0.3,0,0,-p.size*0.5);
+    pCtx.fill();
+    pCtx.restore();
+  });
+  if(parts.length>0)requestAnimationFrame(drawParts);
+}
+
+// ===== DATA =====
+function loadAll(){try{const r=localStorage.getItem(STORAGE_KEY);if(r){const p=JSON.parse(r);data=p.data||{};rewards=p.rewards||{r30:'',r60:'',r90:''};visionItems=p.visionItems||[];}}catch(e){}}
+function persistAll(){localStorage.setItem(STORAGE_KEY,JSON.stringify({data,rewards,visionItems}));}
+
+function init(){
+  loadAll();initParticles();initFlowerCanvas();drawFlowerBg(0);
+  document.getElementById('r30').value=rewards.r30;
+  document.getElementById('r60').value=rewards.r60;
+  document.getElementById('r90').value=rewards.r90;
+  ['r30','r60','r90'].forEach(id=>{document.getElementById(id).addEventListener('input',saveRewards);});
+  renderGrid();updateStats();initChart();renderVisionBoard();
+}
+
+// ===== GRID =====
+function renderGrid(){
+  const grid=document.getElementById('grid');grid.innerHTML='';
+  const milestones=[30,60,90];
+  for(let i=1;i<=90;i++){
+    const div=document.createElement('div');
+    div.className='day';
+    if(data[i]?.checked)div.classList.add('active');
+    if(i%7===0)div.classList.add('reward-cell');
+    if(milestones.includes(i))div.classList.add('milestone');
+    if(data[i]?.meals&&hasMealData(data[i].meals))div.classList.add('has-meals');
+    div.innerText=(milestones.includes(i)&&!data[i]?.checked)?'🎁':i;
+    div.onclick=()=>openPanel(i);
+    grid.appendChild(div);
+  }
+}
+function hasMealData(meals){if(!meals)return false;return mealLabels.some(m=>meals[m.key]&&meals[m.key].some(it=>it.name));}
+
+// ===== PANEL =====
+function openPanel(day){
+  currentDay=day;
+  document.getElementById('panelDate').innerText=`第 ${day} 天`;
+  document.getElementById('inputWeight').value=data[day]?.weight||'';
+  // mood
+  document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('selected'));
+  if(data[day]?.mood){document.querySelectorAll('.mood-btn').forEach(b=>{if(b.textContent===data[day].mood)b.classList.add('selected');});}
+  // water
+  const wc=data[day]?.water||0;
+  document.getElementById('waterCount').innerText=wc;
+  const wr=document.getElementById('waterRow');wr.innerHTML='';
+  for(let i=1;i<=8;i++){
+    const s=document.createElement('span');
+    s.className=`water-cup${i<=wc?' filled':''}`;
+    s.textContent='💧';s.onclick=()=>{if(!data[day])data[day]={};data[day].water=i;openPanel(day);};
+    wr.appendChild(s);
+  }
+  renderExercise(day);renderMeals(day);updateDayTotalCal();
+  document.getElementById('overlay').style.display='block';
+  document.getElementById('panel').style.display='block';
+}
+
+function setMood(m){
+  if(!data[currentDay])data[currentDay]={};
+  data[currentDay].mood=m;
+  document.querySelectorAll('.mood-btn').forEach(b=>{b.classList.toggle('selected',b.textContent===m);});
+}
+
+function closePanel(){document.getElementById('overlay').style.display='none';document.getElementById('panel').style.display='none';}
+
+// ===== EXERCISE =====
+function renderExercise(day){
+  const c=document.getElementById('exerciseContainer');c.innerHTML='';
+  if(!data[day])data[day]={};if(!data[day].exercises)data[day].exercises=[];
+  const items=data[day].exercises;if(items.length===0)items.push({name:'',mins:'',cal:''});
+  const s=document.createElement('div');s.className='exercise-section';
+  s.innerHTML='<h4>🏃‍♀️ 运动打卡</h4>';
+  items.forEach((it,idx)=>{
+    const r=document.createElement('div');r.className='exercise-item-row';
+    r.innerHTML=`<input type="text" placeholder="运动项目" value="${esc(it.name||'')}" onchange="updateEx(${idx},'name',this.value)"><input type="number" placeholder="0" value="${it.mins||''}" min="0" onchange="updateEx(${idx},'mins',this.value)"><span class="unit">分钟</span><input type="number" placeholder="0" value="${it.cal||''}" min="0" onchange="updateEx(${idx},'cal',this.value)"><span class="unit">kcal</span>${items.length>1?`<span class="meal-item-row rm" onclick="removeEx(${idx})">×</span>`:''}`;
+    s.appendChild(r);
+  });
+  const ab=document.createElement('button');ab.className='add-ex-btn';ab.textContent='+ 添加运动';
+  ab.onclick=()=>{data[currentDay].exercises.push({name:'',mins:'',cal:''});renderExercise(currentDay);};
+  s.appendChild(ab);
+  const tm=items.reduce((a,i)=>a+(parseInt(i.mins)||0),0),tc=items.reduce((a,i)=>a+(parseInt(i.cal)||0),0);
+  if(tm>0||tc>0){const d=document.createElement('div');d.className='exercise-total';d.textContent=`共 ${tm} 分钟 | 消耗 ${tc} kcal`;s.appendChild(d);}
+  c.appendChild(s);
+}
+function updateEx(i,f,v){if(!data[currentDay].exercises[i])data[currentDay].exercises[i]={};data[currentDay].exercises[i][f]=v;renderExercise(currentDay);updateDayTotalCal();}
+function removeEx(i){data[currentDay].exercises.splice(i,1);renderExercise(currentDay);updateDayTotalCal();}
+
+// ===== MEALS =====
+function renderMeals(day){
+  const c=document.getElementById('mealsContainer');c.innerHTML='';
+  if(!data[day])data[day]={};if(!data[day].meals)data[day].meals={};
+  mealLabels.forEach(meal=>{
+    if(!data[day].meals[meal.key])data[day].meals[meal.key]=[];
+    const items=data[day].meals[meal.key];if(items.length===0)items.push({name:'',cal:''});
+    const s=document.createElement('div');s.className='meal-section';
+    s.innerHTML=`<h4>${meal.icon} ${meal.name}</h4>`;
+    items.forEach((it,idx)=>{
+      const r=document.createElement('div');r.className='meal-item-row';
+      r.innerHTML=`<input type="text" placeholder="食物" value="${esc(it.name||'')}" onchange="updateMeal('${meal.key}',${idx},'name',this.value)"><input type="number" placeholder="0" value="${it.cal||''}" min="0" onchange="updateMeal('${meal.key}',${idx},'cal',this.value)"><span class="unit">kcal</span>${items.length>1?`<span class="rm" onclick="removeMeal('${meal.key}',${idx})">×</span>`:''}`;
+      s.appendChild(r);
+    });
+    const ab=document.createElement('button');ab.className='add-meal-btn';ab.textContent='+ 添加';
+    ab.onclick=()=>{data[currentDay].meals[meal.key].push({name:'',cal:''});renderMeals(currentDay);updateDayTotalCal();};
+    s.appendChild(ab);
+    const sub=items.reduce((a,i)=>a+(parseFloat(i.cal)||0),0);
+    if(sub>0){const d=document.createElement('div');d.className='meal-total';d.textContent=`小计 ${sub} kcal`;s.appendChild(d);}
+    c.appendChild(s);
+  });
+}
+function updateMeal(k,i,f,v){if(!data[currentDay].meals[k][i])data[currentDay].meals[k][i]={};data[currentDay].meals[k][i][f]=v;updateDayTotalCal();}
+function removeMeal(k,i){data[currentDay].meals[k].splice(i,1);renderMeals(currentDay);updateDayTotalCal();}
+
+function updateDayTotalCal(){
+  let tIn=0,tOut=0;
+  if(data[currentDay]?.meals)mealLabels.forEach(m=>{(data[currentDay].meals[m.key]||[]).forEach(i=>{tIn+=parseFloat(i.cal)||0;});});
+  if(data[currentDay]?.exercises)data[currentDay].exercises.forEach(i=>{tOut+=parseInt(i.cal)||0;});
+  document.getElementById('dayTotalCal').innerHTML=`摄入 ${tIn} − 运动 ${tOut} = <strong>净摄入 ${tIn-tOut} kcal</strong>`;
+}
+
+function saveDay(){
+  if(!data[currentDay])data[currentDay]={};
+  const wasNew=!data[currentDay].checked;
+  data[currentDay].checked=true;
+  const w=document.getElementById('inputWeight').value;
+  if(w)data[currentDay].weight=w;
+  if(data[currentDay].meals)mealLabels.forEach(m=>{const it=data[currentDay].meals[m.key];if(it)data[currentDay].meals[m.key]=it.filter(i=>i.name||i.cal);});
+  if(data[currentDay].exercises)data[currentDay].exercises=data[currentDay].exercises.filter(i=>i.name||i.mins||i.cal);
+  persistAll();closePanel();updateStats();renderGrid();updateChart();
+  if(wasNew){
+    const dayEl=document.querySelectorAll('.day')[currentDay-1];
+    if(dayEl){const r=dayEl.getBoundingClientRect();spawnPetals(r.left+r.width/2,r.top+r.height/2);requestAnimationFrame(drawParts);}
+    toast(`🌸 第 ${currentDay} 天打卡成功`);
+  }else toast('已更新');
+}
+
+// ===== REWARDS =====
+function saveRewards(){
+  rewards.r30=document.getElementById('r30').value;
+  rewards.r60=document.getElementById('r60').value;
+  rewards.r90=document.getElementById('r90').value;
+  persistAll();
+}
+
+// ===== STATS & CHART =====
+function updateStats(){
+  const count=Object.keys(data).filter(k=>!isNaN(k)&&data[k].checked).length;
+  const weights=[];for(let i=1;i<=90;i++){if(data[i]?.weight)weights.push(data[i].weight);}
+  const latest=weights.length?weights[weights.length-1]:'--';
+  document.getElementById('statDays').innerText=count;
+  document.getElementById('statWeight').innerText=latest;
+}
+
+function initChart(){
+  const ctx=document.getElementById('weightChart').getContext('2d');
+  Chart.defaults.font.family="'Noto Serif SC',serif";
+  Chart.defaults.font.size=10;Chart.defaults.color='#b08a8e';
+  chart=new Chart(ctx,{
+    type:'line',
+    data:{labels:[],datasets:[{label:'体重',data:[],borderColor:'#c48e93',backgroundColor:'rgba(196,142,147,0.1)',fill:true,tension:0.4,pointRadius:3,pointBackgroundColor:'#c48e93',borderWidth:2}]},
+    options:{
+      maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        annotation:{annotations:{goalLine:{type:'line',yMin:45,yMax:45,borderColor:'rgba(200,176,112,0.5)',borderWidth:1.5,borderDash:[6,4],label:{display:true,content:'目标 45kg',position:'end',font:{size:9,family:'Caveat'},color:'#c8b070',backgroundColor:'transparent'}}}}
+      },
+      scales:{y:{beginAtZero:false,grid:{color:'rgba(0,0,0,0.04)'}},x:{grid:{display:false}}}
+    }
+  });
+  updateChart();
+}
+
+function updateChart(){
+  const labels=[],weights=[];
+  for(let i=1;i<=90;i++){if(data[i]?.weight){labels.push('D'+i);weights.push(parseFloat(data[i].weight));}}
+  chart.data.labels=labels;chart.data.datasets[0].data=weights;chart.update();
+}
+
+// ===== WHISPER =====
+function showWhisper(){
+  document.getElementById('whisperText').textContent=whispers[Math.floor(Math.random()*whispers.length)];
+  document.getElementById('whisperOverlay').style.display='block';
+  document.getElementById('whisperPopup').style.display='block';
+}
+function closeWhisper(){
+  document.getElementById('whisperOverlay').style.display='none';
+  document.getElementById('whisperPopup').style.display='none';
+}
+
+// ===== VISION BOARD =====
+function renderVisionBoard(){
+  const b=document.getElementById('visionBoard');b.innerHTML='';
+  if(!visionItems.length){b.innerHTML='<p style="font-size:0.75rem;color:var(--mw);text-align:center;margin:8px 0;">还没有愿景 — 写下你瘦下来后想做的事 ✨</p>';return;}
+  visionItems.forEach((it,i)=>{
+    const d=document.createElement('div');d.className='vision-item';
+    let h=`<button class="del-v" onclick="removeVision(${i})">×</button><p>${esc(it.text)}</p>`;
+    if(it.img)h+=`<img src="${it.img}" alt="vision">`;
+    d.innerHTML=h;b.appendChild(d);
+  });
+}
+function onVisionImgSelected(input){
+  const f=input.files[0];if(!f){pendingVisionImg=null;document.getElementById('visionImgName').innerText='未选择';return;}
+  document.getElementById('visionImgName').innerText=f.name.length>12?f.name.substring(0,12)+'...':f.name;
+  const reader=new FileReader();
+  reader.onload=e=>{compressImage(e.target.result,600,0.7,c=>{pendingVisionImg=c;});};
+  reader.readAsDataURL(f);
+}
+function compressImage(dataUrl,maxW,q,cb){
+  const img=new Image();img.onload=function(){
+    const cv=document.createElement('canvas');let w=img.width,h=img.height;
+    if(w>maxW){h=h*maxW/w;w=maxW;}cv.width=w;cv.height=h;
+    cv.getContext('2d').drawImage(img,0,0,w,h);cb(cv.toDataURL('image/jpeg',q));
+  };img.src=dataUrl;
+}
+function addVisionItem(){
+  const text=document.getElementById('visionText').value.trim();
+  if(!text&&!pendingVisionImg)return;
+  visionItems.push({text:text||'',img:pendingVisionImg||null});
+  pendingVisionImg=null;document.getElementById('visionText').value='';
+  document.getElementById('visionImg').value='';document.getElementById('visionImgName').innerText='未选择';
+  persistAll();renderVisionBoard();toast('愿景已添加 ✨');
+}
+function removeVision(i){if(confirm('删除这条愿景？')){visionItems.splice(i,1);persistAll();renderVisionBoard();}}
+
+// ===== SAVE/LOAD =====
+function generateCode(){
+  try{const j=JSON.stringify({data,rewards,visionItems});document.getElementById('codeBox').value=btoa(unescape(encodeURIComponent(j)));toast('存档已生成');}catch(e){toast('生成失败');}
+}
+function copyCode(){
+  const box=document.getElementById('codeBox');if(!box.value)generateCode();
+  navigator.clipboard.writeText(box.value).then(()=>toast('存档已复制')).catch(()=>{box.select();document.execCommand('copy');toast('存档已复制');});
+}
+function importCode(){
+  let c=document.getElementById('codeBox').value.trim();
+  if(!c){const input=prompt('请粘贴存档码：');if(!input)return;c=input.trim();}
+  try{
+    const p=JSON.parse(decodeURIComponent(escape(atob(c))));
+    if(p.data)data=p.data;if(p.rewards)rewards=p.rewards;if(p.visionItems)visionItems=p.visionItems;
+    persistAll();document.getElementById('r30').value=rewards.r30||'';
+    document.getElementById('r60').value=rewards.r60||'';document.getElementById('r90').value=rewards.r90||'';
+    renderGrid();updateStats();updateChart();renderVisionBoard();toast('恢复成功');
+  }catch(e){toast('存档码有误');}
+}
+
+window.addEventListener('resize',()=>{initParticles();initFlowerCanvas();});
+init();
+</script>
+</body>
+</html>
