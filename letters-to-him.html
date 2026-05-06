@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>给他的信</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Noto+Serif+SC:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap');
+
+  :root {
+    --m1:#8fa3b0;--m2:#a7bcc7;--m3:#c4d4dc;--m4:#dce6eb;--m5:#edf2f5;--m6:#f5f8fa;
+    --md:#5d7a8a;--mi:#3d5566;--mw:#b8c4cb;
+    --paper:#f9fbfc;--pl:#d8e4ec;--danger:#c47a7a;--hl:#ffeeb3;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--m5);min-height:100vh;font-family:'Noto Serif SC',serif;color:var(--mi);overflow-x:hidden;}
+  body::before{content:'';position:fixed;top:-20%;right:-10%;width:60vw;height:60vw;background:radial-gradient(ellipse,rgba(167,188,199,0.3)0%,transparent 70%);border-radius:50%;pointer-events:none;z-index:0;}
+  body::after{content:'';position:fixed;bottom:-15%;left:-15%;width:50vw;height:50vw;background:radial-gradient(ellipse,rgba(196,212,220,0.25)0%,transparent 70%);border-radius:50%;pointer-events:none;z-index:0;}
+  .container{position:relative;z-index:1;max-width:720px;margin:0 auto;padding:20px 16px 100px;}
+
+  .header{text-align:center;padding:40px 0 24px;position:relative;}
+  .header h1{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:2.2rem;color:var(--md);letter-spacing:6px;margin-bottom:8px;}
+  .header .subtitle{font-family:'Caveat',cursive;font-size:1.1rem;color:var(--m1);letter-spacing:2px;}
+  .header .deco-line{width:60px;height:1px;background:var(--m2);margin:16px auto 0;}
+  .sticker{position:absolute;user-select:none;pointer-events:none;filter:drop-shadow(1px 2px 3px rgba(93,122,138,0.15));opacity:0.85;}
+  .header .s1{top:10px;left:10%;font-size:1.8rem;transform:rotate(-15deg);}
+  .header .s2{top:5px;right:10%;font-size:1.4rem;transform:rotate(12deg);}
+  .header .s3{bottom:5px;left:18%;font-size:1.2rem;transform:rotate(-8deg);}
+
+  .toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;align-items:center;}
+  .toolbar-btn{background:var(--paper);border:1px solid var(--m3);color:var(--md);padding:7px 14px;border-radius:4px;font-family:'Noto Serif SC',serif;font-size:0.8rem;cursor:pointer;transition:all 0.15s;letter-spacing:1px;}
+  .toolbar-btn:hover{background:var(--m4);border-color:var(--m2);}
+  .toolbar-btn.active{background:var(--m2);color:white;border-color:var(--m2);}
+  .search-box{flex:1;min-width:140px;position:relative;}
+  .search-box input{width:100%;padding:7px 12px 7px 30px;border:1px solid var(--m3);border-radius:4px;background:var(--paper);font-family:'Noto Serif SC',serif;font-size:0.85rem;color:var(--mi);outline:none;transition:border-color 0.2s;}
+  .search-box input:focus{border-color:var(--m1);}
+  .search-box input::placeholder{color:var(--mw);}
+  .search-box::before{content:'🔍';position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:0.8rem;opacity:0.5;}
+
+  .archive-panel{background:var(--paper);border:1px solid var(--m3);border-radius:4px;padding:18px 20px;margin-bottom:20px;display:none;animation:fadeIn 0.25s ease;}
+  .archive-panel.show{display:block;}
+  .archive-panel h3{font-family:'Caveat',cursive;font-size:1rem;color:var(--m1);margin-bottom:12px;font-weight:400;}
+  .archive-row{display:flex;gap:8px;margin-bottom:10px;}
+  .archive-row textarea{flex:1;padding:8px 10px;border:1px solid var(--m3);border-radius:4px;font-family:monospace;font-size:0.7rem;color:var(--mi);background:var(--m6);resize:none;height:56px;outline:none;}
+  .archive-row textarea:focus{border-color:var(--m1);}
+  .archive-btn{background:var(--m1);color:white;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-family:'Noto Serif SC',serif;font-size:0.78rem;letter-spacing:1px;transition:background 0.15s;white-space:nowrap;}
+  .archive-btn:hover{background:var(--md);}
+  .archive-msg{font-size:0.78rem;color:var(--m1);font-family:'Caveat',cursive;min-height:1.2em;}
+
+  @keyframes fadeIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes fadeSlideIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+  .letter-count{text-align:center;font-family:'Caveat',cursive;font-size:0.9rem;color:var(--mw);margin-bottom:20px;}
+
+  .letter-card{background:var(--paper);border-radius:4px;margin-bottom:16px;position:relative;box-shadow:0 1px 4px rgba(93,122,138,0.08),0 4px 16px rgba(93,122,138,0.06);border:1px solid rgba(196,212,220,0.4);animation:fadeSlideIn 0.4s ease both;overflow:hidden;}
+  .letter-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--m3),var(--m1),var(--m3));border-radius:4px 4px 0 0;}
+
+  .envelope-header{padding:18px 22px 16px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:background 0.15s;user-select:none;}
+  .envelope-header:hover{background:var(--m6);}
+  .envelope-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .envelope-date{font-family:'Caveat',cursive;font-size:0.9rem;color:var(--m1);}
+  .envelope-preview{font-size:0.8rem;color:var(--mw);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .envelope-stickers{font-size:1rem;display:flex;gap:3px;}
+  .envelope-arrow{font-size:0.7rem;color:var(--mw);transition:transform 0.25s;}
+  .letter-card.open .envelope-arrow{transform:rotate(180deg);}
+
+  .letter-inner{max-height:0;overflow:hidden;transition:max-height 0.35s ease,padding 0.35s ease;padding:0 22px;}
+  .letter-card.open .letter-inner{max-height:5000px;padding:0 22px 20px;}
+
+  .letter-body{font-family:'Noto Serif SC',serif;font-weight:300;font-size:1rem;line-height:2;color:var(--mi);white-space:pre-wrap;word-break:break-word;background-image:repeating-linear-gradient(transparent,transparent 31px,var(--pl) 31px,var(--pl) 32px);padding:2px 0;min-height:32px;}
+  .letter-body mark{background:var(--hl);color:var(--mi);padding:1px 2px;border-radius:2px;}
+
+  .letter-footer{display:flex;justify-content:space-between;align-items:center;margin-top:12px;}
+  .letter-stickers-row{display:flex;gap:5px;}
+  .letter-sticker-item{font-size:1.2rem;opacity:0.75;transition:transform 0.2s,opacity 0.2s;cursor:default;}
+  .letter-sticker-item:hover{transform:scale(1.25) rotate(-5deg);opacity:1;}
+  .letter-delete{background:none;border:none;color:var(--mw);font-size:0.75rem;cursor:pointer;opacity:0.5;transition:opacity 0.2s,color 0.2s;padding:4px 8px;font-family:'Noto Serif SC',serif;letter-spacing:1px;}
+  .letter-delete:hover{opacity:1;color:var(--danger);}
+
+  .compose{background:var(--paper);border-radius:4px;padding:28px 24px 20px;box-shadow:0 1px 4px rgba(93,122,138,0.08),0 4px 16px rgba(93,122,138,0.06);border:1px solid rgba(196,212,220,0.4);position:relative;margin-bottom:20px;}
+  .compose::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--m2),var(--md),var(--m2));border-radius:4px 4px 0 0;}
+  .compose-label{font-family:'Caveat',cursive;font-size:1.1rem;color:var(--m1);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+  .compose textarea{width:100%;border:none;outline:none;resize:none;font-family:'Noto Serif SC',serif;font-weight:300;font-size:1rem;line-height:2;color:var(--mi);background-image:repeating-linear-gradient(transparent,transparent 31px,var(--pl) 31px,var(--pl) 32px);background-color:transparent;min-height:128px;padding:2px 0;}
+  .compose textarea::placeholder{color:var(--mw);font-style:italic;}
+
+  .sticker-picker{display:flex;gap:4px;flex-wrap:wrap;margin-top:14px;padding-top:12px;border-top:1px solid var(--m4);}
+  .sticker-picker-label{width:100%;font-family:'Caveat',cursive;font-size:0.85rem;color:var(--mw);margin-bottom:4px;}
+  .sticker-option{font-size:1.4rem;padding:4px 6px;cursor:pointer;border-radius:6px;transition:background 0.15s,transform 0.15s;border:2px solid transparent;background:none;line-height:1;}
+  .sticker-option:hover{background:var(--m5);transform:scale(1.15);}
+  .sticker-option.selected{border-color:var(--m2);background:var(--m5);}
+
+  .compose-actions{display:flex;justify-content:space-between;align-items:center;margin-top:14px;}
+  .selected-stickers{display:flex;gap:4px;font-size:1.2rem;min-height:1.4em;}
+  .btn-send{background:var(--m1);color:white;border:none;padding:10px 28px;border-radius:4px;font-family:'Noto Serif SC',serif;font-size:0.9rem;letter-spacing:3px;cursor:pointer;transition:background 0.2s,transform 0.15s;}
+  .btn-send:hover{background:var(--md);transform:translateY(-1px);}
+  .btn-send:active{transform:translateY(0);}
+
+  .empty-state{text-align:center;padding:60px 20px;color:var(--mw);font-family:'Caveat',cursive;font-size:1.2rem;letter-spacing:1px;line-height:1.8;}
+  .empty-state .big{font-size:3rem;display:block;margin-bottom:16px;opacity:0.5;}
+
+  .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:var(--md);color:white;padding:10px 24px;border-radius:20px;font-size:0.85rem;font-family:'Noto Serif SC',serif;letter-spacing:1px;opacity:0;pointer-events:none;transition:opacity 0.3s,transform 0.3s;z-index:100;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px);}
+
+  ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--m3);border-radius:2px;}
+  @media(max-width:480px){.container{padding:12px 12px 90px;}.header h1{font-size:1.8rem;letter-spacing:4px;}.compose{padding:22px 18px 16px;}.toolbar{gap:6px;}.toolbar-btn{padding:6px 10px;font-size:0.75rem;}.envelope-preview{max-width:120px;}}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <span class="sticker s1">🕊️</span>
+    <span class="sticker s2">🤍</span>
+    <span class="sticker s3">✉️</span>
+    <h1>给他的信</h1>
+    <div class="subtitle">letters I'll never send</div>
+    <div class="deco-line"></div>
+  </div>
+
+  <div class="toolbar">
+    <div class="search-box"><input type="text" id="searchInput" placeholder="搜索信的内容..."></div>
+    <button class="toolbar-btn" id="btnSort">↑ 最新在前</button>
+    <button class="toolbar-btn" id="btnArchive">📦 存档</button>
+    <button class="toolbar-btn" id="btnExport">📄 导出</button>
+  </div>
+
+  <div class="archive-panel" id="archivePanel">
+    <h3>✧ 生成存档码 / 读取存档</h3>
+    <div class="archive-row">
+      <textarea id="archiveCode" placeholder="存档码会显示在这里，也可以粘贴存档码来恢复..."></textarea>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <button class="archive-btn" id="btnGenCode">生成</button>
+        <button class="archive-btn" id="btnLoadCode">读取</button>
+        <button class="archive-btn" id="btnCopyCode" style="background:var(--m3);color:var(--mi);">复制</button>
+      </div>
+    </div>
+    <div class="archive-msg" id="archiveMsg"></div>
+  </div>
+
+  <div id="letterCount" class="letter-count"></div>
+  <div id="letters"></div>
+
+  <div class="compose">
+    <div class="compose-label"><span>✧</span> 写一封新的信</div>
+    <textarea id="composeText" placeholder="你想对他说什么..."></textarea>
+    <div class="sticker-picker">
+      <div class="sticker-picker-label">选几个贴纸装饰这封信 ♡</div>
+      <span class="sticker-option" data-s="🤍">🤍</span><span class="sticker-option" data-s="💙">💙</span><span class="sticker-option" data-s="🩵">🩵</span><span class="sticker-option" data-s="🦋">🦋</span><span class="sticker-option" data-s="🕊️">🕊️</span><span class="sticker-option" data-s="🌿">🌿</span><span class="sticker-option" data-s="🍃">🍃</span><span class="sticker-option" data-s="☁️">☁️</span><span class="sticker-option" data-s="🌙">🌙</span><span class="sticker-option" data-s="⭐">⭐</span><span class="sticker-option" data-s="✨">✨</span><span class="sticker-option" data-s="🫧">🫧</span><span class="sticker-option" data-s="🪻">🪻</span><span class="sticker-option" data-s="💌">💌</span><span class="sticker-option" data-s="🎀">🎀</span><span class="sticker-option" data-s="🧸">🧸</span><span class="sticker-option" data-s="📎">📎</span><span class="sticker-option" data-s="🤞">🤞</span><span class="sticker-option" data-s="🥀">🥀</span><span class="sticker-option" data-s="🫂">🫂</span><span class="sticker-option" data-s="🐈">🐈</span><span class="sticker-option" data-s="🎐">🎐</span><span class="sticker-option" data-s="🔒">🔒</span><span class="sticker-option" data-s="💫">💫</span>
+    </div>
+    <div class="compose-actions">
+      <div class="selected-stickers" id="selectedPreview"></div>
+      <button class="btn-send" id="btnSend">寄出</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const KEY='letters-to-him-v2';
+let letters=[],selectedStickers=[],sortNewest=true,searchQuery='';
+
+function load(){try{const r=localStorage.getItem(KEY);if(r)letters=JSON.parse(r);}catch(e){letters=[];}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(letters));}catch(e){}}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000);}
+function fmtDate(ts){const d=new Date(ts);return`${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}  ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;}
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+function highlight(text,q){if(!q)return esc(text);const e=esc(text),qe=q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');return e.replace(new RegExp(`(${qe})`,'gi'),'<mark>$1</mark>');}
+function preview(text){return text.length>30?text.slice(0,30)+'…':text;}
+function getFiltered(){let a=letters.map((l,i)=>({...l,idx:i}));if(searchQuery){const q=searchQuery.toLowerCase();a=a.filter(l=>l.text.toLowerCase().includes(q));}if(!sortNewest)a=[...a].reverse();return a;}
+
+function render(){
+  const c=document.getElementById('letters'),ct=document.getElementById('letterCount'),f=getFiltered();
+  if(!letters.length){c.innerHTML=`<div class="empty-state"><span class="big">✉️</span>还没有信。<br>写下第一封吧。</div>`;ct.textContent='';return;}
+  ct.textContent=searchQuery?`找到 ${f.length} / ${letters.length} 封信`:`${letters.length} 封信`;
+  if(!f.length){c.innerHTML=`<div class="empty-state">没有找到匹配的信。</div>`;return;}
+  c.innerHTML=f.map((l,vi)=>`
+    <div class="letter-card${searchQuery?' open':''}" data-idx="${l.idx}" style="animation-delay:${Math.min(vi*0.04,0.4)}s">
+      <div class="envelope-header" onclick="toggleLetter(this)">
+        <div class="envelope-left">
+          <span class="envelope-date">${fmtDate(l.ts)}</span>
+          <span class="envelope-preview">${esc(preview(l.text))}</span>
+          <span class="envelope-stickers">${(l.stickers||[]).map(s=>`<span>${s}</span>`).join('')}</span>
+        </div>
+        <span class="envelope-arrow">▼</span>
+      </div>
+      <div class="letter-inner">
+        <div class="letter-body">${highlight(l.text,searchQuery)}</div>
+        <div class="letter-footer">
+          <div class="letter-stickers-row">${(l.stickers||[]).map(s=>`<span class="letter-sticker-item">${s}</span>`).join('')}</div>
+          <button class="letter-delete" onclick="deleteLetter(${l.idx})">删除</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function toggleLetter(h){h.parentElement.classList.toggle('open');}
+function deleteLetter(i){if(confirm('确定要删除这封信吗？')){letters.splice(i,1);save();render();toast('已删除');}}
+
+document.querySelectorAll('.sticker-option').forEach(el=>{el.addEventListener('click',()=>{const s=el.dataset.s,i=selectedStickers.indexOf(s);if(i>-1){selectedStickers.splice(i,1);el.classList.remove('selected');}else if(selectedStickers.length<5){selectedStickers.push(s);el.classList.add('selected');}document.getElementById('selectedPreview').innerHTML=selectedStickers.map(s=>`<span>${s}</span>`).join('');});});
+
+document.getElementById('btnSend').addEventListener('click',()=>{const t=document.getElementById('composeText').value.trim();if(!t)return;letters.unshift({text:t,stickers:[...selectedStickers],ts:Date.now()});save();render();document.getElementById('composeText').value='';selectedStickers=[];document.querySelectorAll('.sticker-option').forEach(el=>el.classList.remove('selected'));document.getElementById('selectedPreview').innerHTML='';window.scrollTo({top:0,behavior:'smooth'});toast('信已寄出 ✉️');});
+document.getElementById('searchInput').addEventListener('input',e=>{searchQuery=e.target.value.trim();render();});
+document.getElementById('btnSort').addEventListener('click',()=>{sortNewest=!sortNewest;document.getElementById('btnSort').textContent=sortNewest?'↑ 最新在前':'↓ 最早在前';render();});
+document.getElementById('btnArchive').addEventListener('click',()=>{document.getElementById('archivePanel').classList.toggle('show');document.getElementById('btnArchive').classList.toggle('active');});
+document.getElementById('btnGenCode').addEventListener('click',()=>{if(!letters.length){document.getElementById('archiveMsg').textContent='还没有信可以存档';return;}try{const j=JSON.stringify(letters),e=btoa(unescape(encodeURIComponent(j)));document.getElementById('archiveCode').value=e;document.getElementById('archiveMsg').textContent=`✓ 已生成，共 ${letters.length} 封信的存档码`;}catch(e){document.getElementById('archiveMsg').textContent='生成失败';}});
+document.getElementById('btnLoadCode').addEventListener('click',()=>{const c=document.getElementById('archiveCode').value.trim();if(!c){document.getElementById('archiveMsg').textContent='请先粘贴存档码';return;}try{const j=decodeURIComponent(escape(atob(c))),d=JSON.parse(j);if(!Array.isArray(d))throw 0;letters=d;save();render();document.getElementById('archiveMsg').textContent=`✓ 已读取 ${letters.length} 封信`;toast(`读取成功，共 ${letters.length} 封信`);}catch(e){document.getElementById('archiveMsg').textContent='存档码无效，请检查是否完整复制';}});
+document.getElementById('btnCopyCode').addEventListener('click',()=>{const c=document.getElementById('archiveCode').value;if(!c){document.getElementById('archiveMsg').textContent='请先生成存档码';return;}navigator.clipboard.writeText(c).then(()=>toast('已复制到剪贴板')).catch(()=>{document.getElementById('archiveCode').select();document.execCommand('copy');toast('已复制');});});
+document.getElementById('btnExport').addEventListener('click',()=>{if(!letters.length){toast('还没有信可以导出');return;}let t='给他的信\n'+'═'.repeat(30)+'\n\n';letters.forEach((l,i)=>{t+=`── 第 ${i+1} 封 ──\n${fmtDate(l.ts)}\n\n${l.text}\n`;if(l.stickers&&l.stickers.length)t+='\n'+l.stickers.join(' ')+'\n';t+='\n'+'─'.repeat(20)+'\n\n';});t+=`共 ${letters.length} 封信\n`;const b=new Blob([t],{type:'text/plain;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='给他的信.txt';a.click();URL.revokeObjectURL(a.href);toast('已导出');});
+
+load();render();
+</script>
+</body>
+</html>
