@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>阿姜的德语花园</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&family=Noto+Serif+SC:wght@300;400&family=Playfair+Display:ital,wght@0,400;1,400&display=swap');
+:root{--bg:#f0ece4;--text:#4a5043;--text2:#7a8270;--text3:#a0a693;--card:#faf9f6;--accent:#8a9a7a;--accent2:#a3b093;--grass3:#d4dcc8;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;width:100%;position:fixed;top:0;left:0;}
+body{background:var(--bg);font-family:'Noto Serif SC',serif;color:var(--text);}
+.app{display:flex;flex-direction:column;height:100%;width:100%;}
+.header{text-align:center;padding:12px 16px 6px;flex-shrink:0;z-index:10;}
+.header h1{font-family:'Playfair Display',serif;font-weight:400;font-size:1.3rem;letter-spacing:3px;}
+.header .sub{font-family:'Caveat',cursive;font-size:0.82rem;color:var(--text2);margin-top:2px;}
+.stats{font-family:'Caveat',cursive;font-size:0.75rem;color:var(--text3);margin-top:3px;}
+.toolbar{display:flex;gap:5px;padding:5px 10px;flex-shrink:0;flex-wrap:wrap;justify-content:center;z-index:10;}
+.tb{background:rgba(250,249,246,0.85);border:1px solid var(--grass3);color:var(--text2);padding:4px 9px;border-radius:20px;font-family:'Noto Serif SC',serif;font-size:0.65rem;cursor:pointer;transition:all 0.15s;}
+.tb:hover,.tb.active{background:var(--accent);color:white;border-color:var(--accent);}
+.garden-wrap{flex:1;position:relative;overflow:hidden;min-height:0;}
+#garden{display:block;width:100%;height:100%;}
+.tooltip{position:fixed;background:var(--card);border:1px solid var(--grass3);border-radius:8px;padding:10px 14px;box-shadow:0 4px 16px rgba(0,0,0,0.12);pointer-events:none;opacity:0;transition:opacity 0.2s;z-index:50;max-width:250px;}
+.tooltip.show{opacity:1;}
+.tooltip .tw{font-family:'Playfair Display',serif;font-size:1rem;color:var(--text);}
+.tooltip .tm{font-size:0.78rem;color:var(--text2);}
+.tooltip .td,.tooltip .ts,.tooltip .tv{font-family:'Caveat',cursive;font-size:0.7rem;color:var(--text3);}
+.tooltip .tv{color:#b08a5a;}
+.bottom-panels{flex-shrink:0;z-index:10;}
+.add-panel,.archive-panel,.quiz-panel{background:var(--card);border-top:1px solid var(--grass3);padding:10px 14px;display:none;}
+.add-panel.show,.archive-panel.show,.quiz-panel.show{display:block;}
+.add-mode{display:flex;gap:6px;margin-bottom:8px;justify-content:center;}
+.add-mode-btn{padding:4px 12px;border-radius:14px;border:1px solid var(--grass3);background:var(--card);font-size:0.68rem;cursor:pointer;color:var(--text2);}
+.add-mode-btn.active{background:var(--accent);color:white;border-color:var(--accent);}
+.add-row{display:flex;gap:6px;}
+.add-row input{flex:1;padding:7px 10px;border:1px solid var(--grass3);border-radius:6px;font-size:0.8rem;color:var(--text);background:white;outline:none;min-width:0;}
+.add-row input:focus{border-color:var(--accent);}
+.verb-fields{display:none;margin-top:6px;gap:6px;}
+.verb-fields.show{display:flex;}
+.verb-fields input{flex:1;min-width:80px;padding:6px 8px;border:1px solid #d4c8a0;border-radius:6px;font-size:0.75rem;color:var(--text);background:#faf8f0;outline:none;}
+.btn-add{background:var(--accent);color:white;border:none;padding:7px 14px;border-radius:6px;cursor:pointer;font-size:0.75rem;white-space:nowrap;}
+.quiz-panel{text-align:center;}
+.quiz-word{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--text);margin:6px 0;}
+.quiz-input{padding:7px 12px;border:1px solid var(--grass3);border-radius:6px;font-size:0.88rem;width:70%;outline:none;text-align:center;}
+.quiz-result{font-family:'Caveat',cursive;font-size:0.95rem;margin-top:5px;min-height:1.2em;}
+.quiz-btns{margin-top:6px;display:flex;gap:6px;justify-content:center;flex-wrap:wrap;}
+.quiz-btn{background:var(--accent);color:white;border:none;padding:5px 14px;border-radius:6px;cursor:pointer;font-size:0.7rem;}
+.archive-panel h3{font-family:'Caveat',cursive;font-size:0.82rem;color:var(--text2);margin-bottom:5px;font-weight:400;}
+.ar-row{display:flex;gap:6px;margin-bottom:4px;}
+.ar-row textarea{flex:1;padding:5px 7px;border:1px solid var(--grass3);border-radius:4px;font-family:monospace;font-size:0.55rem;color:var(--text);background:white;resize:none;height:40px;outline:none;}
+.ar-btn{background:var(--accent);color:white;border:none;padding:4px 9px;border-radius:4px;cursor:pointer;font-size:0.65rem;white-space:nowrap;}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--card);padding:8px 20px;border-radius:20px;font-size:0.75rem;opacity:0;pointer-events:none;transition:opacity 0.3s;z-index:100;}
+.toast.show{opacity:1;}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="header" id="header"><h1>Wortgarten</h1><div class="sub">阿姜的德语花园</div><div class="stats" id="stats">还没有花</div></div>
+<div class="toolbar">
+<button class="tb" id="btnAdd">🌱 种花</button>
+<button class="tb" id="btnQuiz">🦋 测验</button>
+<button class="tb" id="btnWind">🌬️ 起风了</button>
+<button class="tb" id="btnWeather">☀️ 天气</button>
+<button class="tb" id="btnShovel">🪏 铲子</button>
+<button class="tb" id="btnArchive">📦 存档</button>
+<button class="tb" id="btnExport">📄 导出</button>
+</div>
+<div class="garden-wrap" id="gardenWrap"><canvas id="garden"></canvas></div>
+<div class="bottom-panels">
+<div class="add-panel" id="addPanel">
+<div class="add-mode"><button class="add-mode-btn active" id="modeN" onclick="setAddMode('normal')">🌸 普通词</button><button class="add-mode-btn" id="modeV" onclick="setAddMode('verb')">⭐ 动词挑战</button></div>
+<div class="add-row"><input id="inputWord" placeholder="德语单词"><input id="inputMeaning" placeholder="中文意思"><button class="btn-add" id="btnPlant">种下</button></div>
+<div class="verb-fields" id="verbFields"><input id="inputPast" placeholder="过去式 Präteritum"><input id="inputPP" placeholder="过去分词 Partizip II"></div>
+</div>
+<div class="quiz-panel" id="quizPanel">
+<div style="font-family:'Caveat',cursive;font-size:0.75rem;color:var(--text3)">蝴蝶停在了一朵花上...</div>
+<div style="margin:4px 0;display:flex;justify-content:center;gap:4px">
+<button class="quiz-btn" id="qmDE" style="font-size:0.6rem;padding:3px 8px" onclick="setQM('de2cn')">德→中</button>
+<button class="quiz-btn" id="qmCN" style="font-size:0.6rem;padding:3px 8px;background:var(--text3)" onclick="setQM('cn2de')">中→德</button>
+<button class="quiz-btn" id="qmR" style="font-size:0.6rem;padding:3px 8px;background:var(--text3)" onclick="setQM('random')">随机</button>
+</div>
+<div class="quiz-word" id="quizWord">—</div>
+<input class="quiz-input" id="quizInput" placeholder="输入答案">
+<div class="quiz-result" id="quizResult"></div>
+<div class="quiz-btns"><button class="quiz-btn" id="quizCheck">确认</button><button class="quiz-btn" id="quizSkip" style="background:var(--text3)">跳过</button><button class="quiz-btn" id="quizNext" style="background:var(--accent2)">下一个</button></div>
+</div>
+<div class="archive-panel" id="archivePanel">
+<h3>✧ 存档 / 读取</h3>
+<div class="ar-row"><textarea id="archiveCode" placeholder="存档码"></textarea><div style="display:flex;flex-direction:column;gap:3px"><button class="ar-btn" id="arGen">生成</button><button class="ar-btn" id="arLoad">读取</button><button class="ar-btn" id="arCopy" style="background:var(--grass3);color:var(--text)">复制</button></div></div>
+</div>
+</div>
+<div class="tooltip" id="tooltip"><div class="tw" id="tipWord"></div><div class="tm" id="tipMeaning"></div><div class="tv" id="tipVerb"></div><div class="td" id="tipDate"></div><div class="ts" id="tipState"></div></div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const KEY='wortgarten-v4';
+let flowers=[],canvas,ctx,dpr,viewW,viewH,windStr=0,windTgt=2,weather='auto',weatherIdx=0;
+let quizFlower=null,quizMode='de2cn',quizDir='de2cn',addMode='normal',petalParts=[];
+let shovelMode=false;
+const WM=['auto','day','night','rain'];
+const TIERS={basic:['daisy','wildflower','clover','starflower'],mid:['tulip','bellflower','hyacinth'],rare:['rose','sunflower'],legendary:['cherry']};
+const PAL={basic:['#d4a0a0','#a0b8c8','#c8b8d4','#d4c8a0','#a0c8b8'],mid:['#e06070','#8060c0','#6080e0','#e080a0'],rare:['#c03050','#e0a030'],legendary:['#ffb0c0','#ff90a8']};
+const SC=['#5a7a48','#4a6a38','#6a8a58'],LC=['#6a8a4a','#5a7a3a','#7a9a5a'];
+function rand(a,b){return a+Math.random()*(b-a);}
+function randInt(a,b){return Math.floor(rand(a,b+1));}
+function pick(a){return a[randInt(0,a.length-1)];}
+function lerp(a,b,t){return a+(b-a)*t;}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+function load(){try{const r=localStorage.getItem(KEY);if(r)flowers=JSON.parse(r);}catch(e){flowers=[];}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(flowers));}catch(e){}}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
+function fmtDate(ts){const d=new Date(ts);return d.getFullYear()+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0');}
+function initCanvas(){
+  canvas=document.getElementById("garden");
+  var wr=document.getElementById("gardenWrap");
+  dpr=window.devicePixelRatio||1;
+  viewW=wr.clientWidth||window.innerWidth;
+  viewH=wr.clientHeight;
+  if(!viewH||viewH<50){viewH=window.innerHeight-120;}
+  canvas.width=viewW*dpr;
+  canvas.height=viewH*dpr;
+  canvas.style.width=viewW+"px";
+  canvas.style.height=viewH+"px";
+  ctx=canvas.getContext("2d");
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+function getCurW(){if(weather!=='auto')return weather;const h=new Date().getHours();return(h>=22||h<6)?'night':'day';}
+function desat(hex,a){let r,g,b;if(hex.startsWith('rgb')){[r,g,b]=hex.match(/\d+/g).map(Number);}else{r=parseInt(hex.slice(1,3),16);g=parseInt(hex.slice(3,5),16);b=parseInt(hex.slice(5,7),16);}const gr=(r+g+b)/3;return'rgb('+Math.round(lerp(r,gr,a))+','+Math.round(lerp(g,gr,a))+','+Math.round(lerp(b,gr,a))+')';}
+
+function hillY(x,L){
+  var bases=[viewH*0.5,viewH*0.66,viewH*0.8];
+  var amp=[8,10,12];
+  var fr=[[0.006,0.012],[0.008,0.015],[0.01,0.018]];
+  return bases[L]+Math.sin(x*fr[L][0])*amp[L]+Math.sin(x*fr[L][1])*amp[L]*0.5;
+}
+
+function drawTerrain(w){
+  var sk=w==='night'?['#0d1117','#1a2332','#2a3535']:w==='rain'?['#7a8a8a','#9aaaaa','#b0baba']:['#dde6e8','#e8eded','#eef0e8'];
+  var sg=ctx.createLinearGradient(0,0,0,viewH*0.5);sg.addColorStop(0,sk[0]);sg.addColorStop(1,sk[2]);ctx.fillStyle=sg;ctx.fillRect(0,0,viewW,viewH*0.55);
+  if(w==='day'){var sx=viewW*0.78,sy=viewH*0.12;var g2=ctx.createRadialGradient(sx,sy,3,sx,sy,35);g2.addColorStop(0,'rgba(255,240,200,0.9)');g2.addColorStop(1,'rgba(255,200,100,0)');ctx.fillStyle=g2;ctx.beginPath();ctx.arc(sx,sy,35,0,Math.PI*2);ctx.fill();ctx.fillStyle='rgba(255,235,190,0.95)';ctx.beginPath();ctx.arc(sx,sy,7,0,Math.PI*2);ctx.fill();}
+  if(w==='night'){var mx=viewW*0.8,my=viewH*0.1;ctx.fillStyle='rgba(220,230,240,0.85)';ctx.beginPath();ctx.arc(mx,my,10,0,Math.PI*2);ctx.fill();ctx.fillStyle='#0d1117';ctx.beginPath();ctx.arc(mx+3,my-2,8,0,Math.PI*2);ctx.fill();for(var i=0;i<20;i++){var sx2=(Math.sin(i*127+Date.now()*0.0002)*0.5+0.5)*viewW,sy2=rand(0,viewH*0.4);ctx.fillStyle='rgba(220,230,255,'+(Math.sin(Date.now()*0.002+i*5)*0.3+0.5)+')';ctx.beginPath();ctx.arc(sx2,sy2,rand(0.5,1.2),0,Math.PI*2);ctx.fill();}}
+  var nd=w==='night'?0.5:1;
+  for(var L=0;L<3;L++){var a1=(0.4+L*0.2)*nd,a2=(0.5+L*0.2)*nd;
+    var gc=ctx.createLinearGradient(0,hillY(0,L)-10,0,viewH);
+    gc.addColorStop(0,'rgba('+(185-L*10)+','+(200-L*5)+','+(170-L*10)+','+a1+')');
+    gc.addColorStop(1,'rgba('+(170-L*12)+','+(185-L*8)+','+(155-L*12)+','+a2+')');
+    ctx.fillStyle=gc;ctx.beginPath();ctx.moveTo(0,viewH);for(var x=0;x<=viewW;x+=2)ctx.lineTo(x,hillY(x,L));ctx.lineTo(viewW,viewH);ctx.closePath();ctx.fill();
+    if(L>=1){var t=Date.now();for(var i2=0;i2<15;i2++){var gx=rand(0,viewW),gy=hillY(gx,L),gh=rand(3,7+L*3);var sw=Math.sin(t*0.001*rand(0.8,1.2)+gx*0.1)*windStr*3;ctx.strokeStyle='rgba('+(80+L*15)+','+(120+L*15)+','+(60+L*10)+','+(0.15+L*0.08)+')';ctx.lineWidth=0.7;ctx.beginPath();ctx.moveTo(gx,gy);ctx.quadraticCurveTo(gx+sw,gy-gh*0.6,gx+sw*1.3,gy-gh);ctx.stroke();}}}
+  if(w==='rain'){ctx.strokeStyle='rgba(160,180,200,0.4)';ctx.lineWidth=1;for(var i3=0;i3<100;i3++){var rx=rand(0,viewW),ry=rand(0,viewH);ctx.beginPath();ctx.moveTo(rx,ry);ctx.lineTo(rx+windStr*0.5,ry+10);ctx.stroke();}}
+  if(w==='night'){var t2=Date.now()*0.001;for(var i4=0;i4<6;i4++){var fx=Math.sin(t2*0.7*(i4*0.3+0.5)+i4*3)*viewW*0.3+viewW*0.5,fy=Math.sin(t2*0.5*(i4*0.2+0.3)+i4*7)*viewH*0.15+viewH*0.5;var gl=Math.sin(t2*2+i4*4)*0.3+0.6;var g3=ctx.createRadialGradient(fx,fy,0,fx,fy,5);g3.addColorStop(0,'rgba(200,230,150,'+gl*0.7+')');g3.addColorStop(1,'rgba(200,230,150,0)');ctx.fillStyle=g3;ctx.beginPath();ctx.arc(fx,fy,5,0,Math.PI*2);ctx.fill();}}
+}
+function genVis(tier,type){var pc=pick(PAL[tier]);var base={tier:tier,type:type,pc:pc,sc:pick(SC),lc:pick(LC),ls:Math.random()>0.5?1:-1,lp:rand(0.3,0.6),ss:rand(0.4,1.2),sa:rand(0.02,0.05),phase:rand(0,Math.PI*2)};
+  switch(type){
+    case'daisy':return Object.assign(base,{pn:randInt(8,12),pl:rand(9,15),pw:rand(3,5),cr:rand(3,5),sh:rand(32,55)});
+    case'wildflower':return Object.assign(base,{pn:randInt(5,7),pl:rand(11,17),pw:rand(5,8),cr:rand(2,4),sh:rand(28,52)});
+    case'clover':return Object.assign(base,{pn:3,pl:rand(9,13),pw:rand(9,13),cr:rand(2,3),sh:rand(22,42)});
+    case'starflower':return Object.assign(base,{pn:randInt(5,6),pl:rand(11,16),pw:rand(2,4),cr:rand(2,4),sh:rand(30,50)});
+    case'tulip':return Object.assign(base,{pn:randInt(5,7),pl:rand(16,24),pw:rand(9,15),cr:rand(3,5),sh:rand(48,72)});
+    case'bellflower':return Object.assign(base,{pn:randInt(5,7),pl:rand(13,19),pw:rand(6,10),cr:rand(2,4),sh:rand(42,68),bells:randInt(2,4)});
+    case'hyacinth':return Object.assign(base,{pn:randInt(4,6),pl:rand(6,10),pw:rand(4,7),cr:rand(1,3),sh:rand(48,68),florets:randInt(6,12)});
+    case'rose':return Object.assign(base,{layers:randInt(3,5),pl:rand(11,17),pw:rand(9,15),cr:rand(4,6),sh:rand(52,78)});
+    case'sunflower':return Object.assign(base,{pn:randInt(14,20),pl:rand(15,22),pw:rand(4,6),cr:rand(10,15),sh:rand(62,92)});
+    case'cherry':return Object.assign(base,{sh:rand(85,125),trunkW:rand(6,10),canopyR:rand(32,48)});
+    default:return Object.assign(base,{pn:6,pl:12,pw:5,cr:3,sh:42});
+  }
+}
+function addFlower(word,meaning,tier,type,verb){
+  var L=tier==='legendary'?0:tier==='rare'?randInt(0,1):tier==='mid'?randInt(0,2):randInt(1,2);
+  flowers.push({word:word,meaning:meaning,ts:Date.now(),lastReview:Date.now(),xR:rand(0.06,0.94),layer:L,vis:genVis(tier,type),verb:verb||null});
+  save();updateStats();
+}
+function getStage(f){var age=(Date.now()-f.ts)/3600000,sr=(Date.now()-(f.lastReview||f.ts))/86400000;if(sr>7)return'wilt';if(age<2)return'seed';if(age<6)return'sprout';return'bloom';}
+function gFactor(s){return s==='seed'?0.15:s==='sprout'?0.5:s==='wilt'?0.7:1;}
+function reviewF(f){f.lastReview=Date.now();save();}
+function updateStats(){var n=flowers.length,wc=flowers.filter(function(f){return getStage(f)==='wilt';}).length,rc=flowers.filter(function(f){return f.vis.tier==='rare'||f.vis.tier==='legendary';}).length;var el=document.getElementById('stats');if(!n){el.textContent='还没有花 — 种下第一朵吧';return;}var t='🌸 '+n+' 朵花';if(rc)t+=' · ⭐ '+rc+' 稀有';if(wc)t+=' · 🥀 '+wc+' 需复习';el.textContent=t;}
+function bezAt(a,b,c,d,t){var u=1-t;return u*u*u*a+3*u*u*t*b+3*u*t*t*c+t*t*t*d;}
+
+function drawF(f,time,w){
+  var x=f.xR*viewW,by=hillY(x,f.layer),v=f.vis,st=getStage(f),g=gFactor(st);
+  var sway=Math.sin(time*0.001*v.ss+v.phase)*v.sa*windStr;
+  var nA=w==='night'?0.45:1,wG=st==='wilt'?0.6:0;
+  var ds=0.55+f.layer*0.22;
+  ctx.save();ctx.translate(x,by);ctx.scale(ds,ds);ctx.globalAlpha=nA;
+  var sh=v.sh*g;
+  if(st==='seed'){ctx.fillStyle='#8a7a60';ctx.beginPath();ctx.ellipse(0,-3,5,3,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#6a8a4a';ctx.beginPath();ctx.ellipse(0,-6,3,2,0.3,0,Math.PI*2);ctx.fill();ctx.restore();f._sx=x;f._sy=by-6;f._r=8*ds;return;}
+  var sTop=-sh,swX=sway*sh*0.7;
+  var c1x=swX*0.3,c1y=sTop*0.6,c2x=swX*0.6,c2y=sTop*0.3,tpX=swX,tpY=sTop;
+  var sc=wG?desat(v.sc,wG):v.sc,pc=wG?desat(v.pc,wG):v.pc,lc=wG?desat(v.lc,wG):v.lc;
+
+  // CHERRY BLOSSOM TREE
+  if(v.type==='cherry'){
+    var tw=v.trunkW*g;
+    ctx.fillStyle=sc;ctx.beginPath();ctx.moveTo(-tw,0);ctx.lineTo(-tw*0.5,sTop*0.4);ctx.lineTo(-tw*0.3,sTop);ctx.lineTo(tw*0.3,sTop);ctx.lineTo(tw*0.5,sTop*0.4);ctx.lineTo(tw,0);ctx.closePath();ctx.fill();
+    ctx.strokeStyle=sc;ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(-tw*0.3,sTop);ctx.quadraticCurveTo(-tw*1.5+swX*8,sTop-18,-tw*2+swX*12,sTop-8);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(tw*0.3,sTop);ctx.quadraticCurveTo(tw*1.5+swX*8,sTop-22,tw*1.8+swX*10,sTop-6);ctx.stroke();
+    var cr=v.canopyR*g;
+    ctx.save();ctx.translate(swX*0.4,sTop-cr*0.25);
+    for(var ci=0;ci<5;ci++){var cx2=(ci-2)*cr*0.38,cy2=Math.sin(ci*3)*cr*0.25;ctx.globalAlpha=0.25*nA;ctx.fillStyle=pc;ctx.beginPath();ctx.arc(cx2,cy2,cr*0.5,0,Math.PI*2);ctx.fill();}
+    ctx.globalAlpha=0.45*nA;ctx.fillStyle=pc;ctx.beginPath();ctx.arc(0,-cr*0.08,cr*0.6,0,Math.PI*2);ctx.fill();
+    ctx.globalAlpha=0.65*nA;
+    for(var pi=0;pi<18;pi++){var px=rand(-cr*0.65,cr*0.65),py=rand(-cr*0.55,cr*0.35),ps=rand(2,5);ctx.fillStyle=pc;ctx.beginPath();ctx.moveTo(px,py-ps);ctx.quadraticCurveTo(px+ps*0.5,py,px,py+ps);ctx.quadraticCurveTo(px-ps*0.5,py,px,py-ps);ctx.fill();}
+    ctx.restore();
+    if(st==='bloom'&&Math.random()<0.025)petalParts.push({x:x+rand(-25,25)*ds,y:by+sTop*ds+rand(-15,8)*ds,vx:rand(-0.3,0.3)+windStr*0.08,vy:rand(0.3,0.7),sz:rand(2,4),c:pc,life:1,dec:0.004,rot:rand(0,6.28),rv:rand(0.01,0.03)});
+    ctx.restore();f._sx=x;f._sy=by+sTop*ds;f._r=(cr+10)*ds;return;
+  }
+
+  // STEM
+  ctx.strokeStyle=sc;ctx.lineWidth=st==='sprout'?1:1.8;
+  ctx.beginPath();ctx.moveTo(0,0);ctx.bezierCurveTo(c1x,c1y,c2x,c2y,tpX,tpY);ctx.stroke();
+  if(g>0.3){var lt=v.lp,lx=bezAt(0,c1x,c2x,tpX,lt),ly=bezAt(0,c1y,c2y,tpY,lt);ctx.save();ctx.translate(lx,ly);ctx.rotate(sway*2+v.ls*0.3);ctx.fillStyle=lc;ctx.beginPath();ctx.ellipse(v.ls*8*g,0,10*g,3*g,v.ls*0.4,0,Math.PI*2);ctx.fill();ctx.restore();}
+  if(st==='sprout'){ctx.save();ctx.translate(tpX,tpY);ctx.fillStyle=pc;ctx.globalAlpha*=0.6;ctx.beginPath();ctx.ellipse(0,0,3*g,5*g,-0.2,0,Math.PI*2);ctx.fill();ctx.restore();ctx.restore();f._sx=x+tpX*ds;f._sy=by+tpY*ds;f._r=8*ds;return;}
+
+  ctx.save();ctx.translate(tpX,tpY);ctx.rotate(sway*1.2+(st==='wilt'?0.25:0));
+
+  if(v.type==='daisy'||v.type==='wildflower'||v.type==='clover'||v.type==='starflower'){
+    for(var i=0;i<v.pn;i++){var a=(Math.PI*2/v.pn)*i;ctx.save();ctx.rotate(a);ctx.fillStyle=pc;ctx.globalAlpha=0.8*nA;
+      if(v.type==='starflower'){ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(v.pw*0.3*g,-v.pw*0.2*g);ctx.lineTo(v.pl*g,0);ctx.lineTo(v.pw*0.3*g,v.pw*0.2*g);ctx.closePath();}
+      else if(v.type==='clover'){ctx.beginPath();ctx.arc(v.pl*0.5*g,0,v.pl*0.45*g,0,Math.PI*2);}
+      else{ctx.beginPath();ctx.ellipse(v.pl*0.5*g,0,v.pl*0.5*g,v.pw*0.4*g,0,0,Math.PI*2);}
+      ctx.fill();ctx.globalAlpha=nA;ctx.restore();}
+  }
+  if(v.type==='tulip'){for(var i2=0;i2<v.pn;i2++){var a2=(Math.PI*2/v.pn)*i2-Math.PI*0.5;ctx.save();ctx.rotate(a2);ctx.fillStyle=pc;ctx.globalAlpha=0.8*nA;ctx.beginPath();ctx.moveTo(-v.pw*0.2*g,0);ctx.quadraticCurveTo(-v.pw*0.1*g,-v.pl*0.7*g,0,-v.pl*g);ctx.quadraticCurveTo(v.pw*0.1*g,-v.pl*0.7*g,v.pw*0.2*g,0);ctx.closePath();ctx.fill();ctx.globalAlpha=nA;ctx.restore();}}
+  if(v.type==='bellflower'){for(var b=0;b<(v.bells||3);b++){var bO=(b-(v.bells-1)/2)*13*g;ctx.save();ctx.translate(bO,-b*4*g);ctx.rotate(sway*0.5);for(var i3=0;i3<v.pn;i3++){var a3=(Math.PI*2/v.pn)*i3+0.3;ctx.save();ctx.rotate(a3);ctx.fillStyle=pc;ctx.globalAlpha=0.7*nA;ctx.beginPath();ctx.moveTo(0,0);ctx.quadraticCurveTo(-v.pw*0.3*g,v.pl*0.5*g,0,v.pl*g);ctx.quadraticCurveTo(v.pw*0.3*g,v.pl*0.5*g,0,0);ctx.fill();ctx.globalAlpha=nA;ctx.restore();}ctx.fillStyle=desat(pc,-15);ctx.beginPath();ctx.arc(0,2,(v.cr||3)*g*0.8,0,Math.PI*2);ctx.fill();ctx.restore();}}
+  if(v.type==='hyacinth'){for(var fi=0;fi<(v.florets||8);fi++){var fy=-fi*5*g,fx=Math.sin(fi*1.5)*4*g;ctx.save();ctx.translate(fx,fy);for(var i4=0;i4<v.pn;i4++){var a4=(Math.PI*2/v.pn)*i4;ctx.save();ctx.rotate(a4);ctx.fillStyle=pc;ctx.globalAlpha=0.7*nA;ctx.beginPath();ctx.ellipse(v.pl*0.4*g,0,v.pl*0.35*g,v.pw*0.3*g,0,0,Math.PI*2);ctx.fill();ctx.globalAlpha=nA;ctx.restore();}ctx.fillStyle=desat(pc,-10);ctx.beginPath();ctx.arc(0,0,(v.cr||2)*g*0.6,0,Math.PI*2);ctx.fill();ctx.restore();}}
+  if(v.type==='rose'){for(var rl=0;rl<(v.layers||4);rl++){var rls=1-rl*0.15;ctx.save();ctx.rotate(rl*0.4);for(var i5=0;i5<6;i5++){var a5=(Math.PI*2/6)*i5;ctx.save();ctx.rotate(a5);ctx.fillStyle=rl<2?pc:desat(pc,-20);ctx.globalAlpha=(0.55+rl*0.1)*nA;var rpl=v.pl*g*rls;ctx.beginPath();ctx.moveTo(0,0);ctx.quadraticCurveTo(rpl*0.3,-rpl*0.3,rpl*0.15,-rpl*0.85);ctx.quadraticCurveTo(0,-rpl,-rpl*0.15,-rpl*0.85);ctx.quadraticCurveTo(-rpl*0.3,-rpl*0.3,0,0);ctx.fill();ctx.globalAlpha=nA;ctx.restore();}ctx.restore();}}
+  if(v.type==='sunflower'){for(var i6=0;i6<v.pn;i6++){var a6=(Math.PI*2/v.pn)*i6;ctx.save();ctx.rotate(a6);ctx.fillStyle='#e0a030';ctx.globalAlpha=0.85*nA;ctx.beginPath();ctx.moveTo(0,0);ctx.quadraticCurveTo(v.pw*0.3*g,0,v.pl*g*0.5,-v.pw*0.15*g);ctx.lineTo(v.pl*g,0);ctx.lineTo(v.pl*g*0.5,v.pw*0.15*g);ctx.quadraticCurveTo(v.pw*0.3*g,0,0,0);ctx.fill();ctx.globalAlpha=nA;ctx.restore();}ctx.fillStyle='#5a3a1a';ctx.beginPath();ctx.arc(0,0,v.cr*g,0,Math.PI*2);ctx.fill();ctx.fillStyle='#7a5a2a';for(var s=0;s<30;s++){var sa=s*2.4,sr=s*0.3*g;if(sr<v.cr*g){ctx.beginPath();ctx.arc(Math.cos(sa)*sr,Math.sin(sa)*sr,0.8,0,Math.PI*2);ctx.fill();}}}
+
+  if(['daisy','wildflower','clover','starflower','tulip','bellflower','hyacinth'].indexOf(v.type)!==-1&&v.cr){ctx.fillStyle=desat(pc,-25);ctx.beginPath();ctx.arc(0,0,v.cr*g,0,Math.PI*2);ctx.fill();ctx.fillStyle='rgba(255,255,255,0.2)';ctx.beginPath();ctx.arc(-v.cr*0.2*g,-v.cr*0.2*g,v.cr*0.3*g,0,Math.PI*2);ctx.fill();}
+  if((v.tier==='rare'||v.tier==='legendary')&&st==='bloom'){ctx.globalAlpha=0.08*nA;ctx.fillStyle=pc;ctx.beginPath();ctx.arc(0,0,(v.pl||15)*g*1.3,0,Math.PI*2);ctx.fill();}
+  ctx.restore();ctx.restore();
+  f._sx=x+tpX*ds;f._sy=by+tpY*ds;f._r=(Math.max(v.pl||10,v.pw||5)+(v.cr||3))*g*ds;
+}
+
+function drawPetals(){petalParts=petalParts.filter(function(p){return p.life>0;});petalParts.forEach(function(p){p.x+=p.vx;p.y+=p.vy;p.vy+=0.004;p.vx+=windStr*0.002;p.life-=p.dec;p.rot+=p.rv;ctx.save();ctx.globalAlpha=p.life*0.65;ctx.translate(p.x,p.y);ctx.rotate(p.rot);ctx.fillStyle=p.c;ctx.beginPath();ctx.moveTo(0,-p.sz);ctx.quadraticCurveTo(p.sz*0.5,0,0,p.sz);ctx.quadraticCurveTo(-p.sz*0.5,0,0,-p.sz);ctx.fill();ctx.restore();});}
+
+function drawScene(time){var w=getCurW();ctx.clearRect(0,0,viewW,viewH);drawTerrain(w);
+  var sorted=flowers.slice().sort(function(a,b){return a.layer!==b.layer?a.layer-b.layer:hillY(a.xR*viewW,a.layer)-hillY(b.xR*viewW,b.layer);});
+  sorted.forEach(function(f){drawF(f,time,w);});drawPetals();
+  windStr+=(windTgt-windStr)*0.02;if(Math.abs(windStr-windTgt)<0.01&&windTgt>2)windTgt=2;
+  var hdr=document.getElementById('header'),tb=document.getElementById('toolbar');
+  if(w==='night'){hdr.style.background='#0d1117';tb.style.background='#0d1117';}else{hdr.style.background='';tb.style.background='';}
+  requestAnimationFrame(drawScene);}
+// INTERACTION
+var gel=document.getElementById('garden');
+function findAt(mx,my){for(var i=flowers.length-1;i>=0;i--){var f=flowers[i];if(f._sx===undefined)continue;var dx=mx-f._sx,dy=my-f._sy;if(Math.sqrt(dx*dx+dy*dy)<(f._r||12)+10)return f;}return null;}
+gel.addEventListener('mousemove',function(e){var r=gel.getBoundingClientRect(),f=findAt(e.clientX-r.left,e.clientY-r.top),tip=document.getElementById('tooltip');
+  if(f){document.getElementById('tipWord').textContent=f.word;document.getElementById('tipMeaning').textContent=f.meaning;document.getElementById('tipDate').textContent=fmtDate(f.ts);var sm={seed:'🌱 种子',sprout:'🌿 发芽',bloom:'🌸 盛开',wilt:'🥀 需复习'};document.getElementById('tipState').textContent=(sm[getStage(f)]||'')+' · '+f.vis.type;document.getElementById('tipVerb').textContent=f.verb?f.verb.past+' / '+f.verb.pp:'';tip.style.left=Math.min(e.clientX+12,window.innerWidth-260)+'px';tip.style.top=Math.max(e.clientY-90,10)+'px';tip.classList.add('show');gel.style.cursor='pointer';}
+  else{tip.classList.remove('show');gel.style.cursor='default';}});
+gel.addEventListener('touchstart',function(e){var r=gel.getBoundingClientRect(),t=e.touches[0],f=findAt(t.clientX-r.left,t.clientY-r.top),tip=document.getElementById('tooltip');
+  if(f){document.getElementById('tipWord').textContent=f.word;document.getElementById('tipMeaning').textContent=f.meaning;document.getElementById('tipDate').textContent=fmtDate(f.ts);var sm={seed:'🌱 种子',sprout:'🌿 发芽',bloom:'🌸 盛开',wilt:'🥀 需复习'};document.getElementById('tipState').textContent=(sm[getStage(f)]||'')+' · '+f.vis.type;document.getElementById('tipVerb').textContent=f.verb?f.verb.past+' / '+f.verb.pp:'';tip.style.left=Math.min(t.clientX+10,window.innerWidth-260)+'px';tip.style.top=Math.max(t.clientY-90,10)+'px';tip.classList.add('show');setTimeout(function(){tip.classList.remove('show');},2500);}},{passive:true});
+gel.addEventListener('mouseleave',function(){document.getElementById('tooltip').classList.remove('show');});
+
+function closeAll(){['addPanel','archivePanel','quizPanel'].forEach(function(i){document.getElementById(i).classList.remove('show');});['btnAdd','btnArchive','btnQuiz'].forEach(function(i){document.getElementById(i).classList.remove('active');});}
+document.getElementById('btnAdd').addEventListener('click',function(){var o=document.getElementById('addPanel').classList.contains('show');closeAll();if(!o){document.getElementById('addPanel').classList.add('show');document.getElementById('btnAdd').classList.add('active');document.getElementById('inputWord').focus();}});
+function setAddMode(m){addMode=m;document.getElementById('modeN').classList.toggle('active',m==='normal');document.getElementById('modeV').classList.toggle('active',m==='verb');document.getElementById('verbFields').classList.toggle('show',m==='verb');}
+document.getElementById('btnPlant').addEventListener('click',plant);
+document.getElementById('inputMeaning').addEventListener('keydown',function(e){if(e.key==='Enter')plant();});
+document.getElementById('inputWord').addEventListener('keydown',function(e){if(e.key==='Enter'){if(addMode==='verb')document.getElementById('inputPast').focus();else document.getElementById('inputMeaning').focus();}});
+
+function plant(){
+  var w=document.getElementById('inputWord').value.trim(),m=document.getElementById('inputMeaning').value.trim();if(!w||!m)return;
+  var tier,type,verb=null;
+  if(addMode==='verb'){var p=document.getElementById('inputPast').value.trim(),pp=document.getElementById('inputPP').value.trim();if(!p||!pp){toast('请填写过去式和过去分词');return;}verb={past:p,pp:pp};
+    if(p.endsWith('te')&&pp.startsWith('ge')&&pp.endsWith('t')){tier='mid';type=pick(TIERS.mid);}
+    else{if(Math.random()<0.2){tier='legendary';type='cherry';}else{tier='rare';type=pick(TIERS.rare);}}
+    document.getElementById('inputPast').value='';document.getElementById('inputPP').value='';}
+  else{tier='basic';type=pick(TIERS.basic);}
+  addFlower(w,m,tier,type,verb);document.getElementById('inputWord').value='';document.getElementById('inputMeaning').value='';document.getElementById('inputWord').focus();
+  var tn={basic:'🌸',mid:'🌷',rare:'⭐',legendary:'🌸🌸🌸'};toast(tn[tier]+' '+w+' · '+type);}
+
+document.getElementById('btnWind').addEventListener('click',function(){windTgt=rand(10,18);setTimeout(function(){windTgt=2;},3000);toast('🌬️ 起风了');});
+setInterval(function(){if(windTgt<=2)windTgt=rand(2,5);setTimeout(function(){windTgt=2;},rand(2000,4000));},6000);
+
+document.getElementById('btnWeather').addEventListener('click',function(){weatherIdx=(weatherIdx+1)%WM.length;weather=WM[weatherIdx];var lb={auto:'🔄 自动',day:'☀️ 白天',night:'🌙 夜晚',rain:'🌧️ 下雨'};document.getElementById('btnWeather').textContent=lb[weather];toast(lb[weather]);});
+
+// Shovel mode
+document.getElementById('btnShovel').addEventListener('click',function(){
+  shovelMode=!shovelMode;
+  document.getElementById('btnShovel').classList.toggle('active',shovelMode);
+  if(shovelMode){toast('🪏 点击花朵移除');gel.style.cursor='crosshair';}
+  else{gel.style.cursor='default';}
+});
+gel.addEventListener('click',function(e){
+  if(!shovelMode)return;
+  var r=gel.getBoundingClientRect();
+  var f=findAt(e.clientX-r.left,e.clientY-r.top);
+  if(f){
+    var idx=flowers.indexOf(f);
+    if(idx!==-1&&confirm('移除 "'+f.word+'" ？')){
+      flowers.splice(idx,1);save();updateStats();
+      toast('已移除 '+f.word);
+    }
+  }
+});
+gel.addEventListener('touchend',function(e){
+  if(!shovelMode)return;
+  var r=gel.getBoundingClientRect();
+  var t=e.changedTouches[0];
+  var f=findAt(t.clientX-r.left,t.clientY-r.top);
+  if(f){
+    var idx=flowers.indexOf(f);
+    if(idx!==-1&&confirm('移除 "'+f.word+'" ？')){
+      flowers.splice(idx,1);save();updateStats();
+      toast('已移除 '+f.word);
+    }
+  }
+});
+
+document.getElementById('btnQuiz').addEventListener('click',function(){var o=document.getElementById('quizPanel').classList.contains('show');closeAll();if(!o&&flowers.length){document.getElementById('quizPanel').classList.add('show');document.getElementById('btnQuiz').classList.add('active');nextQ();}else if(!flowers.length)toast('先种几朵花吧');});
+function setQM(m){quizMode=m;document.getElementById('qmDE').style.background=m==='de2cn'?'var(--accent)':'var(--text3)';document.getElementById('qmCN').style.background=m==='cn2de'?'var(--accent)':'var(--text3)';document.getElementById('qmR').style.background=m==='random'?'var(--accent)':'var(--text3)';nextQ();}
+function nextQ(){var bl=flowers.filter(function(f){return getStage(f)==='bloom'||getStage(f)==='wilt';});var pool=bl.length?bl:flowers;quizFlower=pool[randInt(0,pool.length-1)];quizDir=quizMode==='random'?(Math.random()>0.5?'de2cn':'cn2de'):quizMode;document.getElementById('quizWord').textContent=quizDir==='de2cn'?quizFlower.word:quizFlower.meaning;document.getElementById('quizInput').placeholder=quizDir==='de2cn'?'输入中文意思':'输入德语单词';document.getElementById('quizInput').value='';document.getElementById('quizResult').textContent='';document.getElementById('quizInput').focus();}
+document.getElementById('quizCheck').addEventListener('click',chkQ);document.getElementById('quizInput').addEventListener('keydown',function(e){if(e.key==='Enter')chkQ();});
+function chkQ(){if(!quizFlower)return;var ans=document.getElementById('quizInput').value.trim();if(!ans)return;var ok,ca;if(quizDir==='de2cn'){ca=quizFlower.meaning;ok=quizFlower.meaning.indexOf(ans)!==-1||ans.indexOf(quizFlower.meaning)!==-1;}else{ca=quizFlower.word;ok=ans.toLowerCase()===quizFlower.word.toLowerCase();}if(ok){document.getElementById('quizResult').innerHTML='<span style="color:#7a9a5a">✓ '+ca+'</span>';reviewF(quizFlower);toast('🌸 花又鲜活了');}else{document.getElementById('quizResult').innerHTML='<span style="color:#c47a7a">✗ '+ca+'</span>';}}
+document.getElementById('quizSkip').addEventListener('click',function(){if(!quizFlower)return;document.getElementById('quizResult').innerHTML='<span style="color:var(--text3)">'+(quizDir==='de2cn'?quizFlower.meaning:quizFlower.word)+'</span>';});
+document.getElementById('quizNext').addEventListener('click',nextQ);
+
+document.getElementById('btnArchive').addEventListener('click',function(){var o=document.getElementById('archivePanel').classList.contains('show');closeAll();if(!o){document.getElementById('archivePanel').classList.add('show');document.getElementById('btnArchive').classList.add('active');}});
+document.getElementById('arGen').addEventListener('click',function(){if(!flowers.length)return toast('空的');try{document.getElementById('archiveCode').value=btoa(unescape(encodeURIComponent(JSON.stringify(flowers))));toast('✓ '+flowers.length+' 朵花');}catch(e){toast('失败');}});
+document.getElementById('arLoad').addEventListener('click',function(){var c=document.getElementById('archiveCode').value.trim();if(!c)return toast('请粘贴');try{var d=JSON.parse(decodeURIComponent(escape(atob(c))));if(!Array.isArray(d))throw 0;flowers=d;migrate();save();updateStats();toast('🌸 '+flowers.length+' 朵花回来了');}catch(e){toast('无效');}});
+document.getElementById('arCopy').addEventListener('click',function(){var c=document.getElementById('archiveCode').value;if(!c)return toast('请先生成');navigator.clipboard.writeText(c).then(function(){toast('已复制');}).catch(function(){document.getElementById('archiveCode').select();document.execCommand('copy');toast('已复制');});});
+document.getElementById('btnExport').addEventListener('click',function(){if(!flowers.length)return toast('空的');var t='阿姜的德语花园\n'+'═'.repeat(25)+'\n\n';flowers.forEach(function(f,i){t+=(i+1)+'. '+f.word+' — '+f.meaning+' ['+f.vis.type+']';if(f.verb)t+=' ('+f.verb.past+', '+f.verb.pp+')';t+=' ('+fmtDate(f.ts)+')\n';});t+='\n共 '+flowers.length+' 个单词\n';var b=new Blob([t],{type:'text/plain;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='德语花园.txt';a.click();toast('已导出');});
+
+function migrate(){flowers.forEach(function(f){if(!f.layer)f.layer=randInt(1,2);if(!f.vis||!f.vis.type)f.vis=genVis('basic',pick(TIERS.basic));if(!f.lastReview)f.lastReview=f.ts;if(f.xW){f.xR=clamp(f.xW/(viewW||400),0.06,0.94);delete f.xW;}if(f.x&&!f.xR)f.xR=clamp(f.x,0.06,0.94);if(!f.xR)f.xR=rand(0.06,0.94);});save();}
+
+var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(initCanvas,300);});
+load();initCanvas();migrate();updateStats();drawScene(0);
+</script></body></html>
