@@ -166,6 +166,75 @@ body::before{
 }
 .reward-input:focus{border-color:var(--mb1);}
 
+/* Vision Board */
+.vision-list{
+  list-style:none;padding:0;margin:0 0 14px;
+}
+.vision-item{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:10px 12px;margin-bottom:8px;
+  background:var(--mb6);border-radius:10px;
+  border:1px solid var(--mb4);
+  position:relative;
+  animation:visionIn 0.35s ease;
+}
+@keyframes visionIn{
+  from{opacity:0;transform:translateY(8px);}
+  to{opacity:1;transform:translateY(0);}
+}
+.vision-item .vision-icon{
+  font-size:0.85rem;margin-top:1px;flex-shrink:0;
+}
+.vision-item .vision-text{
+  flex:1;font-size:0.82rem;line-height:1.6;
+  color:var(--mi);font-family:'Noto Serif SC',serif;
+  word-break:break-word;
+}
+.vision-item .vision-del{
+  flex-shrink:0;width:22px;height:22px;
+  border:none;background:none;cursor:pointer;
+  color:var(--mb3);font-size:0.75rem;
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  transition:all 0.2s;margin-top:1px;
+}
+.vision-item .vision-del:hover{
+  background:rgba(74,100,120,0.08);color:var(--md);
+}
+.vision-add-row{
+  display:flex;gap:8px;
+}
+.vision-input{
+  flex:1;padding:9px 12px;border:1px solid var(--mb4);border-radius:10px;
+  font-family:'Noto Serif SC',serif;font-size:0.8rem;
+  color:var(--mi);background:var(--mb6);outline:none;
+  transition:border-color 0.2s;
+}
+.vision-input:focus{border-color:var(--mb1);}
+.vision-input::placeholder{color:var(--mb3);font-style:italic;}
+.vision-add-btn{
+  flex-shrink:0;width:40px;height:40px;
+  border:none;border-radius:10px;cursor:pointer;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:white;font-size:1.1rem;
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.2s;
+  box-shadow:0 2px 8px rgba(200,176,112,0.25);
+}
+.vision-add-btn:hover{
+  transform:translateY(-1px);
+  box-shadow:0 4px 14px rgba(200,176,112,0.35);
+}
+.vision-add-btn:active{transform:scale(0.95);}
+.vision-empty{
+  text-align:center;padding:16px 10px;
+  font-family:'Caveat',cursive;font-size:0.9rem;
+  color:var(--mb3);letter-spacing:0.5px;
+}
+.vision-count{
+  font-family:'Caveat',cursive;font-size:0.78rem;
+  color:var(--mb3);text-align:right;margin-top:8px;
+}
+
 /* Rescue button */
 .btn-rescue{
   margin-top:14px;background:var(--mb3);color:var(--mi);
@@ -370,6 +439,17 @@ body::before{
     <button class="btn-rescue" onclick="rescue()">😫 语法太难了？点我</button>
   </div>
 
+  <!-- ✨ Vision Board -->
+  <div class="card">
+    <h3>🌟 我为什么要去德国</h3>
+    <ul class="vision-list" id="visionList"></ul>
+    <div class="vision-add-row">
+      <input class="vision-input" type="text" id="visionInput" placeholder="写下一个理由..." maxlength="200">
+      <button class="vision-add-btn" id="visionAddBtn" onclick="addVision()">+</button>
+    </div>
+    <div class="vision-count" id="visionCount"></div>
+  </div>
+
   <div class="archive-section">
     <h3>📦 城堡存档</h3>
     <textarea id="codeBox" readonly placeholder="存档码"></textarea>
@@ -429,6 +509,8 @@ const rescues=[
   "Eines Tages wirst du in Deutschland stehen und lächeln."
 ];
 
+const visionIcons=['✦','♡','☁️','✿','⟡','◇','❋','⚘','∞','✸','⊹','❁'];
+
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
 
 // Particles
@@ -465,12 +547,81 @@ function drawParticles(){
   if(particles.length>0)requestAnimationFrame(drawParticles);
 }
 
+/* ========== Vision Board ========== */
+function getVisions(){
+  return deData.visions||[];
+}
+function setVisions(arr){
+  deData.visions=arr;
+  saveAll();
+  renderVisions();
+}
+function renderVisions(){
+  const list=document.getElementById('visionList');
+  const visions=getVisions();
+  list.innerHTML='';
+  if(visions.length===0){
+    list.innerHTML='<li class="vision-empty">每一个理由都是你飞向德国的燃料 ✈</li>';
+  }else{
+    visions.forEach((v,i)=>{
+      const li=document.createElement('li');
+      li.className='vision-item';
+      const icon=visionIcons[i%visionIcons.length];
+      li.innerHTML=`
+        <span class="vision-icon">${icon}</span>
+        <span class="vision-text">${escHtml(v)}</span>
+        <button class="vision-del" onclick="delVision(${i})" title="删除">×</button>
+      `;
+      list.appendChild(li);
+    });
+  }
+  const countEl=document.getElementById('visionCount');
+  if(visions.length>0){
+    countEl.textContent=`${visions.length} 个理由，每一个都在发光`;
+  }else{
+    countEl.textContent='';
+  }
+}
+function escHtml(s){
+  const d=document.createElement('div');d.textContent=s;return d.innerHTML;
+}
+function addVision(){
+  const input=document.getElementById('visionInput');
+  const text=input.value.trim();
+  if(!text)return;
+  const visions=getVisions();
+  visions.push(text);
+  setVisions(visions);
+  input.value='';
+  toast('又多了一个理由 ✦');
+  // particle burst on the add button
+  const btn=document.getElementById('visionAddBtn');
+  const rect=btn.getBoundingClientRect();
+  spawnParticles(rect.left+rect.width/2,rect.top+rect.height/2);
+  requestAnimationFrame(drawParticles);
+}
+function delVision(i){
+  const visions=getVisions();
+  visions.splice(i,1);
+  setVisions(visions);
+}
+
+// Allow pressing Enter to add vision
+document.addEventListener('DOMContentLoaded',function(){
+  const vi=document.getElementById('visionInput');
+  if(vi) vi.addEventListener('keydown',function(e){
+    if(e.key==='Enter'){e.preventDefault();addVision();}
+  });
+});
+
+/* ========== End Vision Board ========== */
+
 function init(){
   initParticles();
   document.getElementById('r30').value=deData.r30||"";
   document.getElementById('r60').value=deData.r60||"";
   document.getElementById('r90').value=deData.r90||"";
-  renderGrid();updateStats();initChart();
+  renderGrid();updateStats();initChart();renderVisions();
   document.getElementById('confIn').oninput=function(){
     document.getElementById('confVal').innerText=this.value;
   };
