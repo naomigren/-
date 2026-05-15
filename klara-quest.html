@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="克拉拉养成">
+<title>克拉拉养成计划</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{min-height:100vh;background:linear-gradient(160deg,#fdf2f0 0%,#f5e6e0 40%,#f0e0da 100%);color:#5a4a4a;font-family:'Noto Sans SC','Segoe UI',sans-serif;overflow-x:hidden;-webkit-tap-highlight-color:transparent;}
+button{cursor:pointer;border:none;background:none;font-family:inherit;-webkit-tap-highlight-color:transparent;}
+textarea,input{font-family:inherit;-webkit-appearance:none;}
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(219,147,158,0.3);border-radius:4px;}
+@keyframes slideDown{from{opacity:0;transform:translateX(-50%) translateY(-20px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
+@keyframes sparkle{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
+@keyframes glow{0%,100%{box-shadow:0 0 20px rgba(219,147,158,0.3);}50%{box-shadow:0 0 40px rgba(219,147,158,0.5);}}
+.bg1{position:fixed;top:-20%;right:-10%;width:500px;height:500px;background:radial-gradient(circle,rgba(219,147,158,0.08) 0%,transparent 70%);border-radius:50%;pointer-events:none;}
+.bg2{position:fixed;bottom:-10%;left:-10%;width:400px;height:400px;background:radial-gradient(circle,rgba(199,163,163,0.06) 0%,transparent 70%);border-radius:50%;pointer-events:none;}
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);padding:14px 24px;border-radius:14px;z-index:1000;font-size:15px;font-weight:600;max-width:90vw;text-align:center;color:white;box-shadow:0 8px 32px rgba(255,255,255,0.7);animation:slideDown 0.3s ease-out;}
+.toast-earn{background:linear-gradient(135deg,#7ba889,#6b9a7a);}.toast-big{background:linear-gradient(135deg,#c4868e,#d4a0a0);}.toast-redeem{background:linear-gradient(135deg,#c9a878,#d4b888);}.toast-penalty{background:linear-gradient(135deg,#c07070,#d48888);}.toast-fail{background:linear-gradient(135deg,#374151,#4b5563);}
+.inp{width:100%;padding:8px 12px;border-radius:8px;font-size:14px;background:rgba(255,255,255,0.6);color:#5a4a4a;border:1px solid rgba(219,147,158,0.2);outline:none;box-sizing:border-box;}
+.tab-btn{flex:1;padding:10px;border-radius:10px;font-size:13px;transition:all 0.2s ease;}
+.tab-active{font-weight:600;color:#fff;background:linear-gradient(135deg,rgba(219,147,158,0.3),rgba(199,163,163,0.2));}
+.tab-inactive{font-weight:400;color:#a08888;background:transparent;}
+.task-btn{display:flex;align-items:center;justify-content:space-between;width:100%;padding:12px 14px;border-radius:10px;color:#5a4a4a;border:1px solid rgba(219,147,158,0.2);background:rgba(255,255,255,0.5);}
+.task-btn-big{background:linear-gradient(135deg,rgba(219,147,158,0.12),rgba(199,163,163,0.08));border:1px solid rgba(219,147,158,0.25);}
+.pen-btn{display:flex;align-items:center;justify-content:space-between;width:100%;padding:12px 14px;background:rgba(210,140,140,0.06);border-radius:10px;border:1px solid rgba(210,140,140,0.15);color:#c08888;}
+.pts{font-size:13px;font-weight:700;font-family:'Outfit';white-space:nowrap;margin-left:8px;}
+.section-title{font-size:15px;font-weight:600;margin-bottom:10px;}
+.hidden{display:none;}
+</style>
+</head>
+<body>
+<div class="bg1"></div><div class="bg2"></div>
+<div id="toast" class="toast hidden"></div>
+
+<div style="padding:28px 20px 12px;text-align:center;">
+  <div style="font-family:'Outfit',sans-serif;font-size:13px;letter-spacing:4px;text-transform:uppercase;color:#c4868e;margin-bottom:6px;">✦ KLARA'S LIFE QUEST ✦</div>
+  <h1 style="font-family:'Outfit',sans-serif;font-size:28px;font-weight:800;background:linear-gradient(135deg,#d4a0a0 0%,#d4a0a0 50%,#c9b8a8 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px;">克拉拉养成计划</h1>
+  <div style="font-size:12px;color:#a08888;">2026 春季学期 · 最后一战</div>
+  <div style="display:flex;justify-content:center;gap:10px;margin-top:12px;">
+    <button onclick="toggleSave()" style="padding:6px 16px;border-radius:8px;font-size:12px;font-weight:600;background:linear-gradient(135deg,#c4868e,#b07078);color:#fff;">💾 备份存档</button>
+    <button onclick="toggleLoad()" style="padding:6px 16px;border-radius:8px;font-size:12px;font-weight:600;background:rgba(219,147,158,0.12);color:#8a6a6e;border:1px solid rgba(219,147,158,0.2);">📂 导入存档</button>
+  </div>
+  <div id="savePanel" class="hidden" style="margin-top:12px;padding:12px;background:rgba(255,255,255,0.6);border-radius:12px;border:1px solid rgba(219,147,158,0.2);">
+    <div style="font-size:12px;color:#c4868e;margin-bottom:8px;">长按下方存档码全选复制：</div>
+    <textarea id="saveCode" readonly onfocus="this.select()" style="width:100%;height:60px;font-size:11px;background:rgba(255,255,255,0.7);color:#6a5555;border:1px solid rgba(219,147,158,0.2);border-radius:8px;padding:8px;resize:none;word-break:break-all;"></textarea>
+    <button onclick="copyCode()" style="margin-top:8px;padding:8px 20px;border-radius:8px;font-size:13px;font-weight:600;background:linear-gradient(135deg,#c4868e,#d4a0a0);color:#fff;">复制存档码</button>
+  </div>
+  <div id="loadPanel" class="hidden" style="margin-top:12px;padding:12px;background:rgba(255,255,255,0.6);border-radius:12px;border:1px solid rgba(219,147,158,0.2);">
+    <div style="font-size:12px;color:#c4868e;margin-bottom:8px;">粘贴存档码到下方：</div>
+    <textarea id="loadCode" placeholder="在这里粘贴存档码..." style="width:100%;height:60px;font-size:11px;background:rgba(255,255,255,0.7);color:#6a5555;border:1px solid rgba(219,147,158,0.2);border-radius:8px;padding:8px;resize:none;word-break:break-all;"></textarea>
+    <button onclick="loadSave()" style="margin-top:8px;padding:8px 20px;border-radius:8px;font-size:13px;font-weight:600;background:linear-gradient(135deg,#047857,#065f46);color:#fff;">读取存档</button>
+    <div id="loadMsg" style="font-size:12px;margin-top:6px;"></div>
+  </div>
+</div>
+
+<!-- Points -->
+<div style="display:flex;justify-content:center;gap:16px;padding:12px 20px 16px;">
+  <div id="cpBox" style="flex:1;max-width:180px;background:linear-gradient(135deg,rgba(219,147,158,0.15),rgba(199,163,163,0.1));border-radius:16px;padding:16px;text-align:center;border:1px solid rgba(219,147,158,0.2);">
+    <div style="font-size:11px;color:#c4868e;letter-spacing:1px;margin-bottom:4px;">可用积分</div>
+    <div id="cpVal" style="font-family:'Outfit',sans-serif;font-size:36px;font-weight:800;background:linear-gradient(135deg,#d4a0a0,#e8b4b8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">0</div>
+  </div>
+  <div style="flex:1;max-width:180px;background:rgba(255,255,255,0.5);border-radius:16px;padding:16px;text-align:center;border:1px solid rgba(219,147,158,0.15);">
+    <div style="font-size:11px;color:#a08888;letter-spacing:1px;margin-bottom:4px;">累计总分</div>
+    <div id="tpVal" style="font-family:'Outfit',sans-serif;font-size:36px;font-weight:800;color:#6a5555;">0</div>
+  </div>
+</div>
+
+<!-- Japan -->
+<div style="margin:0 20px 20px;background:rgba(255,255,255,0.5);border-radius:12px;padding:12px 16px;border:1px solid rgba(219,147,158,0.2);">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+    <span style="font-size:12px;color:#a08888;">✈️ 日本旅行进度</span>
+    <span id="japanText" style="font-size:12px;color:#c4868e;font-family:'Outfit';">0/2000</span>
+  </div>
+  <div style="height:6px;border-radius:3px;background:rgba(219,147,158,0.15);overflow:hidden;">
+    <div id="japanBar" style="height:100%;border-radius:3px;width:0%;background:linear-gradient(90deg,#c4868e,#d4a0a0,#c9b8a8);transition:width 0.5s ease;"></div>
+  </div>
+</div>
+
+<!-- Germany -->
+<div style="margin:0 20px 20px;background:rgba(255,255,255,0.5);border-radius:12px;padding:12px 16px;border:1px solid rgba(219,147,158,0.2);">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+    <span style="font-size:12px;color:#a08888;">🇩🇪 德国之路（高财+德语）</span>
+    <span id="deText" style="font-size:12px;color:#c4868e;font-family:'Outfit';">0/2000</span>
+  </div>
+  <div style="height:6px;border-radius:3px;background:rgba(219,147,158,0.15);overflow:hidden;">
+    <div id="deBar" style="height:100%;border-radius:3px;width:0%;background:linear-gradient(90deg,#c9b8a8,#b07078,#c4868e);transition:width 0.5s ease;"></div>
+  </div>
+</div>
+
+<!-- Tabs -->
+<div style="display:flex;margin:0 20px 16px;background:rgba(255,255,255,0.5);border-radius:12px;padding:3px;">
+  <button class="tab-btn tab-active" onclick="switchTab('tasks')" id="tab-tasks">📋 任务</button>
+  <button class="tab-btn tab-inactive" onclick="switchTab('attrs')" id="tab-attrs">💎 属性</button>
+  <button class="tab-btn tab-inactive" onclick="switchTab('shop')" id="tab-shop">🎁 商城</button>
+  <button class="tab-btn tab-inactive" onclick="switchTab('history')" id="tab-history">📜 记录</button>
+</div>
+
+<!-- Content -->
+<div style="padding:0 20px 100px;">
+  <div id="content-tasks"></div>
+  <div id="content-attrs" class="hidden"></div>
+  <div id="content-shop" class="hidden"></div>
+  <div id="content-history" class="hidden"></div>
+</div>
+
+<script>
+/* ═══════ DATA ═══════ */
+const PRAISE={wake:["早起的克拉拉最厉害！","又是元气满满的一天！","闹钟响了就起来，你太自律了！"],dishes_today:["当天碗当天洗，家务小能手！","干净的厨房=干净的心情！"],dishes_late:["虽然迟了一天，但至少洗了！"],socks_today:["袜子清清爽爽！","当天洗完，强迫症都满意了！"],socks_late:["迟到总比不到好……下次加油！"],cook:["自己做饭的女孩子最酷了！","大厨克拉拉上线！","比外卖健康一百倍！"],tidy:["干净的房间，清爽的心！","收拾完是不是神清气爽？"],exercise:["运动的克拉拉在发光！","流汗=在变美，科学认证！","今天又比昨天更强了！"],gc_attend:["高财又撑过一节课！离毕业又近一步！","间谍小李成功潜入敌营！","认真听课的你超帅！"],gc_review:["跟小克过完了，今天的高财被你拿下了！","当天消化不攒债，你太棒了！"],gc_homework:["作业都做完了？？你今天是谁？？","会计作业克星就是你！"],gc_mock:["做模拟题了！考试时你会感谢今天的自己！","高财在你面前瑟瑟发抖！"],gc_pass:["🎉🎉🎉 毕业！！！高财再见！永远不见！！！"],dr_study:["科目题刷起来！驾照在向你招手！","题海战术，稳扎稳打！"],dr_practice:["方向盘在你手里越来越听话了！","马路杀手正在进化成老司机！"],dr_ke1:["🎉 科一过了！！理论大师！！"],dr_ke2:["🎉 科二过了！！倒车入库小意思！！"],dr_ke3:["🎉 科三过了！！路上见！"],dr_ke4:["🎉 科四过了！！驾照到手！！"],de_vocab:["词汇量在偷偷增长！","Sehr gut! 词库+20！"],de_grammar:["语法怪兽又被你打倒一只！","Grammatik gemeistert!"],de_friends:["看Friends学德语，快乐学习法！","边看剧边学，正确的打开方式！"],de_speak:["Dein Deutsch wird immer besser!","开口说才是真的会！"],de_level:["🎉 德语升级了！！克拉拉你太强了！！"],pt_search:["在找兼职了！行动力满分！"],pt_interview:["面试了！经验值+100！"],pt_work:["打工辛苦了！搞钱女孩最美丽！"],piano:["琴声响起，气质拉满！","练琴的你好迷人！"],sing:["唱歌的克拉拉最快乐！","练嗓子ing，好听！"],dance:["跳舞的你在发光！","身体在说话，好美！"],badminton:["羽毛球打起来！挥拍的样子好帅！"],run:["跑起来了！风都追不上你！"],skincare:["护肤做起来，皮肤会感谢你的！"],outfit:["研究穿搭的你好认真！气质这就来了！"],posture:["体态练习！站姿坐姿都在变好看！"],eq_practice:["情商练习！你的表达越来越有力量了！"],social_out:["主动社交了！社恐-1，勇气+100！","走出去的你很勇敢！"],say_no:["说不了！恶女力觉醒！","拒绝了不合理的要求，你保护了自己！","今天的你没有讨好任何人，很酷！"],writing:["写作练习！文字是你的武器！","笔下生花的克拉拉！"],reading:["读书ing！精神世界在扩张！"],journal:["写日记了！记录生活的人最浪漫！"],no_sugar:["控糖成功！身体在感谢你！"],no_snack:["戒零食！意志力在线！"],early_sleep:["早睡了！明天的你会元气满满！"],no_takeout:["没点外卖！健康+1！"],bath:["洗香香🎀是干干净净的大美女！","洗完澡整个人都发光了！"],foot_soak:["泡脚好舒服～养生达人！","热水泡脚，疲劳全消！"],brush:["嘴巴香香软软🐱","按时洗漱，清清爽爽！"],fix_home:["你是最勇敢的！去德国不怕啥！","动手能力max，生活力拉满！"],mop:["地板亮晶晶！赤脚走都舒服！","拖完地整个家都清爽了！"],undies_today:["当天洗完，干干净净！","好习惯养成中！"],undies_late:["迟了一天但还是洗了，下次加油！"],trash:["垃圾清走了，清爽！"],vitamin:["维生素吃了！身体在悄悄变好！","今天的营养补充到位了！"],diet_meal:["减脂餐！管住嘴的你超有毅力！","健康饮食，身材在路上了！"],bowel:["通畅！身体轻盈了！","肠道健康，一整天都舒服！"],water:["今天水喝够了！皮肤在偷偷变好！","多喝水的女孩子会发光！"],stretch:["拉伸完好舒服～肌肉在感谢你！","柔韧性up！"],praise_self:["今天的你值得被夸！","敢夸自己的人最酷了！","全世界都该知道你有多棒！"],contact_teacher:["你主动联系了！这一步比你想象的勇敢！","沟通完了对吧？没那么可怕的！"],deal_academic:["拖了这么久终于动手了！你太厉害了！","解决一件就少一件，你在清除障碍！"],check_grad:["搞清楚了！信息在手心里不慌！","知道要求才能精准发力！"],submit_overdue:["交出去了！！那个压在心上的石头终于落地了！","提交的那一刻你自由了！"],face_fear:["你做到了！！这是今天最勇敢的事！！","恐惧没有打倒你，你打倒了恐惧！！","这一刻的你在发光！！"]};
+const PEN_MSG={pn_skip:["翘课了……下次要去哦"],pn_lazy:["碗/袜子拖太久了……"],pn_noshow:["约了练车没去……教练在风中凌乱"],pn_late_sleep:["又熬夜了……健康在哭泣"],pn_takeout:["点外卖了……偶尔可以但别太频繁哦"],pn_sugar:["吃糖/零食了……下次忍住！"]};
+function rp(a){return a[Math.floor(Math.random()*a.length)];}
+
+const ATTRS=[{id:"health",name:"健康",em:"💚",desc:"早睡早起、规律作息、不点外卖、按时吃饭"},{id:"weight",name:"体重",em:"⚖️",desc:"控糖、戒零食、运动消耗、记录体重"},{id:"sport",name:"运动",em:"🏃‍♀️",desc:"固定运动（羽毛球/跑步）、散步、主动身体活动"},{id:"intel",name:"智识",em:"🧠",desc:"高财学习、阅读非虚构、学习新知识"},{id:"lang",name:"语言",em:"🌍",desc:"德语为主，未来可扩展第三外语"},{id:"life",name:"生活力",em:"🔧",desc:"修东西、组装家具、处理生活问题、跑手续办证"},{id:"cook_a",name:"烹饪",em:"🍳",desc:"做饭、学新菜、研究食谱"},{id:"will",name:"意志",em:"🔥",desc:"坚持计划、每日打卡、不半途而废"},{id:"anti_proc",name:"反拖延",em:"⚡",desc:"当天事当天做、不拖ddl、立刻行动"},{id:"grace",name:"气质",em:"✨",desc:"穿搭研究、护肤、化妆练习、体态练习"},{id:"speech",name:"谈吐",em:"🗣️",desc:"练情商、表达能力、说话技巧"},{id:"social",name:"社交",em:"👥",desc:"主动约人、参加活动、跟陌生人交流、克服社恐"},{id:"mood",name:"心情",em:"🌈",desc:"做开心的事、自我关怀、放松休息"},{id:"creative",name:"创造力",em:"🎨",desc:"做饭创新、手工、任何创造性尝试"},{id:"lit",name:"文学",em:"📝",desc:"写作练习、读小说、写日记、文字表达"},{id:"villain",name:"恶女力",em:"👑",desc:"拒绝讨好、维护边界、说不、自私一点"},{id:"piano",name:"乐器",em:"🎹",desc:"钢琴练习或其他乐器"},{id:"sing",name:"唱歌",em:"🎤",desc:"练嗓、唱歌、声乐练习"},{id:"dance",name:"舞蹈",em:"💃",desc:"跳舞、舞蹈练习、身体律动"}];
+const LVLS=[0,20,50,100,180,300,500];
+function getLv(xp){for(let i=LVLS.length-1;i>=0;i--)if(xp>=LVLS[i])return i;return 0;}
+function getLvPct(xp){const l=getLv(xp);if(l>=LVLS.length-1)return 100;return Math.round(((xp-LVLS[l])/(LVLS[l+1]-LVLS[l]))*100);}
+
+const TASK_ATTRS={wake:{health:2,will:1,anti_proc:1,mood:1},dishes_today:{life:1,anti_proc:2,will:1,mood:1},dishes_late:{life:1,mood:1},socks_today:{life:1,anti_proc:2,mood:1},socks_late:{life:1,mood:1},cook:{cook_a:3,health:1,creative:1,mood:1},tidy:{life:2,anti_proc:1,mood:1},exercise:{sport:3,weight:2,health:1,mood:1},gc_attend:{intel:3,will:1,mood:1},gc_review:{intel:3,will:1,anti_proc:1,mood:1},gc_homework:{intel:2,will:2,anti_proc:2,mood:1},gc_mock:{intel:3,will:2,anti_proc:1,mood:1},gc_pass:{intel:10,will:8,mood:5},dr_study:{intel:1,will:1,anti_proc:1,mood:1},dr_practice:{will:2,mood:1},dr_ke1:{will:5,mood:3},dr_ke2:{will:6,mood:3},dr_ke3:{will:6,mood:3},dr_ke4:{will:5,mood:3},de_vocab:{lang:3,will:1,mood:1},de_grammar:{lang:3,intel:1,mood:1},de_friends:{lang:2,mood:2},de_speak:{lang:3,speech:1,mood:1},de_level:{lang:10,will:5,mood:5},pt_search:{will:1,anti_proc:1,social:1,mood:1},pt_interview:{speech:2,social:2,will:1,mood:1},pt_work:{will:1,social:1,mood:1},piano:{piano:4,will:1,grace:1,mood:1},sing:{sing:4,mood:2,grace:1},dance_t:{dance:4,sport:2,grace:2,weight:1,mood:1},badminton:{sport:4,weight:2,health:1,mood:1},run:{sport:3,weight:2,health:1,will:1,mood:1},skincare:{grace:3,mood:1},outfit:{grace:3,creative:1,mood:1},posture:{grace:3,health:1,mood:1},eq_practice:{speech:3,social:1,mood:1},social_out:{social:4,speech:1,villain:1,mood:1},say_no:{villain:4,will:1,speech:1,mood:1},writing:{lit:3,creative:1,speech:1,mood:1},reading:{lit:2,intel:2,mood:1},journal:{lit:2,creative:1,mood:2},no_sugar:{weight:2,will:2,health:1,mood:1},no_snack:{weight:2,will:2,health:1,mood:1},early_sleep:{health:3,will:1,mood:1},no_takeout:{health:2,cook_a:1,will:1,mood:1},bath:{health:2,grace:1,mood:1},foot_soak:{health:2,mood:2},brush:{health:1,grace:1,anti_proc:1,mood:1},fix_home:{life:5,will:3,villain:2,mood:1},mop:{life:2,health:1,mood:1},undies_today:{anti_proc:1,life:1,mood:1},undies_late:{life:1,mood:1},trash:{life:1,mood:1},vitamin:{health:2,mood:1},diet_meal:{weight:3,health:1,will:2,mood:1},bowel:{health:2,mood:1},water:{health:2,mood:1},stretch:{sport:1,health:2,mood:1},praise_self:{villain:3,speech:1,mood:2},contact_teacher:{will:3,anti_proc:3,social:2,villain:2,mood:1},deal_academic:{will:3,anti_proc:4,intel:1,mood:1},check_grad:{anti_proc:3,will:2,intel:1,mood:1},submit_overdue:{anti_proc:4,will:3,mood:2},face_fear:{villain:4,will:4,anti_proc:2,mood:3}};
+const PEN_ATTRS={pn_skip:{intel:-2,will:-3},pn_lazy:{anti_proc:-2,life:-1},pn_noshow:{will:-3,anti_proc:-1},pn_late_sleep:{health:-3,will:-1},pn_takeout:{health:-2,weight:-1},pn_sugar:{weight:-2,will:-1}};
+
+const TASKS={daily:{label:"🌅 日常习惯",items:[{id:"wake",name:"按时起床出门",pts:5,em:"⏰"},{id:"early_sleep",name:"今天早睡了（12点前）",pts:5,em:"🌙"},{id:"cook",name:"自己做饭",pts:8,em:"🍳"},{id:"no_takeout",name:"今天没点外卖",pts:3,em:"🚫🍱"},{id:"dishes_today",name:"当天洗碗",pts:5,em:"🍽️"},{id:"dishes_late",name:"隔天洗碗（拖了一天）",pts:2,em:"🍽️"},{id:"socks_today",name:"按时洗袜子",pts:5,em:"🧦"},{id:"socks_late",name:"拖了一天才洗袜子",pts:2,em:"🧦"},{id:"tidy",name:"收拾房间",pts:5,em:"🏠"},{id:"mop",name:"拖地",pts:5,em:"🧹"},{id:"undies_today",name:"当天洗内衣裤",pts:3,em:"👙"},{id:"undies_late",name:"拖了一天才洗内衣裤",pts:1,em:"👙"},{id:"trash",name:"倒垃圾",pts:1,em:"🗑️"},{id:"vitamin",name:"吃维生素",pts:2,em:"💊"},{id:"diet_meal",name:"吃减脂餐",pts:8,em:"🥗"},{id:"bowel",name:"每日肠道通畅",pts:3,em:"🍃"},{id:"water",name:"按时多多喝水",pts:2,em:"💧"},{id:"stretch",name:"运动完拉伸",pts:3,em:"🧘‍♀️"},{id:"praise_self",name:"发一个夸夸自己的朋友圈",pts:5,em:"🌟"},{id:"bath",name:"洗澡",pts:20,em:"🫧"},{id:"foot_soak",name:"泡脚",pts:5,em:"🐳"},{id:"brush",name:"按时洗漱",pts:3,em:"🍒"},{id:"fix_home",name:"勇敢修家电",pts:50,em:"🚽"}]},body:{label:"💪 身体管理",items:[{id:"exercise",name:"运动/散步30min+",pts:10,em:"🏃‍♀️"},{id:"badminton",name:"打羽毛球",pts:12,em:"🏸"},{id:"no_snack",name:"今天没吃零食",pts:5,em:"🚫🍪"}]},gaocai:{label:"📚 高财主线",items:[{id:"gc_attend",name:"上课认真听完",pts:10,em:"✏️"},{id:"gc_review",name:"课后跟小克过一遍内容",pts:10,em:"📖"},{id:"gc_homework",name:"完成作业/练习",pts:15,em:"📝"},{id:"gc_mock",name:"做一套模拟题",pts:20,em:"🎯"},{id:"gc_pass",name:"🏆 高财及格通过！",pts:200,em:"🎓"}]},driving:{label:"🚗 驾照主线",items:[{id:"dr_study",name:"刷科一/科四题30min",pts:8,em:"📱"},{id:"dr_practice",name:"练车一次",pts:15,em:"🚙"},{id:"dr_ke1",name:"🏆 科一通过！",pts:100,em:"✅"},{id:"dr_ke2",name:"🏆 科二通过！",pts:150,em:"✅"},{id:"dr_ke3",name:"🏆 科三通过！",pts:150,em:"✅"},{id:"dr_ke4",name:"🏆 科四通过！",pts:100,em:"✅"}]},german:{label:"🌍 语言主线",items:[{id:"de_vocab",name:"背单词20个+",pts:8,em:"🔤"},{id:"de_grammar",name:"学一个语法点",pts:10,em:"📐"},{id:"de_friends",name:"看一集德语配音Friends",pts:10,em:"📺"},{id:"de_speak",name:"跟小克德语对话练习",pts:12,em:"🗣️"},{id:"de_level",name:"🏆 语言通过一个级别！",pts:200,em:"🏅"}]},growth:{label:"🌱 自我成长",items:[{id:"skincare",name:"护肤/化妆练习",pts:5,em:"💄"},{id:"outfit",name:"研究穿搭",pts:5,em:"👗"},{id:"posture",name:"体态练习",pts:5,em:"🧘"},{id:"eq_practice",name:"练情商/表达练习",pts:8,em:"💬"},{id:"social_out",name:"主动社交/约人出去",pts:10,em:"👥"},{id:"say_no",name:"拒绝了不合理的事/维护边界",pts:10,em:"👑"},{id:"writing",name:"写作练习",pts:8,em:"✍️"},{id:"reading",name:"读书",pts:8,em:"📚"},{id:"journal",name:"写日记",pts:5,em:"📓"}]},arts:{label:"🎵 才艺",items:[{id:"piano",name:"练钢琴",pts:10,em:"🎹"},{id:"sing",name:"唱歌/练声",pts:8,em:"🎤"},{id:"dance_t",name:"跳舞/舞蹈练习",pts:10,em:"💃"}]},fear:{label:"🗡️ 直面恐惧",items:[{id:"contact_teacher",name:"主动联系辅导员/老师",pts:15,em:"📞"},{id:"deal_academic",name:"处理一项一直拖着的学业事务",pts:12,em:"📋"},{id:"check_grad",name:"查清楚一个模糊的毕业要求",pts:10,em:"🔍"},{id:"submit_overdue",name:"提交一份一直拖着的材料/申请",pts:15,em:"📨"},{id:"face_fear",name:"做了一件很害怕但还是做了的事",pts:20,em:"🗡️"}]},parttime:{label:"💼 兼职支线",items:[{id:"pt_search",name:"搜索/投递兼职",pts:8,em:"🔍"},{id:"pt_interview",name:"面试一次",pts:20,em:"🤝"},{id:"pt_work",name:"兼职工作一天",pts:15,em:"💰"}]}};
+const PENS=[{id:"pn_skip",name:"无故翘课",pts:-20,em:"❌"},{id:"pn_lazy",name:"碗/袜子拖超过两天",pts:-5,em:"😤"},{id:"pn_noshow",name:"约了练车没去",pts:-15,em:"🚫"},{id:"pn_late_sleep",name:"熬夜超过1点",pts:-8,em:"🦉"},{id:"pn_takeout",name:"点外卖了",pts:-3,em:"📦"},{id:"pn_sugar",name:"吃糖/零食了",pts:-3,em:"🍬"}];
+const SHOP=[{id:"s1",name:"一杯奶茶",cost:30,em:"🧋",t:"s"},{id:"s10",name:"30min刷视频",cost:15,em:"📱",t:"s"},{id:"s2",name:"一份小零食",cost:30,em:"🍪",t:"s"},{id:"s3",name:"一盒手指泡芙",cost:50,em:"🍫",t:"s"},{id:"s4",name:"一顿好吃的外卖",cost:50,em:"🍱",t:"s"},{id:"s5",name:"一顿日料/寿司",cost:200,em:"🍣",t:"m"},{id:"s6",name:"买一件想要的衣服",cost:200,em:"👗",t:"m"},{id:"s7",name:"给Vier买装备",cost:300,em:"🐱",t:"m"},{id:"s8",name:"拍一组写真",cost:600,em:"📸",t:"l"},{id:"s9",name:"日本旅行基金",cost:2000,em:"✈️🇯🇵",t:"x"}];
+const TIER_NAMES={s:"日常小确幸",m:"进阶奖励",l:"豪华奖励",x:"✨ 传说级 ✨"};
+const TIER_COLORS={s:"#16a34a",m:"#d97706",l:"#d4a0a0",x:"#a07078"};
+
+/* ═══════ STATE ═══════ */
+function initAttrs(){const a={};ATTRS.forEach(at=>a[at.id]=0);return a;}
+let S;
+function loadState(){
+  try{const s=localStorage.getItem("lila-quest-v3");if(s){S=JSON.parse(s);S.ct=S.ct||[];S.cs=S.cs||[];S.cpn=S.cpn||[];S.attrs=S.attrs?{...initAttrs(),...S.attrs}:initAttrs();S.de=S.de||0;return;}}catch(e){}
+  S={cp:0,tp:0,h:[],rd:[],bc:false,ct:[],cs:[],cpn:[],attrs:initAttrs(),de:0};
+}
+function saveState(){try{localStorage.setItem("lila-quest-v3",JSON.stringify(S));}catch(e){}}
+function fmtDate(d){const x=new Date(d);return `${x.getMonth()+1}/${x.getDate()} ${x.getHours().toString().padStart(2,"0")}:${x.getMinutes().toString().padStart(2,"0")}`;}
+function encode(s){return btoa(unescape(encodeURIComponent(JSON.stringify(s))));}
+function decode(s){try{return JSON.parse(decodeURIComponent(escape(atob(s.trim()))));}catch{return null;}}
+
+/* ═══════ TOAST ═══════ */
+let toastTimer;
+function flash(msg,type){
+  const t=document.getElementById("toast");
+  t.textContent=msg;t.className="toast toast-"+(type||"earn");t.classList.remove("hidden");
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.add("hidden"),3500);
+  if(type==="earn"||type==="big"){const b=document.getElementById("cpBox");b.style.animation="sparkle 0.5s ease";setTimeout(()=>b.style.animation="",600);}
+}
+
+/* ═══════ ATTRS ═══════ */
+function applyAttrs(mapping){if(!mapping)return;Object.entries(mapping).forEach(([k,v])=>{if(S.attrs[k]!==undefined)S.attrs[k]=Math.max(0,S.attrs[k]+v);});}
+
+/* ═══════ ACTIONS ═══════ */
+const DE_TASKS=new Set(["gc_attend","gc_review","gc_homework","gc_mock","gc_pass","de_vocab","de_grammar","de_friends","de_speak","de_level"]);
+function doTask(id,name,pts,em,praise,attrMap){
+  S.h.unshift({t:"e",n:name,p:pts,d:new Date().toISOString()});
+  if(S.h.length>200)S.h.length=200;
+  S.cp+=pts;S.tp+=pts;
+  if(DE_TASKS.has(id))S.de=(S.de||0)+pts;
+  applyAttrs(TASK_ATTRS[id]||attrMap||{mood:1});
+  saveState();render();
+  const pl=PRAISE[id];const pr=pl?rp(pl):(praise||`+${pts}分！`);
+  flash(pts>=100?pr:`${em} ${pr}`,pts>=100?"big":"earn");
+}
+function doPen(id,name,pts,em,attrMap){
+  S.h.unshift({t:"p",n:name,p:pts,d:new Date().toISOString()});
+  if(S.h.length>200)S.h.length=200;
+  S.cp=Math.max(0,S.cp+pts);
+  S.tp=Math.max(0,S.tp+pts);
+  applyAttrs(PEN_ATTRS[id]||attrMap||{});
+  saveState();render();
+  const ms=PEN_MSG[id];flash(ms?rp(ms):`${name} ${pts}分`,"penalty");
+}
+function doRedeem(name,cost){
+  if(S.cp<cost){flash("积分不够啦，再攒攒！","fail");return;}
+  S.h.unshift({t:"r",n:name,p:-cost,d:new Date().toISOString()});
+  S.cp-=cost;saveState();render();
+  flash(`🎁 兑换成功：${name}！好好享受！`,"redeem");
+}
+function doBonus(){
+  if(S.bc)return;S.bc=true;
+  S.h.unshift({t:"e",n:"🎉 开学首日奖励——小克请你吃泡芙",p:50,d:new Date().toISOString()});
+  S.cp+=50;S.tp+=50;applyAttrs({mood:5});
+  saveState();render();flash("🎉 泡芙基金到账！这是小克请你的！","big");
+}
+function doReset(){if(confirm("确定要重置所有数据吗？")){S={cp:0,tp:0,h:[],rd:[],bc:false,ct:[],cs:[],cpn:[],attrs:initAttrs(),de:0};saveState();render();flash("已重置","penalty");}}
+
+/* ═══════ CUSTOM ═══════ */
+function addCT(){
+  const n=document.getElementById("ct_name").value.trim();if(!n){flash("任务名不能为空！","fail");return;}
+  const pts=Math.max(1,Math.min(500,parseInt(document.getElementById("ct_pts").value)||5));
+  const em=document.getElementById("ct_em").value||"⭐";
+  const pr=document.getElementById("ct_pr").value.trim()||`完成了${n}，好棒！`;
+  S.ct.push({id:"c_"+Date.now(),name:n,pts,em,praise:pr,attrMap:{mood:1}});
+  saveState();render();flash(`✨ 新任务已添加：${n}`,"earn");
+}
+function rmCT(id){S.ct=S.ct.filter(t=>t.id!==id);saveState();render();flash("任务已删除","penalty");}
+function addCS(){
+  const n=document.getElementById("cs_name").value.trim();if(!n){flash("奖励名不能为空！","fail");return;}
+  const cost=Math.max(1,parseInt(document.getElementById("cs_cost").value)||50);
+  const em=document.getElementById("cs_em").value||"🎁";
+  S.cs.push({id:"cs_"+Date.now(),name:n,cost,em});
+  saveState();render();flash(`✨ 新奖励已上架：${n}`,"earn");
+}
+function rmCS(id){S.cs=S.cs.filter(i=>i.id!==id);saveState();render();flash("奖励已下架","penalty");}
+function addCP(){
+  const n=document.getElementById("cp_name").value.trim();if(!n){flash("名称不能为空！","fail");return;}
+  const pts=-Math.abs(parseInt(document.getElementById("cp_pts").value)||10);
+  const em=document.getElementById("cp_em").value||"😬";
+  S.cpn.push({id:"cp_"+Date.now(),name:n,pts,em,attrMap:{mood:-1}});
+  saveState();render();flash(`⚠️ 新扣分项已添加：${n}`,"penalty");
+}
+function rmCP(id){S.cpn=S.cpn.filter(p=>p.id!==id);saveState();render();flash("扣分项已删除","earn");}
+
+/* ═══════ SAVE/LOAD ═══════ */
+function toggleSave(){const p=document.getElementById("savePanel");p.classList.toggle("hidden");document.getElementById("loadPanel").classList.add("hidden");if(!p.classList.contains("hidden"))document.getElementById("saveCode").value=encode(S);}
+function toggleLoad(){document.getElementById("loadPanel").classList.toggle("hidden");document.getElementById("savePanel").classList.add("hidden");document.getElementById("loadMsg").textContent="";}
+function copyCode(){const c=document.getElementById("saveCode").value;navigator.clipboard?navigator.clipboard.writeText(c).then(()=>flash("存档码已复制！","earn")):flash("请长按手动复制","fail");}
+function loadSave(){
+  const d=decode(document.getElementById("loadCode").value);
+  if(d&&typeof d.cp==="number"){S={...d,ct:d.ct||[],cs:d.cs||[],cpn:d.cpn||[],attrs:d.attrs?{...initAttrs(),...d.attrs}:initAttrs(),de:d.de||0};saveState();render();document.getElementById("loadPanel").classList.add("hidden");flash("存档读取成功！","big");}
+  else{document.getElementById("loadMsg").innerHTML='<span style="color:#c07070">❌ 存档码无效</span>';}
+}
+
+/* ═══════ TABS ═══════ */
+let currentTab="tasks";
+function switchTab(t){
+  currentTab=t;
+  ["tasks","attrs","shop","history"].forEach(k=>{
+    document.getElementById("content-"+k).classList.toggle("hidden",k!==t);
+    document.getElementById("tab-"+k).className="tab-btn "+(k===t?"tab-active":"tab-inactive");
+  });
+  render();
+}
+
+/* ═══════ RENDER ═══════ */
+function render(){
+  document.getElementById("cpVal").textContent=S.cp;
+  document.getElementById("tpVal").textContent=S.tp;
+  document.getElementById("japanText").textContent=S.cp+"/2000";
+  document.getElementById("japanBar").style.width=Math.min(100,S.cp/2000*100)+"%";
+  document.getElementById("deText").textContent=(S.de||0)+"/2000";
+  document.getElementById("deBar").style.width=Math.min(100,(S.de||0)/2000*100)+"%";
+
+  if(currentTab==="tasks")renderTasks();
+  else if(currentTab==="attrs")renderAttrs();
+  else if(currentTab==="shop")renderShop();
+  else if(currentTab==="history")renderHistory();
+}
+
+function renderTasks(){
+  let h="";
+  if(!S.bc)h+=`<button onclick="doBonus()" style="width:100%;padding:14px 16px;margin-bottom:20px;border-radius:12px;background:linear-gradient(135deg,#c4868e,#d4a0a0);color:#fff;font-size:15px;font-weight:600;animation:glow 2s ease-in-out infinite;">🎁 领取开学首日奖励 +50分</button>`;
+
+  Object.entries(TASKS).forEach(([k,cat])=>{
+    h+=`<div style="margin-bottom:20px;"><div class="section-title" style="color:#8a6a6e;">${cat.label}</div><div style="display:flex;flex-direction:column;gap:6px;">`;
+    cat.items.forEach(t=>{
+      const big=t.pts>=100;
+      h+=`<button class="task-btn${big?" task-btn-big":""}" onclick="doTask('${t.id}',\`${t.name}\`,${t.pts},'${t.em}')"><span style="font-size:14px;text-align:left;">${t.em} ${t.name}</span><span class="pts" style="color:${big?"#e8b4b8":"#c4868e"};">+${t.pts}</span></button>`;
+    });
+    h+=`</div></div>`;
+  });
+
+  // Custom tasks
+  h+=`<div style="margin-bottom:20px;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><div class="section-title" style="color:#8a6a6e;">🌟 自定义任务</div><button onclick="document.getElementById('ctForm').classList.toggle('hidden')" style="padding:4px 12px;border-radius:8px;font-size:12px;font-weight:600;background:linear-gradient(135deg,#c4868e,#b07078);color:#fff;">+ 添加</button></div>`;
+  h+=`<div id="ctForm" class="hidden" style="padding:14px;margin-bottom:12px;border-radius:12px;background:rgba(219,147,158,0.08);border:1px solid rgba(219,147,158,0.2);"><div style="margin-bottom:10px;"><div style="font-size:12px;color:#c4868e;margin-bottom:4px;">任务名称</div><input id="ct_name" class="inp" placeholder="比如：读书30分钟"></div><div style="display:flex;gap:10px;margin-bottom:10px;"><div style="flex:1;"><div style="font-size:12px;color:#c4868e;margin-bottom:4px;">积分</div><input id="ct_pts" type="number" value="5" class="inp"></div><div style="flex:1;"><div style="font-size:12px;color:#c4868e;margin-bottom:4px;">图标</div><input id="ct_em" value="⭐" class="inp"></div></div><div style="margin-bottom:12px;"><div style="font-size:12px;color:#c4868e;margin-bottom:4px;">完成褒奖</div><input id="ct_pr" class="inp" placeholder="比如：好棒！"></div><button onclick="addCT()" style="width:100%;padding:10px;border-radius:8px;font-size:14px;font-weight:600;background:linear-gradient(135deg,#c4868e,#d4a0a0);color:#fff;">确认添加</button></div>`;
+  if(S.ct.length){h+=`<div style="display:flex;flex-direction:column;gap:6px;">`;S.ct.forEach(t=>{h+=`<div style="display:flex;align-items:center;width:100%;padding:12px 14px;background:rgba(219,147,158,0.06);border-radius:10px;border:1px solid rgba(219,147,158,0.15);"><button onclick="doTask('${t.id}',\`${t.name}\`,${t.pts},'${t.em}',\`${t.praise||""}\`)" style="flex:1;display:flex;align-items:center;justify-content:space-between;color:#5a4a4a;"><span style="font-size:14px;">${t.em} ${t.name}</span><span class="pts" style="color:#c4868e;">+${t.pts}</span></button><button onclick="rmCT('${t.id}')" style="margin-left:8px;padding:4px 8px;border-radius:6px;font-size:11px;color:#c07070;background:rgba(210,140,140,0.1);">删除</button></div>`;});h+=`</div>`;}
+  h+=`</div>`;
+
+  // Penalties
+  h+=`<div style="margin-bottom:20px;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><div class="section-title" style="color:#c07070;">⚠️ 扣分项</div><button onclick="document.getElementById('cpForm').classList.toggle('hidden')" style="padding:4px 12px;border-radius:8px;font-size:12px;font-weight:600;background:rgba(210,140,140,0.15);color:#c08888;border:1px solid rgba(210,140,140,0.2);">+ 添加</button></div>`;
+  h+=`<div id="cpForm" class="hidden" style="padding:14px;margin-bottom:12px;border-radius:12px;background:rgba(210,140,140,0.06);border:1px solid rgba(210,140,140,0.15);"><div style="margin-bottom:10px;"><div style="font-size:12px;color:#c08888;margin-bottom:4px;">扣分项名称</div><input id="cp_name" class="inp" placeholder="比如：熬夜超过2点"></div><div style="display:flex;gap:10px;margin-bottom:12px;"><div style="flex:1;"><div style="font-size:12px;color:#c08888;margin-bottom:4px;">扣多少分</div><input id="cp_pts" type="number" value="10" class="inp"></div><div style="flex:1;"><div style="font-size:12px;color:#c08888;margin-bottom:4px;">图标</div><input id="cp_em" value="😬" class="inp"></div></div><button onclick="addCP()" style="width:100%;padding:10px;border-radius:8px;font-size:14px;font-weight:600;background:linear-gradient(135deg,#d48888,#c07070);color:#fff;">确认添加</button></div>`;
+  h+=`<div style="display:flex;flex-direction:column;gap:6px;">`;
+  PENS.forEach(p=>{h+=`<button class="pen-btn" onclick="doPen('${p.id}',\`${p.name}\`,${p.pts},'${p.em}')"><span style="font-size:14px;">${p.em} ${p.name}</span><span class="pts" style="color:#c07070;">${p.pts}</span></button>`;});
+  S.cpn.forEach(p=>{h+=`<div style="display:flex;align-items:center;width:100%;padding:12px 14px;background:rgba(210,140,140,0.06);border-radius:10px;border:1px solid rgba(210,140,140,0.15);"><button onclick="doPen('${p.id}',\`${p.name}\`,${p.pts},'${p.em}')" style="flex:1;display:flex;align-items:center;justify-content:space-between;color:#c08888;"><span style="font-size:14px;">${p.em} ${p.name}</span><span class="pts" style="color:#c07070;">${p.pts}</span></button><button onclick="rmCP('${p.id}')" style="margin-left:8px;padding:4px 8px;border-radius:6px;font-size:11px;color:#c07070;background:rgba(210,140,140,0.1);">删除</button></div>`;});
+  h+=`</div></div>`;
+
+  h+=`<button onclick="doReset()" style="width:100%;padding:10px;border-radius:8px;background:rgba(255,255,255,0.5);border:1px solid rgba(219,147,158,0.15);color:#b09898;font-size:12px;margin-top:10px;">重置所有数据</button>`;
+  document.getElementById("content-tasks").innerHTML=h;
+}
+
+function renderAttrs(){
+  const cx=160,cy=160,maxR=130,levels=6,n=ATTRS.length,step=(2*Math.PI)/n;
+  function gp(i,r){const a=-Math.PI/2+i*step;return [cx+r*Math.cos(a),cy+r*Math.sin(a)];}
+  let svg=`<div style="display:flex;justify-content:center;margin-bottom:20px;"><svg width="320" height="320" viewBox="0 0 320 320">`;
+  for(let l=1;l<=levels;l++){const r=(maxR/levels)*l;let pts="";ATTRS.forEach((_,i)=>{const p=gp(i,r);pts+=p[0]+","+p[1]+" ";});svg+=`<polygon points="${pts}" fill="none" stroke="rgba(219,147,158,0.2)" stroke-width="1"/>`;}
+  ATTRS.forEach((_,i)=>{const p=gp(i,maxR);svg+=`<line x1="${cx}" y1="${cy}" x2="${p[0]}" y2="${p[1]}" stroke="rgba(219,147,158,0.15)" stroke-width="1"/>`;});
+  let dataPts="";ATTRS.forEach((attr,i)=>{const xp=S.attrs[attr.id]||0;const lv=getLv(xp);const r=Math.max(8,(lv/levels)*maxR);const p=gp(i,r);dataPts+=p[0]+","+p[1]+" ";});
+  svg+=`<polygon points="${dataPts}" fill="rgba(196,134,142,0.25)" stroke="#c4868e" stroke-width="2"/>`;
+  ATTRS.forEach((attr,i)=>{const xp=S.attrs[attr.id]||0;const lv=getLv(xp);const r=Math.max(8,(lv/levels)*maxR);const p=gp(i,r);svg+=`<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="#c4868e"/>`;});
+  ATTRS.forEach((attr,i)=>{const p=gp(i,maxR+18);svg+=`<text x="${p[0]}" y="${p[1]}" text-anchor="middle" dominant-baseline="middle" fill="#8a6a6e" font-size="9" font-family="'Noto Sans SC'">${attr.em}${attr.name}</text>`;});
+  svg+=`</svg></div>`;
+  let h=svg+`<div style="font-size:13px;color:#a08888;margin-bottom:16px;text-align:center;">点击属性查看详情</div><div style="display:flex;flex-direction:column;gap:8px;">`;
+  ATTRS.forEach(a=>{
+    const xp=S.attrs[a.id]||0,lv=getLv(xp),pct=getLvPct(xp),nxt=lv<LVLS.length-1?LVLS[lv+1]:null;
+    const col=lv>=3?"#e8b4b8":lv>=1?"#c4868e":"#8b7fa8";
+    const barCol=lv>=3?"linear-gradient(90deg,#d4a0a0,#e8b4b8)":lv>=1?"linear-gradient(90deg,#c4868e,#c4868e)":"linear-gradient(90deg,#4b5563,#6b7280)";
+    h+=`<div><button onclick="this.nextElementSibling.classList.toggle('hidden');this.style.background=this.nextElementSibling.classList.contains('hidden')?'rgba(255,255,255,0.5)':'rgba(219,147,158,0.1)'" style="width:100%;padding:14px 16px;border-radius:12px;text-align:left;background:rgba(255,255,255,0.5);border:1px solid rgba(219,147,158,0.15);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <div style="display:flex;align-items:center;gap:8px;"><span style="font-size:18px;">${a.em}</span><span style="font-size:14px;font-weight:600;color:#5a4a4a;">${a.name}</span></div>
+        <div style="display:flex;align-items:center;gap:8px;"><span style="font-size:12px;font-family:'Outfit';font-weight:700;color:${col};">Lv.${lv}</span><span style="font-size:11px;color:#b09898;font-family:'Outfit';">${xp}${nxt?"/"+nxt:""}</span></div>
+      </div>
+      <div style="height:4px;border-radius:2px;background:rgba(219,147,158,0.15);overflow:hidden;"><div style="height:100%;border-radius:2px;width:${pct}%;background:${barCol};transition:width 0.5s ease;"></div></div>
+    </button><div class="hidden" style="padding:12px 16px;margin-top:4px;border-radius:10px;background:rgba(219,147,158,0.06);border:1px solid rgba(219,147,158,0.15);font-size:13px;color:#8a6a6e;">${a.desc}</div></div>`;
+  });
+  h+=`</div>`;
+  document.getElementById("content-attrs").innerHTML=h;
+}
+
+function renderShop(){
+  let h="";
+  ["s","m","l","x"].forEach(tier=>{
+    const items=SHOP.filter(i=>i.t===tier);if(!items.length)return;
+    h+=`<div style="margin-bottom:20px;"><div style="font-size:13px;font-weight:600;margin-bottom:10px;color:${TIER_COLORS[tier]};letter-spacing:1px;">${TIER_NAMES[tier]}</div><div style="display:flex;flex-direction:column;gap:8px;">`;
+    items.forEach(item=>{
+      const ok=S.cp>=item.cost;
+      const bg=tier==="x"?"linear-gradient(135deg,rgba(199,163,163,0.1),rgba(199,163,163,0.06))":"rgba(255,255,255,0.5)";
+      const brd=tier==="x"?"1px solid rgba(199,163,163,0.25)":"1px solid rgba(219,147,158,0.15)";
+      const anim=tier==="x"?"animation:glow 3s ease-in-out infinite;":"";
+      h+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:${bg};border-radius:12px;border:${brd};${anim}"><div><div style="font-size:14px;color:#5a4a4a;">${item.em} ${item.name}</div><div style="font-size:12px;color:#a08888;font-family:'Outfit';margin-top:2px;">${item.cost} 积分</div></div><button onclick="doRedeem(\`${item.name}\`,${item.cost})" style="padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;background:${ok?"linear-gradient(135deg,#c4868e,#d4a0a0)":"rgba(219,147,158,0.2)"};color:${ok?"#fff":"#4b4560"};opacity:${ok?1:0.5};">${ok?"兑换":"攒攒"}</button></div>`;
+    });
+    h+=`</div></div>`;
+  });
+
+  // Custom shop
+  h+=`<div style="margin-bottom:20px;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><div style="font-size:13px;font-weight:600;color:#c4868e;letter-spacing:1px;">🌟 自定义奖励</div><button onclick="document.getElementById('csForm').classList.toggle('hidden')" style="padding:4px 12px;border-radius:8px;font-size:12px;font-weight:600;background:linear-gradient(135deg,#c4868e,#b07078);color:#fff;">+ 上架</button></div>`;
+  h+=`<div id="csForm" class="hidden" style="padding:14px;margin-bottom:12px;border-radius:12px;background:rgba(219,147,158,0.08);border:1px solid rgba(219,147,158,0.2);"><div style="margin-bottom:10px;"><div style="font-size:12px;color:#c4868e;margin-bottom:4px;">奖励名称</div><input id="cs_name" class="inp" placeholder="比如：一双好看的鞋"></div><div style="display:flex;gap:10px;margin-bottom:12px;"><div style="flex:1;"><div style="font-size:12px;color:#c4868e;margin-bottom:4px;">所需积分</div><input id="cs_cost" type="number" value="50" class="inp"></div><div style="flex:1;"><div style="font-size:12px;color:#c4868e;margin-bottom:4px;">图标</div><input id="cs_em" value="🎁" class="inp"></div></div><button onclick="addCS()" style="width:100%;padding:10px;border-radius:8px;font-size:14px;font-weight:600;background:linear-gradient(135deg,#c4868e,#d4a0a0);color:#fff;">确认上架</button></div>`;
+  if(S.cs.length){h+=`<div style="display:flex;flex-direction:column;gap:8px;">`;S.cs.forEach(item=>{const ok=S.cp>=item.cost;h+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:rgba(219,147,158,0.06);border-radius:12px;border:1px solid rgba(219,147,158,0.15);"><div style="flex:1;"><div style="font-size:14px;color:#5a4a4a;">${item.em} ${item.name}</div><div style="font-size:12px;color:#a08888;font-family:'Outfit';margin-top:2px;">${item.cost} 积分</div></div><button onclick="doRedeem(\`${item.name}\`,${item.cost})" style="padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;background:${ok?"linear-gradient(135deg,#c4868e,#d4a0a0)":"rgba(219,147,158,0.2)"};color:${ok?"#fff":"#4b4560"};opacity:${ok?1:0.5};margin-right:8px;">${ok?"兑换":"攒攒"}</button><button onclick="rmCS('${item.id}')" style="padding:4px 8px;border-radius:6px;font-size:11px;color:#c07070;background:rgba(210,140,140,0.1);">下架</button></div>`;});h+=`</div>`;}
+  h+=`</div>`;
+  document.getElementById("content-shop").innerHTML=h;
+}
+
+function renderHistory(){
+  let h="";
+  if(!S.h.length){h=`<div style="text-align:center;padding:40px 20px;color:#b09898;font-size:14px;">还没有记录，去完成第一个任务吧！</div>`;}
+  else{h=`<div style="display:flex;flex-direction:column;gap:4px;">`;S.h.forEach(e=>{
+    const col=e.t==="e"?"#c4868e":e.t==="r"?"#c9b8a8":"#c07070";
+    h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:rgba(255,255,255,0.02);border-radius:8px;border-left:3px solid ${col};"><div><div style="font-size:13px;color:#6a5555;">${e.n}</div><div style="font-size:11px;color:#b09898;margin-top:2px;">${fmtDate(e.d)}</div></div><div style="font-size:14px;font-weight:700;font-family:'Outfit';color:${col};">${e.p>0?"+"+e.p:e.p}</div></div>`;
+  });h+=`</div>`;}
+  document.getElementById("content-history").innerHTML=h;
+}
+
+/* ═══════ INIT ═══════ */
+loadState();render();
+</script>
+</body>
+</html>
