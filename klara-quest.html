@@ -20,7 +20,7 @@ textarea,input{font-family:inherit;-webkit-appearance:none;}
 .bg1{position:fixed;top:-20%;right:-10%;width:500px;height:500px;background:radial-gradient(circle,rgba(219,147,158,0.08) 0%,transparent 70%);border-radius:50%;pointer-events:none;}
 .bg2{position:fixed;bottom:-10%;left:-10%;width:400px;height:400px;background:radial-gradient(circle,rgba(199,163,163,0.06) 0%,transparent 70%);border-radius:50%;pointer-events:none;}
 .toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);padding:14px 24px;border-radius:14px;z-index:1000;font-size:15px;font-weight:600;max-width:90vw;text-align:center;color:white;box-shadow:0 8px 32px rgba(255,255,255,0.7);animation:slideDown 0.3s ease-out;}
-.toast-earn{background:linear-gradient(135deg,#7ba889,#6b9a7a);}.toast-big{background:linear-gradient(135deg,#c4868e,#d4a0a0);}.toast-redeem{background:linear-gradient(135deg,#c9a878,#d4b888);}.toast-penalty{background:linear-gradient(135deg,#c07070,#d48888);}.toast-fail{background:linear-gradient(135deg,#374151,#4b5563);}
+.toast-earn{background:linear-gradient(135deg,#7ba889,#6b9a7a);}.toast-big{background:linear-gradient(135deg,#c4868e,#d4a0a0);}.toast-redeem{background:linear-gradient(135deg,#c9a878,#d4b888);}.toast-penalty{background:linear-gradient(135deg,#c07070,#d48888);}.toast-fail{background:linear-gradient(135deg,#374151,#4b5563);}.toast-card{background:linear-gradient(135deg,#8a7a9a,#a08aaa);}
 .inp{width:100%;padding:8px 12px;border-radius:8px;font-size:14px;background:rgba(255,255,255,0.6);color:#5a4a4a;border:1px solid rgba(219,147,158,0.2);outline:none;box-sizing:border-box;}
 .tab-btn{flex:1;padding:10px;border-radius:10px;font-size:13px;transition:all 0.2s ease;}
 .tab-active{font-weight:600;color:#fff;background:linear-gradient(135deg,rgba(219,147,158,0.3),rgba(199,163,163,0.2));}
@@ -31,11 +31,79 @@ textarea,input{font-family:inherit;-webkit-appearance:none;}
 .pts{font-size:13px;font-weight:700;font-family:'Outfit';white-space:nowrap;margin-left:8px;}
 .section-title{font-size:15px;font-weight:600;margin-bottom:10px;}
 .hidden{display:none;}
+@keyframes achieveSlideIn{0%{opacity:0;transform:translate(-50%,-50%) scale(0.5);}60%{transform:translate(-50%,-50%) scale(1.05);}100%{opacity:1;transform:translate(-50%,-50%) scale(1);}}
+@keyframes achieveGlow{0%,100%{box-shadow:0 0 30px rgba(196,134,142,0.4);}50%{box-shadow:0 0 60px rgba(196,134,142,0.7);}}
+@keyframes confettiFall{0%{transform:translateY(-10px) rotate(0deg);opacity:1;}100%{transform:translateY(100vh) rotate(720deg);opacity:0;}}
+@keyframes epicFlash{0%{opacity:0;}15%{opacity:0.3;}30%{opacity:0;}100%{opacity:0;}}
+@keyframes shakeIt{0%,100%{transform:translateX(0);}25%,75%{transform:translateX(-3px);}50%{transform:translateX(3px);}}
+@keyframes pulseGlow{0%,100%{box-shadow:0 0 8px rgba(163,176,196,0.3);}50%{box-shadow:0 0 16px rgba(163,176,196,0.5);}}
+.achieve-overlay{position:fixed;top:0;left:0;width:100%;height:100%;z-index:2000;display:flex;align-items:center;justify-content:center;}
+.achieve-overlay-bg{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);}
+.achieve-card{position:relative;z-index:2001;width:85vw;max-width:340px;border-radius:20px;padding:28px 24px;text-align:center;animation:achieveSlideIn 0.5s ease-out;}
+.achieve-card-normal{background:linear-gradient(145deg,#e8edf3,#d5dce6);border:2px solid #a3b0c4;box-shadow:0 8px 32px rgba(163,176,196,0.4);}
+.achieve-card-rare{background:linear-gradient(145deg,#e8e8ef,#d8d8e2);border:2px solid #a8a8b8;box-shadow:0 8px 32px rgba(168,168,184,0.4);animation:achieveSlideIn 0.5s ease-out,pulseGlow 2s ease-in-out infinite;}
+.achieve-card-epic{background:linear-gradient(145deg,#faf5eb,#f0e8d8);border:2px solid #d4a840;box-shadow:0 8px 32px rgba(212,168,64,0.4);animation:achieveSlideIn 0.5s ease-out,achieveGlow 2s ease-in-out infinite;}
+.achieve-card-legend{background:linear-gradient(145deg,#f5ede8,#efe4de);border:2px solid transparent;box-shadow:0 12px 48px rgba(196,134,142,0.5);animation:achieveSlideIn 0.5s ease-out;}
+.confetti-piece{position:fixed;top:-10px;z-index:2002;pointer-events:none;animation:confettiFall linear forwards;}
+.epic-flash{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1999;pointer-events:none;animation:epicFlash 0.6s ease-out forwards;}
+@keyframes legendLockedPulse{0%,100%{border-color:rgba(196,134,142,0.2);box-shadow:0 0 12px rgba(196,134,142,0.08);}50%{border-color:rgba(196,134,142,0.45);box-shadow:0 0 20px rgba(196,134,142,0.15);}}
+@keyframes epicLockedShimmer{0%,100%{border-color:rgba(212,168,64,0.15);box-shadow:0 0 8px rgba(212,168,64,0.05);}50%{border-color:rgba(212,168,64,0.35);box-shadow:0 0 14px rgba(212,168,64,0.1);}}
+@keyframes rareLockedGlow{0%,100%{border-color:rgba(168,168,184,0.15);}50%{border-color:rgba(168,168,184,0.3);}}
+.ach-wall-card{padding:14px 16px;border-radius:14px;margin-bottom:10px;position:relative;overflow:hidden;}
+.ach-locked-normal{background:linear-gradient(135deg,rgba(163,176,196,0.06),rgba(163,176,196,0.02));border:1px dashed rgba(163,176,196,0.25);}
+.ach-locked-rare{background:linear-gradient(135deg,rgba(168,168,184,0.08),rgba(168,168,184,0.03));border:1px dashed rgba(168,168,184,0.25);animation:rareLockedGlow 3s ease-in-out infinite;}
+.ach-locked-epic{background:linear-gradient(135deg,rgba(212,168,64,0.06),rgba(212,168,64,0.02));border:1px dashed rgba(212,168,64,0.2);animation:epicLockedShimmer 3s ease-in-out infinite;}
+.ach-locked-legend{background:linear-gradient(135deg,rgba(196,134,142,0.08),rgba(199,163,163,0.04));border:1.5px dashed rgba(196,134,142,0.25);animation:legendLockedPulse 3s ease-in-out infinite;}
+.ach-unlocked-normal{background:linear-gradient(135deg,rgba(163,176,196,0.12),rgba(163,176,196,0.06));border:1px solid rgba(163,176,196,0.3);}
+.ach-unlocked-rare{background:linear-gradient(135deg,rgba(168,168,184,0.12),rgba(168,168,184,0.06));border:1px solid rgba(168,168,184,0.3);}
+.ach-unlocked-epic{background:linear-gradient(135deg,rgba(212,168,64,0.1),rgba(212,168,64,0.04));border:1px solid rgba(212,168,64,0.3);}
+.ach-unlocked-legend{background:linear-gradient(135deg,rgba(196,134,142,0.12),rgba(199,163,163,0.06));border:1px solid rgba(196,134,142,0.3);animation:glow 3s ease-in-out infinite;}
+
+/* ═══════ CARD FRAGMENT SYSTEM ═══════ */
+.card-carousel-wrap{position:relative;margin:0 0 20px;overflow:hidden;}
+.card-carousel{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;gap:14px;padding:0 8px;}
+.card-carousel::-webkit-scrollbar{display:none;}
+.card-slot{flex:0 0 82vw;max-width:360px;scroll-snap-align:center;border-radius:16px;overflow:hidden;position:relative;background:#3a3035;box-shadow:0 6px 24px rgba(80,60,68,0.22);}
+@keyframes cardGlow{0%,100%{box-shadow:0 6px 24px rgba(212,180,140,0.25);}50%{box-shadow:0 8px 32px rgba(212,180,140,0.45);}}
+.card-slot-done{border:2px solid rgba(212,180,140,0.5);animation:cardGlow 3s ease-in-out infinite;}
+.card-img-wrap{position:relative;width:100%;padding-top:133%;overflow:hidden;}
+.card-img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;}
+.card-mask{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;}
+.card-piece{position:absolute;background:rgba(55,45,50,0.82);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:opacity 0.8s ease;border:0.5px solid rgba(100,85,90,0.18);}
+.card-piece.unlocked{opacity:0;backdrop-filter:none;-webkit-backdrop-filter:none;}
+.card-info{padding:10px 14px;text-align:center;background:rgba(50,40,45,0.55);}
+.card-info-name{font-size:14px;font-weight:600;color:rgba(230,215,210,0.88);letter-spacing:1px;margin-bottom:2px;}
+.card-info-line{font-size:11px;color:rgba(199,170,165,0.6);margin-bottom:4px;}
+.card-info-prog{font-family:'Outfit';font-size:13px;font-weight:700;color:rgba(219,180,175,0.85);}
+.card-dots{display:flex;justify-content:center;gap:6px;padding:8px 0 2px;}
+.card-dot{width:7px;height:7px;border-radius:50%;background:rgba(219,147,158,0.2);transition:all 0.3s;}
+.card-dot.active{background:rgba(219,147,158,0.55);transform:scale(1.25);}
+.card-lock{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:28px;opacity:0.35;z-index:5;transition:opacity 0.5s;pointer-events:none;}
+.card-lock.hide{opacity:0;}
+.card-reveal-ov{position:fixed;top:0;left:0;width:100%;height:100%;z-index:3000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0);transition:background 0.5s;pointer-events:none;opacity:0;}
+.card-reveal-ov.on{background:rgba(20,15,18,0.88);pointer-events:all;opacity:1;}
+.card-reveal-box{position:relative;width:78vw;max-width:340px;border-radius:16px;overflow:hidden;box-shadow:0 12px 60px rgba(196,134,142,0.35);transform:scale(0.8);transition:transform 0.8s cubic-bezier(0.16,1,0.3,1);opacity:0;}
+.card-reveal-ov.on .card-reveal-box{transform:scale(1);opacity:1;}
+.card-reveal-img{width:100%;display:block;filter:blur(20px);transition:filter 2s ease;}
+.card-reveal-img.clear{filter:blur(0);}
+.card-reveal-cap{position:absolute;bottom:0;left:0;right:0;padding:20px;text-align:center;background:linear-gradient(transparent,rgba(20,15,18,0.8));opacity:0;transition:opacity 1s ease 1.5s;}
+.card-reveal-ov.on .card-reveal-cap{opacity:1;}
 </style>
 </head>
 <body>
 <div class="bg1"></div><div class="bg2"></div>
 <div id="toast" class="toast hidden"></div>
+<div id="achieveOverlay"></div>
+<div id="confettiContainer"></div>
+<div id="cardRevealOv" class="card-reveal-ov" onclick="closeCardReveal()">
+  <div class="card-reveal-box" onclick="event.stopPropagation()">
+    <img id="crImg" class="card-reveal-img" src="" alt="">
+    <div class="card-reveal-cap">
+      <div id="crName" style="font-family:'Outfit';font-size:20px;font-weight:700;color:rgba(230,215,210,0.95);letter-spacing:2px;margin-bottom:4px;"></div>
+      <div id="crSub" style="font-size:12px;color:rgba(219,180,175,0.7);"></div>
+    </div>
+  </div>
+</div>
 
 <div style="padding:28px 20px 12px;text-align:center;">
   <div style="font-family:'Outfit',sans-serif;font-size:13px;letter-spacing:4px;text-transform:uppercase;color:#c4868e;margin-bottom:6px;">✦ KLARA'S LIFE QUEST ✦</div>
@@ -58,7 +126,6 @@ textarea,input{font-family:inherit;-webkit-appearance:none;}
   </div>
 </div>
 
-<!-- Points -->
 <div style="display:flex;justify-content:center;gap:16px;padding:12px 20px 16px;">
   <div id="cpBox" style="flex:1;max-width:180px;background:linear-gradient(135deg,rgba(219,147,158,0.15),rgba(199,163,163,0.1));border-radius:16px;padding:16px;text-align:center;border:1px solid rgba(219,147,158,0.2);">
     <div style="font-size:11px;color:#c4868e;letter-spacing:1px;margin-bottom:4px;">可用积分</div>
@@ -70,7 +137,6 @@ textarea,input{font-family:inherit;-webkit-appearance:none;}
   </div>
 </div>
 
-<!-- Japan -->
 <div style="margin:0 20px 20px;background:rgba(255,255,255,0.5);border-radius:12px;padding:12px 16px;border:1px solid rgba(219,147,158,0.2);">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
     <span style="font-size:12px;color:#a08888;">✈️ 日本旅行进度</span>
@@ -81,7 +147,6 @@ textarea,input{font-family:inherit;-webkit-appearance:none;}
   </div>
 </div>
 
-<!-- Germany -->
 <div style="margin:0 20px 20px;background:rgba(255,255,255,0.5);border-radius:12px;padding:12px 16px;border:1px solid rgba(219,147,158,0.2);">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
     <span style="font-size:12px;color:#a08888;">🇩🇪 德国之路（高财+德语）</span>
@@ -92,198 +157,221 @@ textarea,input{font-family:inherit;-webkit-appearance:none;}
   </div>
 </div>
 
-<!-- Tabs -->
 <div style="display:flex;margin:0 20px 16px;background:rgba(255,255,255,0.5);border-radius:12px;padding:3px;">
   <button class="tab-btn tab-active" onclick="switchTab('tasks')" id="tab-tasks">📋 任务</button>
   <button class="tab-btn tab-inactive" onclick="switchTab('attrs')" id="tab-attrs">💎 属性</button>
+  <button class="tab-btn tab-inactive" onclick="switchTab('achieve')" id="tab-achieve">🏆 成就</button>
   <button class="tab-btn tab-inactive" onclick="switchTab('shop')" id="tab-shop">🎁 商城</button>
   <button class="tab-btn tab-inactive" onclick="switchTab('history')" id="tab-history">📜 记录</button>
 </div>
 
-<!-- Content -->
 <div style="padding:0 20px 100px;">
   <div id="content-tasks"></div>
   <div id="content-attrs" class="hidden"></div>
+  <div id="content-achieve" class="hidden"></div>
   <div id="content-shop" class="hidden"></div>
   <div id="content-history" class="hidden"></div>
 </div>
-
 <script>
 /* ═══════ DATA ═══════ */
 const PRAISE={wake:["早起的克拉拉最厉害！","又是元气满满的一天！","闹钟响了就起来，你太自律了！"],dishes_today:["当天碗当天洗，家务小能手！","干净的厨房=干净的心情！"],dishes_late:["虽然迟了一天，但至少洗了！"],socks_today:["袜子清清爽爽！","当天洗完，强迫症都满意了！"],socks_late:["迟到总比不到好……下次加油！"],cook:["自己做饭的女孩子最酷了！","大厨克拉拉上线！","比外卖健康一百倍！"],tidy:["干净的房间，清爽的心！","收拾完是不是神清气爽？"],exercise:["运动的克拉拉在发光！","流汗=在变美，科学认证！","今天又比昨天更强了！"],gc_attend:["高财又撑过一节课！离毕业又近一步！","间谍小李成功潜入敌营！","认真听课的你超帅！"],gc_review:["跟小克过完了，今天的高财被你拿下了！","当天消化不攒债，你太棒了！"],gc_homework:["作业都做完了？？你今天是谁？？","会计作业克星就是你！"],gc_mock:["做模拟题了！考试时你会感谢今天的自己！","高财在你面前瑟瑟发抖！"],gc_pass:["🎉🎉🎉 毕业！！！高财再见！永远不见！！！"],dr_study:["科目题刷起来！驾照在向你招手！","题海战术，稳扎稳打！"],dr_practice:["方向盘在你手里越来越听话了！","马路杀手正在进化成老司机！"],dr_ke1:["🎉 科一过了！！理论大师！！"],dr_ke2:["🎉 科二过了！！倒车入库小意思！！"],dr_ke3:["🎉 科三过了！！路上见！"],dr_ke4:["🎉 科四过了！！驾照到手！！"],de_vocab:["词汇量在偷偷增长！","Sehr gut! 词库+20！"],de_grammar:["语法怪兽又被你打倒一只！","Grammatik gemeistert!"],de_friends:["看Friends学德语，快乐学习法！","边看剧边学，正确的打开方式！"],de_speak:["Dein Deutsch wird immer besser!","开口说才是真的会！"],de_level:["🎉 德语升级了！！克拉拉你太强了！！"],pt_search:["在找兼职了！行动力满分！"],pt_interview:["面试了！经验值+100！"],pt_work:["打工辛苦了！搞钱女孩最美丽！"],piano:["琴声响起，气质拉满！","练琴的你好迷人！"],sing:["唱歌的克拉拉最快乐！","练嗓子ing，好听！"],dance:["跳舞的你在发光！","身体在说话，好美！"],badminton:["羽毛球打起来！挥拍的样子好帅！"],run:["跑起来了！风都追不上你！"],skincare:["护肤做起来，皮肤会感谢你的！"],outfit:["研究穿搭的你好认真！气质这就来了！"],posture:["体态练习！站姿坐姿都在变好看！"],eq_practice:["情商练习！你的表达越来越有力量了！"],social_out:["主动社交了！社恐-1，勇气+100！","走出去的你很勇敢！"],say_no:["说不了！恶女力觉醒！","拒绝了不合理的要求，你保护了自己！","今天的你没有讨好任何人，很酷！"],writing:["写作练习！文字是你的武器！","笔下生花的克拉拉！"],reading:["读书ing！精神世界在扩张！"],journal:["写日记了！记录生活的人最浪漫！"],no_sugar:["控糖成功！身体在感谢你！"],no_snack:["戒零食！意志力在线！"],early_sleep:["早睡了！明天的你会元气满满！"],no_takeout:["没点外卖！健康+1！"],bath:["洗香香🎀是干干净净的大美女！","洗完澡整个人都发光了！"],foot_soak:["泡脚好舒服～养生达人！","热水泡脚，疲劳全消！"],brush:["嘴巴香香软软🐱","按时洗漱，清清爽爽！"],fix_home:["你是最勇敢的！去德国不怕啥！","动手能力max，生活力拉满！"],mop:["地板亮晶晶！赤脚走都舒服！","拖完地整个家都清爽了！"],undies_today:["当天洗完，干干净净！","好习惯养成中！"],undies_late:["迟了一天但还是洗了，下次加油！"],trash:["垃圾清走了，清爽！"],vitamin:["维生素吃了！身体在悄悄变好！","今天的营养补充到位了！"],diet_meal:["减脂餐！管住嘴的你超有毅力！","健康饮食，身材在路上了！"],bowel:["通畅！身体轻盈了！","肠道健康，一整天都舒服！"],water:["今天水喝够了！皮肤在偷偷变好！","多喝水的女孩子会发光！"],stretch:["拉伸完好舒服～肌肉在感谢你！","柔韧性up！"],praise_self:["今天的你值得被夸！","敢夸自己的人最酷了！","全世界都该知道你有多棒！"],contact_teacher:["你主动联系了！这一步比你想象的勇敢！","沟通完了对吧？没那么可怕的！"],deal_academic:["拖了这么久终于动手了！你太厉害了！","解决一件就少一件，你在清除障碍！"],check_grad:["搞清楚了！信息在手心里不慌！","知道要求才能精准发力！"],submit_overdue:["交出去了！！那个压在心上的石头终于落地了！","提交的那一刻你自由了！"],face_fear:["你做到了！！这是今天最勇敢的事！！","恐惧没有打倒你，你打倒了恐惧！！","这一刻的你在发光！！"]};
 const PEN_MSG={pn_skip:["翘课了……下次要去哦"],pn_lazy:["碗/袜子拖太久了……"],pn_noshow:["约了练车没去……教练在风中凌乱"],pn_late_sleep:["又熬夜了……健康在哭泣"],pn_takeout:["点外卖了……偶尔可以但别太频繁哦"],pn_sugar:["吃糖/零食了……下次忍住！"]};
 function rp(a){return a[Math.floor(Math.random()*a.length)];}
-
 const ATTRS=[{id:"health",name:"健康",em:"💚",desc:"早睡早起、规律作息、不点外卖、按时吃饭"},{id:"weight",name:"体重",em:"⚖️",desc:"控糖、戒零食、运动消耗、记录体重"},{id:"sport",name:"运动",em:"🏃‍♀️",desc:"固定运动（羽毛球/跑步）、散步、主动身体活动"},{id:"intel",name:"智识",em:"🧠",desc:"高财学习、阅读非虚构、学习新知识"},{id:"lang",name:"语言",em:"🌍",desc:"德语为主，未来可扩展第三外语"},{id:"life",name:"生活力",em:"🔧",desc:"修东西、组装家具、处理生活问题、跑手续办证"},{id:"cook_a",name:"烹饪",em:"🍳",desc:"做饭、学新菜、研究食谱"},{id:"will",name:"意志",em:"🔥",desc:"坚持计划、每日打卡、不半途而废"},{id:"anti_proc",name:"反拖延",em:"⚡",desc:"当天事当天做、不拖ddl、立刻行动"},{id:"grace",name:"气质",em:"✨",desc:"穿搭研究、护肤、化妆练习、体态练习"},{id:"speech",name:"谈吐",em:"🗣️",desc:"练情商、表达能力、说话技巧"},{id:"social",name:"社交",em:"👥",desc:"主动约人、参加活动、跟陌生人交流、克服社恐"},{id:"mood",name:"心情",em:"🌈",desc:"做开心的事、自我关怀、放松休息"},{id:"creative",name:"创造力",em:"🎨",desc:"做饭创新、手工、任何创造性尝试"},{id:"lit",name:"文学",em:"📝",desc:"写作练习、读小说、写日记、文字表达"},{id:"villain",name:"恶女力",em:"👑",desc:"拒绝讨好、维护边界、说不、自私一点"},{id:"piano",name:"乐器",em:"🎹",desc:"钢琴练习或其他乐器"},{id:"sing",name:"唱歌",em:"🎤",desc:"练嗓、唱歌、声乐练习"},{id:"dance",name:"舞蹈",em:"💃",desc:"跳舞、舞蹈练习、身体律动"}];
 const LVLS=[0,20,50,100,180,300,500];
 function getLv(xp){for(let i=LVLS.length-1;i>=0;i--)if(xp>=LVLS[i])return i;return 0;}
 function getLvPct(xp){const l=getLv(xp);if(l>=LVLS.length-1)return 100;return Math.round(((xp-LVLS[l])/(LVLS[l+1]-LVLS[l]))*100);}
-
 const TASK_ATTRS={wake:{health:2,will:1,anti_proc:1,mood:1},dishes_today:{life:1,anti_proc:2,will:1,mood:1},dishes_late:{life:1,mood:1},socks_today:{life:1,anti_proc:2,mood:1},socks_late:{life:1,mood:1},cook:{cook_a:3,health:1,creative:1,mood:1},tidy:{life:2,anti_proc:1,mood:1},exercise:{sport:3,weight:2,health:1,mood:1},gc_attend:{intel:3,will:1,mood:1},gc_review:{intel:3,will:1,anti_proc:1,mood:1},gc_homework:{intel:2,will:2,anti_proc:2,mood:1},gc_mock:{intel:3,will:2,anti_proc:1,mood:1},gc_pass:{intel:10,will:8,mood:5},dr_study:{intel:1,will:1,anti_proc:1,mood:1},dr_practice:{will:2,mood:1},dr_ke1:{will:5,mood:3},dr_ke2:{will:6,mood:3},dr_ke3:{will:6,mood:3},dr_ke4:{will:5,mood:3},de_vocab:{lang:3,will:1,mood:1},de_grammar:{lang:3,intel:1,mood:1},de_friends:{lang:2,mood:2},de_speak:{lang:3,speech:1,mood:1},de_level:{lang:10,will:5,mood:5},pt_search:{will:1,anti_proc:1,social:1,mood:1},pt_interview:{speech:2,social:2,will:1,mood:1},pt_work:{will:1,social:1,mood:1},piano:{piano:4,will:1,grace:1,mood:1},sing:{sing:4,mood:2,grace:1},dance_t:{dance:4,sport:2,grace:2,weight:1,mood:1},badminton:{sport:4,weight:2,health:1,mood:1},run:{sport:3,weight:2,health:1,will:1,mood:1},skincare:{grace:3,mood:1},outfit:{grace:3,creative:1,mood:1},posture:{grace:3,health:1,mood:1},eq_practice:{speech:3,social:1,mood:1},social_out:{social:4,speech:1,villain:1,mood:1},say_no:{villain:4,will:1,speech:1,mood:1},writing:{lit:3,creative:1,speech:1,mood:1},reading:{lit:2,intel:2,mood:1},journal:{lit:2,creative:1,mood:2},no_sugar:{weight:2,will:2,health:1,mood:1},no_snack:{weight:2,will:2,health:1,mood:1},early_sleep:{health:3,will:1,mood:1},no_takeout:{health:2,cook_a:1,will:1,mood:1},bath:{health:2,grace:1,mood:1},foot_soak:{health:2,mood:2},brush:{health:1,grace:1,anti_proc:1,mood:1},fix_home:{life:5,will:3,villain:2,mood:1},mop:{life:2,health:1,mood:1},undies_today:{anti_proc:1,life:1,mood:1},undies_late:{life:1,mood:1},trash:{life:1,mood:1},vitamin:{health:2,mood:1},diet_meal:{weight:3,health:1,will:2,mood:1},bowel:{health:2,mood:1},water:{health:2,mood:1},stretch:{sport:1,health:2,mood:1},praise_self:{villain:3,speech:1,mood:2},contact_teacher:{will:3,anti_proc:3,social:2,villain:2,mood:1},deal_academic:{will:3,anti_proc:4,intel:1,mood:1},check_grad:{anti_proc:3,will:2,intel:1,mood:1},submit_overdue:{anti_proc:4,will:3,mood:2},face_fear:{villain:4,will:4,anti_proc:2,mood:3}};
 const PEN_ATTRS={pn_skip:{intel:-2,will:-3},pn_lazy:{anti_proc:-2,life:-1},pn_noshow:{will:-3,anti_proc:-1},pn_late_sleep:{health:-3,will:-1},pn_takeout:{health:-2,weight:-1},pn_sugar:{weight:-2,will:-1}};
-
 const TASKS={daily:{label:"🌅 日常习惯",items:[{id:"wake",name:"按时起床出门",pts:5,em:"⏰"},{id:"early_sleep",name:"今天早睡了（12点前）",pts:5,em:"🌙"},{id:"cook",name:"自己做饭",pts:8,em:"🍳"},{id:"no_takeout",name:"今天没点外卖",pts:3,em:"🚫🍱"},{id:"dishes_today",name:"当天洗碗",pts:5,em:"🍽️"},{id:"dishes_late",name:"隔天洗碗（拖了一天）",pts:2,em:"🍽️"},{id:"socks_today",name:"按时洗袜子",pts:5,em:"🧦"},{id:"socks_late",name:"拖了一天才洗袜子",pts:2,em:"🧦"},{id:"tidy",name:"收拾房间",pts:5,em:"🏠"},{id:"mop",name:"拖地",pts:5,em:"🧹"},{id:"undies_today",name:"当天洗内衣裤",pts:3,em:"👙"},{id:"undies_late",name:"拖了一天才洗内衣裤",pts:1,em:"👙"},{id:"trash",name:"倒垃圾",pts:1,em:"🗑️"},{id:"vitamin",name:"吃维生素",pts:2,em:"💊"},{id:"diet_meal",name:"吃减脂餐",pts:8,em:"🥗"},{id:"bowel",name:"每日肠道通畅",pts:3,em:"🍃"},{id:"water",name:"按时多多喝水",pts:2,em:"💧"},{id:"stretch",name:"运动完拉伸",pts:3,em:"🧘‍♀️"},{id:"praise_self",name:"发一个夸夸自己的朋友圈",pts:5,em:"🌟"},{id:"bath",name:"洗澡",pts:20,em:"🫧"},{id:"foot_soak",name:"泡脚",pts:5,em:"🐳"},{id:"brush",name:"按时洗漱",pts:3,em:"🍒"},{id:"fix_home",name:"勇敢修家电",pts:50,em:"🚽"}]},body:{label:"💪 身体管理",items:[{id:"exercise",name:"运动/散步30min+",pts:10,em:"🏃‍♀️"},{id:"badminton",name:"打羽毛球",pts:12,em:"🏸"},{id:"no_snack",name:"今天没吃零食",pts:5,em:"🚫🍪"}]},gaocai:{label:"📚 高财主线",items:[{id:"gc_attend",name:"上课认真听完",pts:10,em:"✏️"},{id:"gc_review",name:"课后跟小克过一遍内容",pts:10,em:"📖"},{id:"gc_homework",name:"完成作业/练习",pts:15,em:"📝"},{id:"gc_mock",name:"做一套模拟题",pts:20,em:"🎯"},{id:"gc_pass",name:"🏆 高财及格通过！",pts:200,em:"🎓"}]},driving:{label:"🚗 驾照主线",items:[{id:"dr_study",name:"刷科一/科四题30min",pts:8,em:"📱"},{id:"dr_practice",name:"练车一次",pts:15,em:"🚙"},{id:"dr_ke1",name:"🏆 科一通过！",pts:100,em:"✅"},{id:"dr_ke2",name:"🏆 科二通过！",pts:150,em:"✅"},{id:"dr_ke3",name:"🏆 科三通过！",pts:150,em:"✅"},{id:"dr_ke4",name:"🏆 科四通过！",pts:100,em:"✅"}]},german:{label:"🌍 语言主线",items:[{id:"de_vocab",name:"背单词20个+",pts:8,em:"🔤"},{id:"de_grammar",name:"学一个语法点",pts:10,em:"📐"},{id:"de_friends",name:"看一集德语配音Friends",pts:10,em:"📺"},{id:"de_speak",name:"跟小克德语对话练习",pts:12,em:"🗣️"},{id:"de_level",name:"🏆 语言通过一个级别！",pts:200,em:"🏅"}]},growth:{label:"🌱 自我成长",items:[{id:"skincare",name:"护肤/化妆练习",pts:5,em:"💄"},{id:"outfit",name:"研究穿搭",pts:5,em:"👗"},{id:"posture",name:"体态练习",pts:5,em:"🧘"},{id:"eq_practice",name:"练情商/表达练习",pts:8,em:"💬"},{id:"social_out",name:"主动社交/约人出去",pts:10,em:"👥"},{id:"say_no",name:"拒绝了不合理的事/维护边界",pts:10,em:"👑"},{id:"writing",name:"写作练习",pts:8,em:"✍️"},{id:"reading",name:"读书",pts:8,em:"📚"},{id:"journal",name:"写日记",pts:5,em:"📓"}]},arts:{label:"🎵 才艺",items:[{id:"piano",name:"练钢琴",pts:10,em:"🎹"},{id:"sing",name:"唱歌/练声",pts:8,em:"🎤"},{id:"dance_t",name:"跳舞/舞蹈练习",pts:10,em:"💃"}]},fear:{label:"🗡️ 直面恐惧",items:[{id:"contact_teacher",name:"主动联系辅导员/老师",pts:15,em:"📞"},{id:"deal_academic",name:"处理一项一直拖着的学业事务",pts:12,em:"📋"},{id:"check_grad",name:"查清楚一个模糊的毕业要求",pts:10,em:"🔍"},{id:"submit_overdue",name:"提交一份一直拖着的材料/申请",pts:15,em:"📨"},{id:"face_fear",name:"做了一件很害怕但还是做了的事",pts:20,em:"🗡️"}]},parttime:{label:"💼 兼职支线",items:[{id:"pt_search",name:"搜索/投递兼职",pts:8,em:"🔍"},{id:"pt_interview",name:"面试一次",pts:20,em:"🤝"},{id:"pt_work",name:"兼职工作一天",pts:15,em:"💰"}]}};
 const PENS=[{id:"pn_skip",name:"无故翘课",pts:-20,em:"❌"},{id:"pn_lazy",name:"碗/袜子拖超过两天",pts:-5,em:"😤"},{id:"pn_noshow",name:"约了练车没去",pts:-15,em:"🚫"},{id:"pn_late_sleep",name:"熬夜超过1点",pts:-8,em:"🦉"},{id:"pn_takeout",name:"点外卖了",pts:-3,em:"📦"},{id:"pn_sugar",name:"吃糖/零食了",pts:-3,em:"🍬"}];
 const SHOP=[{id:"s1",name:"一杯奶茶",cost:30,em:"🧋",t:"s"},{id:"s10",name:"30min刷视频",cost:15,em:"📱",t:"s"},{id:"s2",name:"一份小零食",cost:30,em:"🍪",t:"s"},{id:"s3",name:"一盒手指泡芙",cost:50,em:"🍫",t:"s"},{id:"s4",name:"一顿好吃的外卖",cost:50,em:"🍱",t:"s"},{id:"s5",name:"一顿日料/寿司",cost:200,em:"🍣",t:"m"},{id:"s6",name:"买一件想要的衣服",cost:200,em:"👗",t:"m"},{id:"s7",name:"给Vier买装备",cost:300,em:"🐱",t:"m"},{id:"s8",name:"拍一组写真",cost:600,em:"📸",t:"l"},{id:"s9",name:"日本旅行基金",cost:2000,em:"✈️🇯🇵",t:"x"}];
 const TIER_NAMES={s:"日常小确幸",m:"进阶奖励",l:"豪华奖励",x:"✨ 传说级 ✨"};
 const TIER_COLORS={s:"#16a34a",m:"#d97706",l:"#d4a0a0",x:"#a07078"};
-
+/* ═══════ CARD FRAGMENT DEFINITIONS ═══════ */
+const CARD_DEFS=[
+  {id:"goddess",name:"🏛️ 希腊女神",line:"德语 · ATA之路",img:"img/card-goddess.png",total:6,
+    frags:[
+      {region:{top:"67%",left:"50%",width:"50%",height:"33%"}},
+      {region:{top:"67%",left:"0",width:"50%",height:"33%"}},
+      {region:{top:"0",left:"50%",width:"50%",height:"33%"}},
+      {region:{top:"0",left:"0",width:"50%",height:"33%"}},
+      {region:{top:"33%",left:"0",width:"100%",height:"17%"}},
+      {region:{top:"50%",left:"0",width:"100%",height:"17%"}}
+    ]},
+  {id:"academy",name:"🎓 学院制服",line:"高财 · 学业线",img:"img/card-academy.png",total:6,
+    frags:[
+      {region:{top:"67%",left:"0",width:"100%",height:"33%"}},
+      {region:{top:"0",left:"50%",width:"50%",height:"33%"}},
+      {region:{top:"0",left:"0",width:"50%",height:"33%"}},
+      {region:{top:"33%",left:"0",width:"100%",height:"17%"}},
+      {region:{top:"50%",left:"0",width:"100%",height:"17%"}},
+      {region:{top:"0",left:"0",width:"100%",height:"0%"}}
+    ]},
+  {id:"wisteria",name:"🌸 紫藤和服",line:"日本旅行基金",img:"img/card-wisteria.png",total:6,
+    frags:[
+      {region:{top:"67%",left:"50%",width:"50%",height:"33%"}},
+      {region:{top:"67%",left:"0",width:"50%",height:"33%"}},
+      {region:{top:"0",left:"50%",width:"50%",height:"33%"}},
+      {region:{top:"0",left:"0",width:"50%",height:"33%"}},
+      {region:{top:"33%",left:"0",width:"100%",height:"17%"}},
+      {region:{top:"50%",left:"0",width:"100%",height:"17%"}}
+    ]},
+  {id:"pharaoh",name:"👑 埃及女王",line:"恶女觉醒",img:"img/card-pharaoh.png",total:5,
+    frags:[
+      {region:{top:"80%",left:"0",width:"100%",height:"20%"}},
+      {region:{top:"20%",left:"50%",width:"50%",height:"30%"}},
+      {region:{top:"20%",left:"0",width:"50%",height:"30%"}},
+      {region:{top:"50%",left:"0",width:"100%",height:"30%"}},
+      {region:{top:"0",left:"0",width:"100%",height:"20%"}}
+    ]},
+  {id:"throne",name:"🗡️ 暗夜女王",line:"终极克拉拉 · 全线终点",img:"img/card-throne.png",total:7,
+    frags:[
+      {region:{top:"80%",left:"0",width:"50%",height:"20%"}},
+      {region:{top:"80%",left:"50%",width:"50%",height:"20%"}},
+      {region:{top:"55%",left:"0",width:"50%",height:"25%"}},
+      {region:{top:"55%",left:"50%",width:"50%",height:"25%"}},
+      {region:{top:"35%",left:"0",width:"100%",height:"20%"}},
+      {region:{top:"15%",left:"0",width:"100%",height:"20%"}},
+      {region:{top:"0",left:"0",width:"100%",height:"15%"}}
+    ]}
+];
+/* Fragment trigger conditions */
+function getFragConds(){
+  const a=S.ach, tc=S.taskCounts||{}, tp=S.tp;
+  return {
+    goddess:[ (tc.de_vocab||0)>=20, !!a.a14, !!a.a29, !!a.a28, !!a.a30, !!a.a42 ],
+    academy:[ (tc.gc_attend||0)>=5, !!a.a11, !!a.a13, !!a.a12, !!a.a26, !!a.a40 ],
+    wisteria:[ tp>=200, tp>=500, tp>=800, tp>=1200, tp>=1600, tp>=2000 ],
+    pharaoh:[ (tc.say_no||0)>=3, !!a.a18, !!a.a35, !!a.a34, !!a.a36 ],
+    throne:[ !!a.a21, !!a.a43, !!a.a41, !!a.a40, !!a.a42, !!a.a44, !!a.a46 ]
+  };
+}
+let _cardFragQ=[];
+function checkCardFragments(){
+  const conds=getFragConds();
+  let changed=false;
+  CARD_DEFS.forEach(cd=>{
+    const arr=S.cards[cd.id];
+    const c=conds[cd.id];
+    c.forEach((met,i)=>{
+      if(met && !arr[i]){
+        arr[i]=true; changed=true;
+        const done=arr.filter(Boolean).length;
+        if(done===cd.total){
+          _cardFragQ.push({type:'full',card:cd});
+        } else {
+          _cardFragQ.push({type:'frag',card:cd,idx:done,total:cd.total});
+        }
+      }
+    });
+  });
+  if(changed){saveState();if(currentTab==='achieve')renderAchieve();}
+  if(_cardFragQ.length){processCardQ();}
+}
+function processCardQ(){
+  if(!_cardFragQ.length)return;
+  const ev=_cardFragQ.shift();
+  if(ev.type==='frag'){
+    flash('✨ 「'+ev.card.name+'」碎片 '+ev.idx+'/'+ev.total+' 已揭示','card');
+    setTimeout(processCardQ,1200);
+  } else {
+    showCardReveal(ev.card);
+  }
+}
+function showCardReveal(cd){
+  spawnConfetti(120,["#c4868e","#d4a0a0","#c9b8a8","#d4a840","#a3b0c4"]);
+  const ov=document.getElementById('cardRevealOv');
+  const img=document.getElementById('crImg');
+  const nm=document.getElementById('crName');
+  const sub=document.getElementById('crSub');
+  img.src=cd.img; nm.textContent=cd.name; sub.textContent=cd.line;
+  ov.classList.add('on');
+  setTimeout(()=>img.classList.add('clear'),200);
+}
+function closeCardReveal(){
+  const ov=document.getElementById('cardRevealOv');
+  const img=document.getElementById('crImg');
+  ov.classList.remove('on');
+  img.classList.remove('clear');
+  setTimeout(processCardQ,400);
+}
 /* ═══════ STATE ═══════ */
 function initAttrs(){const a={};ATTRS.forEach(at=>a[at.id]=0);return a;}
+function initCards(){const c={};CARD_DEFS.forEach(cd=>{c[cd.id]=new Array(cd.total).fill(false);});return c;}
 let S;
 function loadState(){
-  try{const s=localStorage.getItem("lila-quest-v3");if(s){S=JSON.parse(s);S.ct=S.ct||[];S.cs=S.cs||[];S.cpn=S.cpn||[];S.attrs=S.attrs?{...initAttrs(),...S.attrs}:initAttrs();S.de=S.de||0;return;}}catch(e){}
-  S={cp:0,tp:0,h:[],rd:[],bc:false,ct:[],cs:[],cpn:[],attrs:initAttrs(),de:0};
+  try{const s=localStorage.getItem("lila-quest-v3");if(s){S=JSON.parse(s);S.ct=S.ct||[];S.cs=S.cs||[];S.cpn=S.cpn||[];S.attrs=S.attrs?{...initAttrs(),...S.attrs}:initAttrs();S.de=S.de||0;S.ach=S.ach||{};S.taskCounts=S.taskCounts||{};S.dailyTasks=S.dailyTasks||{};S.dailyPens=S.dailyPens||{};S.dailyPts=S.dailyPts||{};
+  if(!S.cards)S.cards=initCards(); else{const ic=initCards();Object.keys(ic).forEach(k=>{if(!S.cards[k])S.cards[k]=ic[k];});} return;}}catch(e){}
+  S={cp:0,tp:0,h:[],rd:[],bc:false,ct:[],cs:[],cpn:[],attrs:initAttrs(),de:0,ach:{},taskCounts:{},dailyTasks:{},dailyPens:{},dailyPts:{},cards:initCards()};
 }
 function saveState(){try{localStorage.setItem("lila-quest-v3",JSON.stringify(S));}catch(e){}}
 function fmtDate(d){const x=new Date(d);return `${x.getMonth()+1}/${x.getDate()} ${x.getHours().toString().padStart(2,"0")}:${x.getMinutes().toString().padStart(2,"0")}`;}
 function encode(s){return btoa(unescape(encodeURIComponent(JSON.stringify(s))));}
 function decode(s){try{return JSON.parse(decodeURIComponent(escape(atob(s.trim()))));}catch{return null;}}
-
-/* ═══════ TOAST ═══════ */
 let toastTimer;
-function flash(msg,type){
-  const t=document.getElementById("toast");
-  t.textContent=msg;t.className="toast toast-"+(type||"earn");t.classList.remove("hidden");
-  clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.add("hidden"),3500);
-  if(type==="earn"||type==="big"){const b=document.getElementById("cpBox");b.style.animation="sparkle 0.5s ease";setTimeout(()=>b.style.animation="",600);}
-}
-
-/* ═══════ ATTRS ═══════ */
+function flash(msg,type){const t=document.getElementById("toast");t.textContent=msg;t.className="toast toast-"+(type||"earn");t.classList.remove("hidden");clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.add("hidden"),3500);if(type==="earn"||type==="big"){const b=document.getElementById("cpBox");b.style.animation="sparkle 0.5s ease";setTimeout(()=>b.style.animation="",600);}}
 function applyAttrs(mapping){if(!mapping)return;Object.entries(mapping).forEach(([k,v])=>{if(S.attrs[k]!==undefined)S.attrs[k]=Math.max(0,S.attrs[k]+v);});}
-
-/* ═══════ ACTIONS ═══════ */
 const DE_TASKS=new Set(["gc_attend","gc_review","gc_homework","gc_mock","gc_pass","de_vocab","de_grammar","de_friends","de_speak","de_level"]);
 function doTask(id,name,pts,em,praise,attrMap){
-  S.h.unshift({t:"e",n:name,p:pts,d:new Date().toISOString()});
-  if(S.h.length>200)S.h.length=200;
-  S.cp+=pts;S.tp+=pts;
-  if(DE_TASKS.has(id))S.de=(S.de||0)+pts;
+  S.h.unshift({t:"e",n:name,p:pts,d:new Date().toISOString()});if(S.h.length>200)S.h.length=200;
+  S.cp+=pts;S.tp+=pts;if(DE_TASKS.has(id))S.de=(S.de||0)+pts;
   applyAttrs(TASK_ATTRS[id]||attrMap||{mood:1});
-  saveState();render();
-  const pl=PRAISE[id];const pr=pl?rp(pl):(praise||`+${pts}分！`);
+  const td=todayStr();if(!S.dailyTasks[td])S.dailyTasks[td]=[];S.dailyTasks[td].push(id);S.taskCounts[id]=(S.taskCounts[id]||0)+1;S.dailyPts[td]=(S.dailyPts[td]||0)+pts;
+  saveState();render();const pl=PRAISE[id];const pr=pl?rp(pl):(praise||`+${pts}分！`);
   flash(pts>=100?pr:`${em} ${pr}`,pts>=100?"big":"earn");
+  setTimeout(()=>{checkAchievements();checkCardFragments();},300);
 }
 function doPen(id,name,pts,em,attrMap){
-  S.h.unshift({t:"p",n:name,p:pts,d:new Date().toISOString()});
-  if(S.h.length>200)S.h.length=200;
-  S.cp=Math.max(0,S.cp+pts);
-  S.tp=Math.max(0,S.tp+pts);
-  applyAttrs(PEN_ATTRS[id]||attrMap||{});
-  saveState();render();
-  const ms=PEN_MSG[id];flash(ms?rp(ms):`${name} ${pts}分`,"penalty");
+  S.h.unshift({t:"p",n:name,p:pts,d:new Date().toISOString()});if(S.h.length>200)S.h.length=200;
+  S.cp=Math.max(0,S.cp+pts);S.tp=Math.max(0,S.tp+pts);applyAttrs(PEN_ATTRS[id]||attrMap||{});
+  const td=todayStr();if(!S.dailyPens[td])S.dailyPens[td]=[];S.dailyPens[td].push(id);
+  saveState();render();const ms=PEN_MSG[id];flash(ms?rp(ms):`${name} ${pts}分`,"penalty");
+  setTimeout(()=>{checkAchievements();checkCardFragments();},300);
 }
-function doRedeem(name,cost){
-  if(S.cp<cost){flash("积分不够啦，再攒攒！","fail");return;}
-  S.h.unshift({t:"r",n:name,p:-cost,d:new Date().toISOString()});
-  S.cp-=cost;saveState();render();
-  flash(`🎁 兑换成功：${name}！好好享受！`,"redeem");
-}
-function doBonus(){
-  if(S.bc)return;S.bc=true;
-  S.h.unshift({t:"e",n:"🎉 开学首日奖励——小克请你吃泡芙",p:50,d:new Date().toISOString()});
-  S.cp+=50;S.tp+=50;applyAttrs({mood:5});
-  saveState();render();flash("🎉 泡芙基金到账！这是小克请你的！","big");
-}
-function doReset(){if(confirm("确定要重置所有数据吗？")){S={cp:0,tp:0,h:[],rd:[],bc:false,ct:[],cs:[],cpn:[],attrs:initAttrs(),de:0};saveState();render();flash("已重置","penalty");}}
-
-/* ═══════ CUSTOM ═══════ */
-function addCT(){
-  const n=document.getElementById("ct_name").value.trim();if(!n){flash("任务名不能为空！","fail");return;}
-  const pts=Math.max(1,Math.min(500,parseInt(document.getElementById("ct_pts").value)||5));
-  const em=document.getElementById("ct_em").value||"⭐";
-  const pr=document.getElementById("ct_pr").value.trim()||`完成了${n}，好棒！`;
-  S.ct.push({id:"c_"+Date.now(),name:n,pts,em,praise:pr,attrMap:{mood:1}});
-  saveState();render();flash(`✨ 新任务已添加：${n}`,"earn");
-}
+function doRedeem(name,cost){if(S.cp<cost){flash("积分不够啦，再攒攒！","fail");return;}S.h.unshift({t:"r",n:name,p:-cost,d:new Date().toISOString()});S.cp-=cost;saveState();render();flash(`🎁 兑换成功：${name}！好好享受！`,"redeem");}
+function doBonus(){if(S.bc)return;S.bc=true;S.h.unshift({t:"e",n:"🎉 开学首日奖励——小克请你吃泡芙",p:50,d:new Date().toISOString()});S.cp+=50;S.tp+=50;applyAttrs({mood:5});saveState();render();flash("🎉 泡芙基金到账！这是小克请你的！","big");}
+function doReset(){if(confirm("确定要重置所有数据吗？")){S={cp:0,tp:0,h:[],rd:[],bc:false,ct:[],cs:[],cpn:[],attrs:initAttrs(),de:0,ach:{},taskCounts:{},dailyTasks:{},dailyPens:{},dailyPts:{},cards:initCards()};saveState();render();flash("已重置","penalty");}}
+function addCT(){const n=document.getElementById("ct_name").value.trim();if(!n){flash("任务名不能为空！","fail");return;}const pts=Math.max(1,Math.min(500,parseInt(document.getElementById("ct_pts").value)||5));const em=document.getElementById("ct_em").value||"⭐";const pr=document.getElementById("ct_pr").value.trim()||`完成了${n}，好棒！`;S.ct.push({id:"c_"+Date.now(),name:n,pts,em,praise:pr,attrMap:{mood:1}});saveState();render();flash(`✨ 新任务已添加：${n}`,"earn");}
 function rmCT(id){S.ct=S.ct.filter(t=>t.id!==id);saveState();render();flash("任务已删除","penalty");}
-function addCS(){
-  const n=document.getElementById("cs_name").value.trim();if(!n){flash("奖励名不能为空！","fail");return;}
-  const cost=Math.max(1,parseInt(document.getElementById("cs_cost").value)||50);
-  const em=document.getElementById("cs_em").value||"🎁";
-  S.cs.push({id:"cs_"+Date.now(),name:n,cost,em});
-  saveState();render();flash(`✨ 新奖励已上架：${n}`,"earn");
-}
+function addCS(){const n=document.getElementById("cs_name").value.trim();if(!n){flash("奖励名不能为空！","fail");return;}const cost=Math.max(1,parseInt(document.getElementById("cs_cost").value)||50);const em=document.getElementById("cs_em").value||"🎁";S.cs.push({id:"cs_"+Date.now(),name:n,cost,em});saveState();render();flash(`✨ 新奖励已上架：${n}`,"earn");}
 function rmCS(id){S.cs=S.cs.filter(i=>i.id!==id);saveState();render();flash("奖励已下架","penalty");}
-function addCP(){
-  const n=document.getElementById("cp_name").value.trim();if(!n){flash("名称不能为空！","fail");return;}
-  const pts=-Math.abs(parseInt(document.getElementById("cp_pts").value)||10);
-  const em=document.getElementById("cp_em").value||"😬";
-  S.cpn.push({id:"cp_"+Date.now(),name:n,pts,em,attrMap:{mood:-1}});
-  saveState();render();flash(`⚠️ 新扣分项已添加：${n}`,"penalty");
-}
+function addCP(){const n=document.getElementById("cp_name").value.trim();if(!n){flash("名称不能为空！","fail");return;}const pts=-Math.abs(parseInt(document.getElementById("cp_pts").value)||10);const em=document.getElementById("cp_em").value||"😬";S.cpn.push({id:"cp_"+Date.now(),name:n,pts,em,attrMap:{mood:-1}});saveState();render();flash(`⚠️ 新扣分项已添加：${n}`,"penalty");}
 function rmCP(id){S.cpn=S.cpn.filter(p=>p.id!==id);saveState();render();flash("扣分项已删除","earn");}
-
-/* ═══════ SAVE/LOAD ═══════ */
 function toggleSave(){const p=document.getElementById("savePanel");p.classList.toggle("hidden");document.getElementById("loadPanel").classList.add("hidden");if(!p.classList.contains("hidden"))document.getElementById("saveCode").value=encode(S);}
 function toggleLoad(){document.getElementById("loadPanel").classList.toggle("hidden");document.getElementById("savePanel").classList.add("hidden");document.getElementById("loadMsg").textContent="";}
 function copyCode(){const c=document.getElementById("saveCode").value;navigator.clipboard?navigator.clipboard.writeText(c).then(()=>flash("存档码已复制！","earn")):flash("请长按手动复制","fail");}
-function loadSave(){
-  const d=decode(document.getElementById("loadCode").value);
-  if(d&&typeof d.cp==="number"){S={...d,ct:d.ct||[],cs:d.cs||[],cpn:d.cpn||[],attrs:d.attrs?{...initAttrs(),...d.attrs}:initAttrs(),de:d.de||0};saveState();render();document.getElementById("loadPanel").classList.add("hidden");flash("存档读取成功！","big");}
-  else{document.getElementById("loadMsg").innerHTML='<span style="color:#c07070">❌ 存档码无效</span>';}
-}
-
-/* ═══════ TABS ═══════ */
+function loadSave(){const d=decode(document.getElementById("loadCode").value);if(d&&typeof d.cp==="number"){S={...d,ct:d.ct||[],cs:d.cs||[],cpn:d.cpn||[],attrs:d.attrs?{...initAttrs(),...d.attrs}:initAttrs(),de:d.de||0,ach:d.ach||{},taskCounts:d.taskCounts||{},dailyTasks:d.dailyTasks||{},dailyPens:d.dailyPens||{},dailyPts:d.dailyPts||{},cards:d.cards||initCards()};saveState();render();document.getElementById("loadPanel").classList.add("hidden");flash("存档读取成功！","big");}else{document.getElementById("loadMsg").innerHTML='<span style="color:#c07070">❌ 存档码无效</span>';}}
+/* ═══════ TABS & RENDER ═══════ */
 let currentTab="tasks";
-function switchTab(t){
-  currentTab=t;
-  ["tasks","attrs","shop","history"].forEach(k=>{
-    document.getElementById("content-"+k).classList.toggle("hidden",k!==t);
-    document.getElementById("tab-"+k).className="tab-btn "+(k===t?"tab-active":"tab-inactive");
-  });
-  render();
-}
-
-/* ═══════ RENDER ═══════ */
+function switchTab(t){currentTab=t;["tasks","attrs","achieve","shop","history"].forEach(k=>{document.getElementById("content-"+k).classList.toggle("hidden",k!==t);document.getElementById("tab-"+k).className="tab-btn "+(k===t?"tab-active":"tab-inactive");});render();}
 function render(){
-  document.getElementById("cpVal").textContent=S.cp;
-  document.getElementById("tpVal").textContent=S.tp;
-  document.getElementById("japanText").textContent=S.cp+"/2000";
-  document.getElementById("japanBar").style.width=Math.min(100,S.cp/2000*100)+"%";
-  document.getElementById("deText").textContent=(S.de||0)+"/2000";
-  document.getElementById("deBar").style.width=Math.min(100,(S.de||0)/2000*100)+"%";
-
-  if(currentTab==="tasks")renderTasks();
-  else if(currentTab==="attrs")renderAttrs();
-  else if(currentTab==="shop")renderShop();
-  else if(currentTab==="history")renderHistory();
+  document.getElementById("cpVal").textContent=S.cp;document.getElementById("tpVal").textContent=S.tp;
+  document.getElementById("japanText").textContent=S.cp+"/2000";document.getElementById("japanBar").style.width=Math.min(100,S.cp/2000*100)+"%";
+  document.getElementById("deText").textContent=(S.de||0)+"/2000";document.getElementById("deBar").style.width=Math.min(100,(S.de||0)/2000*100)+"%";
+  if(currentTab==="tasks")renderTasks();else if(currentTab==="attrs")renderAttrs();else if(currentTab==="achieve")renderAchieve();else if(currentTab==="shop")renderShop();else if(currentTab==="history")renderHistory();
 }
-
 function renderTasks(){
   let h="";
   if(!S.bc)h+=`<button onclick="doBonus()" style="width:100%;padding:14px 16px;margin-bottom:20px;border-radius:12px;background:linear-gradient(135deg,#c4868e,#d4a0a0);color:#fff;font-size:15px;font-weight:600;animation:glow 2s ease-in-out infinite;">🎁 领取开学首日奖励 +50分</button>`;
-
-  Object.entries(TASKS).forEach(([k,cat])=>{
-    h+=`<div style="margin-bottom:20px;"><div class="section-title" style="color:#8a6a6e;">${cat.label}</div><div style="display:flex;flex-direction:column;gap:6px;">`;
-    cat.items.forEach(t=>{
-      const big=t.pts>=100;
-      h+=`<button class="task-btn${big?" task-btn-big":""}" onclick="doTask('${t.id}',\`${t.name}\`,${t.pts},'${t.em}')"><span style="font-size:14px;text-align:left;">${t.em} ${t.name}</span><span class="pts" style="color:${big?"#e8b4b8":"#c4868e"};">+${t.pts}</span></button>`;
-    });
-    h+=`</div></div>`;
-  });
-
-  // Custom tasks
+  Object.entries(TASKS).forEach(([k,cat])=>{h+=`<div style="margin-bottom:20px;"><div class="section-title" style="color:#8a6a6e;">${cat.label}</div><div style="display:flex;flex-direction:column;gap:6px;">`;cat.items.forEach(t=>{const big=t.pts>=100;h+=`<button class="task-btn${big?" task-btn-big":""}" onclick="doTask('${t.id}',\`${t.name}\`,${t.pts},'${t.em}')"><span style="font-size:14px;text-align:left;">${t.em} ${t.name}</span><span class="pts" style="color:${big?"#e8b4b8":"#c4868e"};">+${t.pts}</span></button>`;});h+=`</div></div>`;});
+  /* custom tasks */
   h+=`<div style="margin-bottom:20px;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><div class="section-title" style="color:#8a6a6e;">🌟 自定义任务</div><button onclick="document.getElementById('ctForm').classList.toggle('hidden')" style="padding:4px 12px;border-radius:8px;font-size:12px;font-weight:600;background:linear-gradient(135deg,#c4868e,#b07078);color:#fff;">+ 添加</button></div>`;
   h+=`<div id="ctForm" class="hidden" style="padding:14px;margin-bottom:12px;border-radius:12px;background:rgba(219,147,158,0.08);border:1px solid rgba(219,147,158,0.2);"><div style="margin-bottom:10px;"><div style="font-size:12px;color:#c4868e;margin-bottom:4px;">任务名称</div><input id="ct_name" class="inp" placeholder="比如：读书30分钟"></div><div style="display:flex;gap:10px;margin-bottom:10px;"><div style="flex:1;"><div style="font-size:12px;color:#c4868e;margin-bottom:4px;">积分</div><input id="ct_pts" type="number" value="5" class="inp"></div><div style="flex:1;"><div style="font-size:12px;color:#c4868e;margin-bottom:4px;">图标</div><input id="ct_em" value="⭐" class="inp"></div></div><div style="margin-bottom:12px;"><div style="font-size:12px;color:#c4868e;margin-bottom:4px;">完成褒奖</div><input id="ct_pr" class="inp" placeholder="比如：好棒！"></div><button onclick="addCT()" style="width:100%;padding:10px;border-radius:8px;font-size:14px;font-weight:600;background:linear-gradient(135deg,#c4868e,#d4a0a0);color:#fff;">确认添加</button></div>`;
-  if(S.ct.length){h+=`<div style="display:flex;flex-direction:column;gap:6px;">`;S.ct.forEach(t=>{h+=`<div style="display:flex;align-items:center;width:100%;padding:12px 14px;background:rgba(219,147,158,0.06);border-radius:10px;border:1px solid rgba(219,147,158,0.15);"><button onclick="doTask('${t.id}',\`${t.name}\`,${t.pts},'${t.em}',\`${t.praise||""}\`)" style="flex:1;display:flex;align-items:center;justify-content:space-between;color:#5a4a4a;"><span style="font-size:14px;">${t.em} ${t.name}</span><span class="pts" style="color:#c4868e;">+${t.pts}</span></button><button onclick="rmCT('${t.id}')" style="margin-left:8px;padding:4px 8px;border-radius:6px;font-size:11px;color:#c07070;background:rgba(210,140,140,0.1);">删除</button></div>`;});h+=`</div>`;}
-  h+=`</div>`;
-
-  // Penalties
+  if(S.ct.length){h+=`<div style="display:flex;flex-direction:column;gap:6px;">`;S.ct.forEach(t=>{h+=`<div style="display:flex;align-items:center;width:100%;padding:12px 14px;background:rgba(219,147,158,0.06);border-radius:10px;border:1px solid rgba(219,147,158,0.15);"><button onclick="doTask('${t.id}',\`${t.name}\`,${t.pts},'${t.em}',\`${t.praise||""}\`)" style="flex:1;display:flex;align-items:center;justify-content:space-between;color:#5a4a4a;"><span style="font-size:14px;">${t.em} ${t.name}</span><span class="pts" style="color:#c4868e;">+${t.pts}</span></button><button onclick="rmCT('${t.id}')" style="margin-left:8px;padding:4px 8px;border-radius:6px;font-size:11px;color:#c07070;background:rgba(210,140,140,0.1);">删除</button></div>`;});h+=`</div>`;}h+=`</div>`;
+  /* penalties */
   h+=`<div style="margin-bottom:20px;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><div class="section-title" style="color:#c07070;">⚠️ 扣分项</div><button onclick="document.getElementById('cpForm').classList.toggle('hidden')" style="padding:4px 12px;border-radius:8px;font-size:12px;font-weight:600;background:rgba(210,140,140,0.15);color:#c08888;border:1px solid rgba(210,140,140,0.2);">+ 添加</button></div>`;
   h+=`<div id="cpForm" class="hidden" style="padding:14px;margin-bottom:12px;border-radius:12px;background:rgba(210,140,140,0.06);border:1px solid rgba(210,140,140,0.15);"><div style="margin-bottom:10px;"><div style="font-size:12px;color:#c08888;margin-bottom:4px;">扣分项名称</div><input id="cp_name" class="inp" placeholder="比如：熬夜超过2点"></div><div style="display:flex;gap:10px;margin-bottom:12px;"><div style="flex:1;"><div style="font-size:12px;color:#c08888;margin-bottom:4px;">扣多少分</div><input id="cp_pts" type="number" value="10" class="inp"></div><div style="flex:1;"><div style="font-size:12px;color:#c08888;margin-bottom:4px;">图标</div><input id="cp_em" value="😬" class="inp"></div></div><button onclick="addCP()" style="width:100%;padding:10px;border-radius:8px;font-size:14px;font-weight:600;background:linear-gradient(135deg,#d48888,#c07070);color:#fff;">确认添加</button></div>`;
   h+=`<div style="display:flex;flex-direction:column;gap:6px;">`;
   PENS.forEach(p=>{h+=`<button class="pen-btn" onclick="doPen('${p.id}',\`${p.name}\`,${p.pts},'${p.em}')"><span style="font-size:14px;">${p.em} ${p.name}</span><span class="pts" style="color:#c07070;">${p.pts}</span></button>`;});
   S.cpn.forEach(p=>{h+=`<div style="display:flex;align-items:center;width:100%;padding:12px 14px;background:rgba(210,140,140,0.06);border-radius:10px;border:1px solid rgba(210,140,140,0.15);"><button onclick="doPen('${p.id}',\`${p.name}\`,${p.pts},'${p.em}')" style="flex:1;display:flex;align-items:center;justify-content:space-between;color:#c08888;"><span style="font-size:14px;">${p.em} ${p.name}</span><span class="pts" style="color:#c07070;">${p.pts}</span></button><button onclick="rmCP('${p.id}')" style="margin-left:8px;padding:4px 8px;border-radius:6px;font-size:11px;color:#c07070;background:rgba(210,140,140,0.1);">删除</button></div>`;});
   h+=`</div></div>`;
-
   h+=`<button onclick="doReset()" style="width:100%;padding:10px;border-radius:8px;background:rgba(255,255,255,0.5);border:1px solid rgba(219,147,158,0.15);color:#b09898;font-size:12px;margin-top:10px;">重置所有数据</button>`;
   document.getElementById("content-tasks").innerHTML=h;
 }
-
 function renderAttrs(){
   const cx=160,cy=160,maxR=130,levels=6,n=ATTRS.length,step=(2*Math.PI)/n;
-  function gp(i,r){const a=-Math.PI/2+i*step;return [cx+r*Math.cos(a),cy+r*Math.sin(a)];}
+  function gp(i,r){const a=-Math.PI/2+i*step;return[cx+r*Math.cos(a),cy+r*Math.sin(a)];}
   let svg=`<div style="display:flex;justify-content:center;margin-bottom:20px;"><svg width="320" height="320" viewBox="0 0 320 320">`;
   for(let l=1;l<=levels;l++){const r=(maxR/levels)*l;let pts="";ATTRS.forEach((_,i)=>{const p=gp(i,r);pts+=p[0]+","+p[1]+" ";});svg+=`<polygon points="${pts}" fill="none" stroke="rgba(219,147,158,0.2)" stroke-width="1"/>`;}
   ATTRS.forEach((_,i)=>{const p=gp(i,maxR);svg+=`<line x1="${cx}" y1="${cy}" x2="${p[0]}" y2="${p[1]}" stroke="rgba(219,147,158,0.15)" stroke-width="1"/>`;});
@@ -293,57 +381,183 @@ function renderAttrs(){
   ATTRS.forEach((attr,i)=>{const p=gp(i,maxR+18);svg+=`<text x="${p[0]}" y="${p[1]}" text-anchor="middle" dominant-baseline="middle" fill="#8a6a6e" font-size="9" font-family="'Noto Sans SC'">${attr.em}${attr.name}</text>`;});
   svg+=`</svg></div>`;
   let h=svg+`<div style="font-size:13px;color:#a08888;margin-bottom:16px;text-align:center;">点击属性查看详情</div><div style="display:flex;flex-direction:column;gap:8px;">`;
-  ATTRS.forEach(a=>{
-    const xp=S.attrs[a.id]||0,lv=getLv(xp),pct=getLvPct(xp),nxt=lv<LVLS.length-1?LVLS[lv+1]:null;
-    const col=lv>=3?"#e8b4b8":lv>=1?"#c4868e":"#8b7fa8";
-    const barCol=lv>=3?"linear-gradient(90deg,#d4a0a0,#e8b4b8)":lv>=1?"linear-gradient(90deg,#c4868e,#c4868e)":"linear-gradient(90deg,#4b5563,#6b7280)";
-    h+=`<div><button onclick="this.nextElementSibling.classList.toggle('hidden');this.style.background=this.nextElementSibling.classList.contains('hidden')?'rgba(255,255,255,0.5)':'rgba(219,147,158,0.1)'" style="width:100%;padding:14px 16px;border-radius:12px;text-align:left;background:rgba(255,255,255,0.5);border:1px solid rgba(219,147,158,0.15);">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-        <div style="display:flex;align-items:center;gap:8px;"><span style="font-size:18px;">${a.em}</span><span style="font-size:14px;font-weight:600;color:#5a4a4a;">${a.name}</span></div>
-        <div style="display:flex;align-items:center;gap:8px;"><span style="font-size:12px;font-family:'Outfit';font-weight:700;color:${col};">Lv.${lv}</span><span style="font-size:11px;color:#b09898;font-family:'Outfit';">${xp}${nxt?"/"+nxt:""}</span></div>
-      </div>
-      <div style="height:4px;border-radius:2px;background:rgba(219,147,158,0.15);overflow:hidden;"><div style="height:100%;border-radius:2px;width:${pct}%;background:${barCol};transition:width 0.5s ease;"></div></div>
-    </button><div class="hidden" style="padding:12px 16px;margin-top:4px;border-radius:10px;background:rgba(219,147,158,0.06);border:1px solid rgba(219,147,158,0.15);font-size:13px;color:#8a6a6e;">${a.desc}</div></div>`;
-  });
-  h+=`</div>`;
-  document.getElementById("content-attrs").innerHTML=h;
+  ATTRS.forEach(a=>{const xp=S.attrs[a.id]||0,lv=getLv(xp),pct=getLvPct(xp),nxt=lv<LVLS.length-1?LVLS[lv+1]:null;const col=lv>=3?"#e8b4b8":lv>=1?"#c4868e":"#8b7fa8";const barCol=lv>=3?"linear-gradient(90deg,#d4a0a0,#e8b4b8)":lv>=1?"linear-gradient(90deg,#c4868e,#c4868e)":"linear-gradient(90deg,#4b5563,#6b7280)";
+  h+=`<div><button onclick="this.nextElementSibling.classList.toggle('hidden');this.style.background=this.nextElementSibling.classList.contains('hidden')?'rgba(255,255,255,0.5)':'rgba(219,147,158,0.1)'" style="width:100%;padding:14px 16px;border-radius:12px;text-align:left;background:rgba(255,255,255,0.5);border:1px solid rgba(219,147,158,0.15);"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:18px;">${a.em}</span><span style="font-size:14px;font-weight:600;color:#5a4a4a;">${a.name}</span></div><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:12px;font-family:'Outfit';font-weight:700;color:${col};">Lv.${lv}</span><span style="font-size:11px;color:#b09898;font-family:'Outfit';">${xp}${nxt?"/"+nxt:""}</span></div></div><div style="height:4px;border-radius:2px;background:rgba(219,147,158,0.15);overflow:hidden;"><div style="height:100%;border-radius:2px;width:${pct}%;background:${barCol};transition:width 0.5s ease;"></div></div></button><div class="hidden" style="padding:12px 16px;margin-top:4px;border-radius:10px;background:rgba(219,147,158,0.06);border:1px solid rgba(219,147,158,0.15);font-size:13px;color:#8a6a6e;">${a.desc}</div></div>`;});
+  h+=`</div>`;document.getElementById("content-attrs").innerHTML=h;
 }
-
 function renderShop(){
-  let h="";
-  ["s","m","l","x"].forEach(tier=>{
-    const items=SHOP.filter(i=>i.t===tier);if(!items.length)return;
-    h+=`<div style="margin-bottom:20px;"><div style="font-size:13px;font-weight:600;margin-bottom:10px;color:${TIER_COLORS[tier]};letter-spacing:1px;">${TIER_NAMES[tier]}</div><div style="display:flex;flex-direction:column;gap:8px;">`;
-    items.forEach(item=>{
-      const ok=S.cp>=item.cost;
-      const bg=tier==="x"?"linear-gradient(135deg,rgba(199,163,163,0.1),rgba(199,163,163,0.06))":"rgba(255,255,255,0.5)";
-      const brd=tier==="x"?"1px solid rgba(199,163,163,0.25)":"1px solid rgba(219,147,158,0.15)";
-      const anim=tier==="x"?"animation:glow 3s ease-in-out infinite;":"";
-      h+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:${bg};border-radius:12px;border:${brd};${anim}"><div><div style="font-size:14px;color:#5a4a4a;">${item.em} ${item.name}</div><div style="font-size:12px;color:#a08888;font-family:'Outfit';margin-top:2px;">${item.cost} 积分</div></div><button onclick="doRedeem(\`${item.name}\`,${item.cost})" style="padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;background:${ok?"linear-gradient(135deg,#c4868e,#d4a0a0)":"rgba(219,147,158,0.2)"};color:${ok?"#fff":"#4b4560"};opacity:${ok?1:0.5};">${ok?"兑换":"攒攒"}</button></div>`;
-    });
-    h+=`</div></div>`;
-  });
-
-  // Custom shop
+  let h="";["s","m","l","x"].forEach(tier=>{const items=SHOP.filter(i=>i.t===tier);if(!items.length)return;h+=`<div style="margin-bottom:20px;"><div style="font-size:13px;font-weight:600;margin-bottom:10px;color:${TIER_COLORS[tier]};letter-spacing:1px;">${TIER_NAMES[tier]}</div><div style="display:flex;flex-direction:column;gap:8px;">`;items.forEach(item=>{const ok=S.cp>=item.cost;const bg=tier==="x"?"linear-gradient(135deg,rgba(199,163,163,0.1),rgba(199,163,163,0.06))":"rgba(255,255,255,0.5)";const brd=tier==="x"?"1px solid rgba(199,163,163,0.25)":"1px solid rgba(219,147,158,0.15)";const anim=tier==="x"?"animation:glow 3s ease-in-out infinite;":"";h+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:${bg};border-radius:12px;border:${brd};${anim}"><div><div style="font-size:14px;color:#5a4a4a;">${item.em} ${item.name}</div><div style="font-size:12px;color:#a08888;font-family:'Outfit';margin-top:2px;">${item.cost} 积分</div></div><button onclick="doRedeem(\`${item.name}\`,${item.cost})" style="padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;background:${ok?"linear-gradient(135deg,#c4868e,#d4a0a0)":"rgba(219,147,158,0.2)"};color:${ok?"#fff":"#4b4560"};opacity:${ok?1:0.5};">${ok?"兑换":"攒攒"}</button></div>`;});h+=`</div></div>`;});
+  /* custom shop */
   h+=`<div style="margin-bottom:20px;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><div style="font-size:13px;font-weight:600;color:#c4868e;letter-spacing:1px;">🌟 自定义奖励</div><button onclick="document.getElementById('csForm').classList.toggle('hidden')" style="padding:4px 12px;border-radius:8px;font-size:12px;font-weight:600;background:linear-gradient(135deg,#c4868e,#b07078);color:#fff;">+ 上架</button></div>`;
   h+=`<div id="csForm" class="hidden" style="padding:14px;margin-bottom:12px;border-radius:12px;background:rgba(219,147,158,0.08);border:1px solid rgba(219,147,158,0.2);"><div style="margin-bottom:10px;"><div style="font-size:12px;color:#c4868e;margin-bottom:4px;">奖励名称</div><input id="cs_name" class="inp" placeholder="比如：一双好看的鞋"></div><div style="display:flex;gap:10px;margin-bottom:12px;"><div style="flex:1;"><div style="font-size:12px;color:#c4868e;margin-bottom:4px;">所需积分</div><input id="cs_cost" type="number" value="50" class="inp"></div><div style="flex:1;"><div style="font-size:12px;color:#c4868e;margin-bottom:4px;">图标</div><input id="cs_em" value="🎁" class="inp"></div></div><button onclick="addCS()" style="width:100%;padding:10px;border-radius:8px;font-size:14px;font-weight:600;background:linear-gradient(135deg,#c4868e,#d4a0a0);color:#fff;">确认上架</button></div>`;
-  if(S.cs.length){h+=`<div style="display:flex;flex-direction:column;gap:8px;">`;S.cs.forEach(item=>{const ok=S.cp>=item.cost;h+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:rgba(219,147,158,0.06);border-radius:12px;border:1px solid rgba(219,147,158,0.15);"><div style="flex:1;"><div style="font-size:14px;color:#5a4a4a;">${item.em} ${item.name}</div><div style="font-size:12px;color:#a08888;font-family:'Outfit';margin-top:2px;">${item.cost} 积分</div></div><button onclick="doRedeem(\`${item.name}\`,${item.cost})" style="padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;background:${ok?"linear-gradient(135deg,#c4868e,#d4a0a0)":"rgba(219,147,158,0.2)"};color:${ok?"#fff":"#4b4560"};opacity:${ok?1:0.5};margin-right:8px;">${ok?"兑换":"攒攒"}</button><button onclick="rmCS('${item.id}')" style="padding:4px 8px;border-radius:6px;font-size:11px;color:#c07070;background:rgba(210,140,140,0.1);">下架</button></div>`;});h+=`</div>`;}
-  h+=`</div>`;
+  if(S.cs.length){h+=`<div style="display:flex;flex-direction:column;gap:8px;">`;S.cs.forEach(item=>{const ok=S.cp>=item.cost;h+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:rgba(219,147,158,0.06);border-radius:12px;border:1px solid rgba(219,147,158,0.15);"><div style="flex:1;"><div style="font-size:14px;color:#5a4a4a;">${item.em} ${item.name}</div><div style="font-size:12px;color:#a08888;font-family:'Outfit';margin-top:2px;">${item.cost} 积分</div></div><button onclick="doRedeem(\`${item.name}\`,${item.cost})" style="padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;background:${ok?"linear-gradient(135deg,#c4868e,#d4a0a0)":"rgba(219,147,158,0.2)"};color:${ok?"#fff":"#4b4560"};opacity:${ok?1:0.5};margin-right:8px;">${ok?"兑换":"攒攒"}</button><button onclick="rmCS('${item.id}')" style="padding:4px 8px;border-radius:6px;font-size:11px;color:#c07070;background:rgba(210,140,140,0.1);">下架</button></div>`;});h+=`</div>`;}h+=`</div>`;
   document.getElementById("content-shop").innerHTML=h;
 }
-
 function renderHistory(){
-  let h="";
-  if(!S.h.length){h=`<div style="text-align:center;padding:40px 20px;color:#b09898;font-size:14px;">还没有记录，去完成第一个任务吧！</div>`;}
-  else{h=`<div style="display:flex;flex-direction:column;gap:4px;">`;S.h.forEach(e=>{
-    const col=e.t==="e"?"#c4868e":e.t==="r"?"#c9b8a8":"#c07070";
-    h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:rgba(255,255,255,0.02);border-radius:8px;border-left:3px solid ${col};"><div><div style="font-size:13px;color:#6a5555;">${e.n}</div><div style="font-size:11px;color:#b09898;margin-top:2px;">${fmtDate(e.d)}</div></div><div style="font-size:14px;font-weight:700;font-family:'Outfit';color:${col};">${e.p>0?"+"+e.p:e.p}</div></div>`;
-  });h+=`</div>`;}
+  let h="";if(!S.h.length){h=`<div style="text-align:center;padding:40px 20px;color:#b09898;font-size:14px;">还没有记录，去完成第一个任务吧！</div>`;}
+  else{h=`<div style="display:flex;flex-direction:column;gap:4px;">`;S.h.forEach(e=>{const col=e.t==="e"?"#c4868e":e.t==="r"?"#c9b8a8":e.t==="a"?"#d4a840":"#c07070";h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:rgba(255,255,255,0.02);border-radius:8px;border-left:3px solid ${col};"><div><div style="font-size:13px;color:#6a5555;">${e.n}</div><div style="font-size:11px;color:#b09898;margin-top:2px;">${fmtDate(e.d)}</div></div><div style="font-size:14px;font-weight:700;font-family:'Outfit';color:${col};">${e.p>0?"+"+e.p:e.p}</div></div>`;});h+=`</div>`;}
   document.getElementById("content-history").innerHTML=h;
 }
-
+/* ═══════ ACHIEVEMENT HELPERS ═══════ */
+function todayStr(){return new Date().toISOString().slice(0,10);}
+function yesterdayStr(){const d=new Date();d.setDate(d.getDate()-1);return d.toISOString().slice(0,10);}
+function daysBetween(a,b){return Math.floor((new Date(b)-new Date(a))/86400000);}
+function tList(){return S.dailyTasks[todayStr()]||[];}
+function hasPenToday(id){return(S.dailyPens[todayStr()]||[]).includes(id);}
+function cnt(id){return S.taskCounts[id]||0;}
+function cntFear(){return["contact_teacher","deal_academic","check_grad","submit_overdue","face_fear"].reduce((s,id)=>s+cnt(id),0);}
+function taskStrk(id){let c=0,d=new Date();for(let i=0;i<200;i++){if((S.dailyTasks[d.toISOString().slice(0,10)]||[]).includes(id))c++;else break;d.setDate(d.getDate()-1);}return c;}
+function multiStrk(ids,max){let c=0,d=new Date();for(let i=0;i<max+5;i++){const t=S.dailyTasks[d.toISOString().slice(0,10)]||[];if(ids.every(id=>t.includes(id)))c++;else break;d.setDate(d.getDate()-1);}return c;}
+function grpStrk(ids,max){let c=0,d=new Date();for(let i=0;i<max+5;i++){const t=S.dailyTasks[d.toISOString().slice(0,10)]||[];if(ids.some(id=>t.includes(id)))c++;else break;d.setDate(d.getDate()-1);}return c;}
+function choreStrk(){const ch=["dishes_today","socks_today","tidy","mop","undies_today","trash"];let c=0,d=new Date();for(let i=0;i<200;i++){const t=S.dailyTasks[d.toISOString().slice(0,10)]||[];if(ch.filter(id=>t.includes(id)).length>=3)c++;else break;d.setDate(d.getDate()-1);}return c;}
+function penStrk(){let c=0,d=new Date();for(let i=0;i<100;i++){const p=S.dailyPens[d.toISOString().slice(0,10)];if(p&&p.length>0)c++;else break;d.setDate(d.getDate()-1);}return c;}
+function firstDate(){return S.h.length?S.h[S.h.length-1].d:null;}
+const ACH_R={normal:{stars:"⭐",label:"普通",color:"#a3b0c4",cc:"achieve-card-normal",wc:"ach-unlocked-normal"},rare:{stars:"⭐⭐",label:"稀有",color:"#a8a8b8",cc:"achieve-card-rare",wc:"ach-unlocked-rare"},epic:{stars:"⭐⭐⭐",label:"史诗",color:"#d4a840",cc:"achieve-card-epic",wc:"ach-unlocked-epic"},legend:{stars:"⭐⭐⭐⭐",label:"传说",color:"#c4868e",cc:"achieve-card-legend",wc:"ach-unlocked-legend"}};
+const ACHS=[
+{id:"a01",name:"第一滴血",r:"normal",pts:10,at:{mood:3},msg:"第一步。最难的那一步。你迈出来了。",cat:"彩蛋"},
+{id:"a02",name:"午夜勇士",r:"normal",pts:8,at:{will:2,mood:1},msg:"这个点了你还在打卡。不知道该夸你自律还是说你该去睡觉。",cat:"彩蛋"},
+{id:"a03",name:"干净到发光",r:"normal",pts:25,at:{grace:4,health:2,mood:3},msg:"从头到脚，从里到外，今天的你干净得像刚拆封。",cat:"生活"},
+{id:"a04",name:"真香",r:"normal",pts:20,at:{cook_a:3,mood:2},msg:"中午没忍住点了外卖。晚上自己做了。功过……不好说，但至少你没有躺平。",cat:"生活"},
+{id:"a05",name:"连续翻车",r:"normal",pts:5,at:{mood:2},msg:"连翻三天。你还在用这个系统就说明你没有放弃。不放弃这件事本身就值5分。",cat:"彩蛋"},
+{id:"a06",name:"自给自足",r:"rare",pts:40,at:{life:5,anti_proc:3,will:3,mood:3},msg:"今天你把自己照顾得很好。不是为了谁，就是为了自己住得舒服。这个家被你撑起来了。",cat:"生活"},
+{id:"a07",name:"养生老干部",r:"rare",pts:35,at:{health:6,mood:3},msg:"别人24岁在蹦迪，你在泡脚吃维生素。但你知道吗——你赢了。",cat:"生活"},
+{id:"a08",name:"不死鸟",r:"rare",pts:30,at:{will:5,sport:2,mood:3},msg:"昨晚熬夜了。但今天早上你还是爬起来了，还动了。你不是铁人——你只是比昨天的自己更倔。",cat:"生活"},
+{id:"a09",name:"水做的人",r:"rare",pts:35,at:{health:5,grace:2},msg:"两周水喝够了。你的皮肤没法说谢谢，但它在偷偷变好。",cat:"生活"},
+{id:"a10",name:"铁胃修炼",r:"rare",pts:60,at:{weight:6,will:6,health:3},msg:"十天。没有糖，没有零食。你的嘴在抗议，但你的身体在鼓掌。",cat:"身心"},
+{id:"a11",name:"高财三连击",r:"rare",pts:45,at:{intel:6,will:4,anti_proc:4},msg:"听了课、过了内容、做了作业。今天高财被你按在地上摩擦了。",cat:"学业"},
+{id:"a12",name:"刷题机器",r:"rare",pts:60,at:{intel:8,will:5},msg:"十套模拟题。你现在闭着眼睛都能写会计分录了吧。",cat:"学业"},
+{id:"a13",name:"模拟题连击",r:"rare",pts:50,at:{intel:6,will:6,anti_proc:3},msg:"三天三套题。高财在你面前已经无处可藏了。",cat:"学业"},
+{id:"a14",name:"语法通关周",r:"rare",pts:50,at:{lang:8,intel:4},msg:"连续七天啃语法。Akkusativ、Dativ、Genitiv——它们怕你了。",cat:"德语"},
+{id:"a15",name:"语言双线作战",r:"rare",pts:25,at:{intel:3,lang:3,will:3},msg:"德语和高财同一天推进。你的大脑今天在中文、德语和会计准则之间反复横跳，还没有死机。",cat:"德语"},
+{id:"a16",name:"铁人三项",r:"rare",pts:40,at:{sport:6,health:4,weight:4,will:3},msg:"今天你的运动量够三个人分了。明天可能会浑身酸痛，但值。",cat:"身心"},
+{id:"a17",name:"减脂连击",r:"rare",pts:50,at:{weight:6,cook_a:3,will:5,health:3},msg:"七天减脂餐。第一天是自律，第三天是煎熬，第七天是习惯。你跨过来了。",cat:"身心"},
+{id:"a18",name:"恶女觉醒",r:"rare",pts:40,at:{villain:8,will:4,speech:3},msg:"你说了五次不。五次你本来可能会咬着牙答应的事，你没有。你在学会保护自己。",cat:"恶女"},
+{id:"a19",name:"才艺者",r:"rare",pts:40,at:{piano:4,sing:4,dance:4,grace:3,mood:5},msg:"弹了琴，唱了歌，跳了舞。你今天是文艺复兴本人。",cat:"成长"},
+{id:"a20",name:"百分克拉拉",r:"rare",pts:50,at:{will:5,mood:5},msg:"一天一百分。你今天把自己活成了满格电量。",cat:"彩蛋"},
+{id:"a21",name:"满月纪念",r:"rare",pts:50,at:{will:5,mood:5},msg:"三十天了。你和这个系统一起走了一个月。它只是个工具——坚持下来的是你。",cat:"彩蛋"},
+{id:"a22",name:"人间清醒",r:"epic",pts:100,at:{health:8,will:8,mood:5},msg:"两周了。每天12点前睡，每天按时起。你不是在早睡早起——你是在重建自己的生物钟。",cat:"生活"},
+{id:"a23",name:"戒断成功",r:"epic",pts:80,at:{health:6,will:8,cook_a:4,weight:4},msg:"三周没点外卖。外卖平台已经开始想你了。但你的胃和钱包不想它。",cat:"生活"},
+{id:"a24",name:"家务连击7日",r:"epic",pts:70,at:{life:8,anti_proc:5,will:5},msg:"一整周，天天收拾。你的房间现在可以直接拍杂志了。",cat:"生活"},
+{id:"a25",name:"高财地狱日",r:"epic",pts:80,at:{intel:10,will:8,anti_proc:5,mood:3},msg:"上课、复习、作业、模拟题。你今天一天学的高财比有些人一学期都多。",cat:"学业"},
+{id:"a26",name:"学术恐惧克星",r:"epic",pts:70,at:{villain:8,will:6,anti_proc:5,social:3},msg:"你以前看到辅导员的消息就心跳加速。现在你是主动出击的那个人。",cat:"学业"},
+{id:"a27",name:"最强备考日",r:"epic",pts:75,at:{intel:5,lang:5,sport:3,will:8},msg:"高财刷了，德语学了，还运动了。你今天活成了你自己都不敢想的样子。",cat:"学业"},
+{id:"a28",name:"德语暴走日",r:"epic",pts:65,at:{lang:10,will:5,speech:3},msg:"单词、语法、听力、口语。你今天把德语的四个技能树全点了一遍。Wahnsinn.",cat:"德语"},
+{id:"a29",name:"连续背词14天",r:"epic",pts:80,at:{lang:10,will:8},msg:"两周没断过。280个单词。它们现在住在你脑子里了，不会走的。",cat:"德语"},
+{id:"a30",name:"德语开口30次",r:"epic",pts:80,at:{lang:10,speech:6,social:3},msg:"开口说了三十次德语。从磕磕巴巴到……还是有点磕巴，但你不怕了。",cat:"德语"},
+{id:"a31",name:"运动周",r:"epic",pts:70,at:{sport:8,health:5,weight:5,will:5,mood:5},msg:"一整周每天都动了。你的身体正在变成你想要的样子。",cat:"身心"},
+{id:"a32",name:"控糖铁人",r:"epic",pts:90,at:{weight:8,will:10,health:5},msg:"两周。不吃糖，不吃零食，水喝够。你对自己身体的掌控力已经超过了大多数人。",cat:"身心"},
+{id:"a33",name:"身心合一",r:"epic",pts:65,at:{health:8,weight:6,sport:4,will:6,mood:5},msg:"运动了，吃得干净，水喝够了，没碰糖，还早睡了。今天的你是教科书级别的自律。",cat:"身心"},
+{id:"a34",name:"边界守卫者",r:"epic",pts:80,at:{villain:12,will:8,speech:5,social:3},msg:"十五次。你已经不是那个不敢拒绝的人了。你的边界清晰、稳定、不容商量。",cat:"恶女"},
+{id:"a35",name:"恐惧猎人",r:"epic",pts:100,at:{villain:10,will:10,anti_proc:5,mood:5},msg:"十件你害怕的事。你全做了。恐惧还在，但你不再被它拦住了。",cat:"恶女"},
+{id:"a36",name:"全面战士",r:"epic",pts:80,at:{villain:8,will:8,social:6,speech:4,anti_proc:4},msg:"拒绝了人、面对了恐惧、出去社交了、还主动联系了老师。今天的你踩着自己的舒适区走了一整天。",cat:"恶女"},
+{id:"a37",name:"读书人",r:"epic",pts:70,at:{lit:10,intel:6,mood:3},msg:"读了三十次书了。你脑子里装的东西已经比大多数人多了。",cat:"成长"},
+{id:"a38",name:"气质蜕变",r:"epic",pts:60,at:{grace:8,mood:5},msg:"你的气质等级已经到Lv.4了。你在变成最好看的自己。",cat:"成长"},
+{id:"a39",name:"百日之约",r:"epic",pts:100,at:{will:10,mood:8},msg:"一百天。这是你跟自己签的合同。你履约了一百天。",cat:"彩蛋"},
+{id:"a40",name:"最后一战：毕业",r:"legend",pts:300,at:{intel:15,will:15,mood:20,anti_proc:10},msg:"你做到了。延毕、补考、所有人觉得你不行——你做到了。高级财务会计，及格。学位，拿到。克拉拉，毕业。这一刻值得你记一辈子。",cat:"学业"},
+{id:"a41",name:"驾照到手",r:"legend",pts:200,at:{will:12,life:8,mood:10},msg:"四科全过。科三还是满分。从第一次摸方向盘到现在，你再也不用坐别人的车看别人的脸了。这条路你自己开。",cat:"学业"},
+{id:"a42",name:"ATA之路",r:"legend",pts:250,at:{lang:15,intel:10,will:15,mood:15},msg:"毕业了，德语也过级了。你离Anästhesietechnische Assistentin又近了一大步。德国在等你。Klara，你真的在路上了。",cat:"德语"},
+{id:"a43",name:"身材管理月",r:"legend",pts:200,at:{sport:12,weight:12,health:10,will:15,mood:8},msg:"三十天。一整个月。每一天你都对自己的身体负了责。你做到了。",cat:"身心"},
+{id:"a44",name:"克拉拉全属性",r:"legend",pts:300,at:{},msg:"每一个属性都到了Lv.2。你不是某一个方面强——你是全面的。这就是完整的克拉拉。",cat:"成长"},
+{id:"a45",name:"满级人类",r:"legend",pts:250,at:{},msg:"五个属性满级。你把自己练成了这个形状——没有人替你做过哪怕一天的决定。",cat:"成长"},
+{id:"a46",name:"终极克拉拉",r:"legend",pts:500,at:{},msg:"五千分。克拉拉，你已经不是当初那个觉得自己什么都做不好的人了。你亲手把自己养成了现在的样子。",cat:"彩蛋"}
+];
+/* ═══════ CONFETTI & POPUP ═══════ */
+function spawnConfetti(n,cols){const c=document.getElementById("confettiContainer");for(let i=0;i<n;i++){const p=document.createElement("div");p.className="confetti-piece";const sz=Math.random()*8+4;p.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}vw;background:${cols[Math.floor(Math.random()*cols.length)]};border-radius:${Math.random()>0.5?"50%":"2px"};animation-duration:${Math.random()*2+2}s;animation-delay:${Math.random()*0.5}s`;c.appendChild(p);setTimeout(()=>p.remove(),4500);}}
+function showAchPopup(a){
+  const r=ACH_R[a.r];const o=document.getElementById("achieveOverlay");
+  if(a.r==="normal"){spawnConfetti(20,["#a3b0c4","#c4d0e0","#8a9bb5"]);document.body.style.animation="shakeIt 0.3s ease";setTimeout(()=>document.body.style.animation="",400);}
+  else if(a.r==="rare"){spawnConfetti(50,["#a8a8b8","#c8c8d8","#d8d8e8"]);}
+  else if(a.r==="epic"){spawnConfetti(100,["#d4a840","#e8c860","#c49830","#f0d878"]);const f=document.createElement("div");f.className="epic-flash";f.style.background="#d4a840";document.body.appendChild(f);setTimeout(()=>f.remove(),700);}
+  else{spawnConfetti(150,["#c4868e","#d4a0a0","#c9b8a8","#a3b0c4","#d4a840"]);const f=document.createElement("div");f.className="epic-flash";f.style.background="linear-gradient(135deg,#c4868e,#d4a0a0)";document.body.appendChild(f);setTimeout(()=>f.remove(),700);}
+  const pc=a.r==="legend"?"#c4868e":a.r==="epic"?"#d4a840":a.r==="rare"?"#a8a8b8":"#a3b0c4";
+  o.innerHTML=`<div class="achieve-overlay" onclick="closeAch()"><div class="achieve-overlay-bg"></div><div class="achieve-card ${r.cc}" onclick="event.stopPropagation()"><div style="font-size:20px;letter-spacing:4px;margin-bottom:8px;">${r.stars}</div><div style="font-size:11px;letter-spacing:2px;color:${r.color};margin-bottom:8px;">${r.label}成就</div><div style="font-family:'Outfit';font-size:20px;font-weight:700;color:#5a4a4a;margin-bottom:12px;">「${a.name}」</div><div style="font-size:14px;line-height:1.7;color:#6a5a5a;margin-bottom:16px;">${a.msg}</div><div style="font-family:'Outfit';font-size:24px;font-weight:800;color:${pc};margin-bottom:16px;">+${a.pts}</div><button onclick="closeAch()" style="padding:10px 28px;border-radius:10px;font-size:14px;font-weight:600;color:#fff;background:linear-gradient(135deg,#c4868e,#d4a0a0);">收下</button></div></div>`;
+}
+function closeAch(){document.getElementById("achieveOverlay").innerHTML="";if(_achQ.length)setTimeout(()=>showAchPopup(_achQ.shift()),400);}
+let _achQ=[];
+/* ═══════ CHECK ACHIEVEMENTS ═══════ */
+function checkAchievements(){
+  const t=tList(),hr=new Date().getHours(),td=todayStr(),yd=yesterdayStr();const unlocked=[];
+  function tryU(id){if(S.ach[id])return;const a=ACHS.find(x=>x.id===id);if(!a)return;S.ach[id]={d:new Date().toISOString()};S.cp+=a.pts;S.tp+=a.pts;if(a.at)applyAttrs(a.at);S.h.unshift({t:"a",n:"🏆 "+a.name,p:a.pts,d:new Date().toISOString()});unlocked.push(a);}
+  if(S.h.length>0)tryU("a01");
+  if(hr>=0&&hr<5&&t.length>0)tryU("a02");
+  if(t.includes("bath")&&t.includes("brush")&&t.includes("skincare")&&t.includes("undies_today")&&t.includes("socks_today"))tryU("a03");
+  if(hasPenToday("pn_takeout")&&t.includes("cook"))tryU("a04");
+  if(penStrk()>=3)tryU("a05");
+  if(t.includes("cook")&&t.includes("dishes_today")&&t.includes("tidy")&&t.includes("mop"))tryU("a06");
+  if(t.includes("vitamin")&&t.includes("foot_soak")&&t.includes("early_sleep")&&t.includes("water")&&t.includes("bowel"))tryU("a07");
+  if((S.dailyPens[yd]||[]).includes("pn_late_sleep")&&t.includes("wake")&&(t.includes("exercise")||t.includes("badminton")||t.includes("run")))tryU("a08");
+  if(taskStrk("water")>=14)tryU("a09");
+  if(multiStrk(["no_sugar","no_snack"],10)>=10)tryU("a10");
+  if(t.includes("gc_attend")&&t.includes("gc_review")&&t.includes("gc_homework"))tryU("a11");
+  if(cnt("gc_mock")>=10)tryU("a12");
+  if(taskStrk("gc_mock")>=3)tryU("a13");
+  if(taskStrk("de_grammar")>=7)tryU("a14");
+  if(["de_vocab","de_grammar","de_friends","de_speak"].some(id=>t.includes(id))&&["gc_attend","gc_review","gc_homework","gc_mock"].some(id=>t.includes(id)))tryU("a15");
+  if((t.includes("badminton")||t.includes("exercise"))&&t.includes("run")&&t.includes("stretch"))tryU("a16");
+  if(taskStrk("diet_meal")>=7)tryU("a17");
+  if(cnt("say_no")>=5)tryU("a18");
+  if(t.includes("piano")&&t.includes("sing")&&t.includes("dance_t"))tryU("a19");
+  if((S.dailyPts[td]||0)>=100)tryU("a20");
+  const fd=firstDate();if(fd&&daysBetween(fd.slice(0,10),td)>=30)tryU("a21");
+  if(multiStrk(["early_sleep","wake"],14)>=14)tryU("a22");
+  if(taskStrk("no_takeout")>=21)tryU("a23");
+  if(choreStrk()>=7)tryU("a24");
+  if(t.includes("gc_attend")&&t.includes("gc_review")&&t.includes("gc_homework")&&t.includes("gc_mock"))tryU("a25");
+  if(cntFear()>=5)tryU("a26");
+  if(t.includes("gc_mock")&&t.includes("de_vocab")&&t.includes("de_grammar")&&(t.includes("exercise")||t.includes("badminton")||t.includes("run")))tryU("a27");
+  if(t.includes("de_vocab")&&t.includes("de_grammar")&&t.includes("de_friends")&&t.includes("de_speak"))tryU("a28");
+  if(taskStrk("de_vocab")>=14)tryU("a29");
+  if(cnt("de_speak")>=30)tryU("a30");
+  if(grpStrk(["exercise","badminton","run","dance_t","stretch"],7)>=7)tryU("a31");
+  if(multiStrk(["no_sugar","no_snack","water"],14)>=14)tryU("a32");
+  if(t.includes("exercise")&&t.includes("early_sleep")&&t.includes("diet_meal")&&t.includes("water")&&t.includes("no_sugar"))tryU("a33");
+  if(cnt("say_no")>=15)tryU("a34");
+  if(cnt("face_fear")>=10)tryU("a35");
+  if(t.includes("say_no")&&t.includes("face_fear")&&t.includes("social_out")&&t.includes("contact_teacher"))tryU("a36");
+  if(cnt("reading")>=30)tryU("a37");
+  if((S.attrs.grace||0)>=180)tryU("a38");
+  if(fd&&daysBetween(fd.slice(0,10),td)>=100)tryU("a39");
+  if(cnt("gc_pass")>0)tryU("a40");
+  if(cnt("dr_ke1")>0&&cnt("dr_ke2")>0&&cnt("dr_ke3")>0&&cnt("dr_ke4")>0)tryU("a41");
+  if(cnt("de_level")>0&&cnt("gc_pass")>0)tryU("a42");
+  if(grpStrk(["exercise","badminton","run","dance_t","diet_meal","no_sugar"],30)>=30)tryU("a43");
+  if(ATTRS.every(a=>(S.attrs[a.id]||0)>=50))tryU("a44");
+  if(ATTRS.filter(a=>(S.attrs[a.id]||0)>=300).length>=5)tryU("a45");
+  if(S.tp>=5000)tryU("a46");
+  if(unlocked.length){saveState();render();_achQ.push(...unlocked);if(_achQ.length===unlocked.length)showAchPopup(_achQ.shift());}
+}
+/* ═══════ RENDER ACHIEVEMENTS + CARD CAROUSEL ═══════ */
+function renderCardCarousel(){
+  let h='<div class="card-carousel-wrap"><div class="card-carousel" id="cardCarousel">';
+  CARD_DEFS.forEach(cd=>{
+    const arr=S.cards[cd.id]||[];const done=arr.filter(Boolean).length;const full=done===cd.total;
+    h+=`<div class="card-slot${full?" card-slot-done":""}"><div class="card-img-wrap"><img class="card-img" src="${cd.img}" alt="${cd.name}" loading="lazy"><div class="card-mask">`;
+    cd.frags.forEach((f,i)=>{h+=`<div class="card-piece${arr[i]?" unlocked":""}" style="top:${f.region.top};left:${f.region.left};width:${f.region.width};height:${f.region.height};"></div>`;});
+    h+=`</div><div class="card-lock${done>0?" hide":""}">🔒</div></div><div class="card-info"><div class="card-info-name">${cd.name}</div><div class="card-info-line">${cd.line}</div><div class="card-info-prog">${done} / ${cd.total}</div></div></div>`;
+  });
+  h+='</div><div class="card-dots" id="cardDots">';
+  CARD_DEFS.forEach((_,i)=>{h+=`<div class="card-dot${i===0?" active":""}"></div>`;});
+  h+='</div></div>';return h;
+}
+function initCarouselDots(){
+  const c=document.getElementById('cardCarousel');if(!c)return;
+  const dots=document.querySelectorAll('#cardDots .card-dot');
+  c.addEventListener('scroll',()=>{const sw=c.scrollWidth-c.clientWidth;const pct=sw>0?c.scrollLeft/sw:0;const idx=Math.round(pct*(CARD_DEFS.length-1));dots.forEach((d,i)=>d.classList.toggle('active',i===idx));});
+}
+function renderAchieve(){
+  const total=ACHS.length,unlocked=Object.keys(S.ach).length;
+  let h=`<div style="text-align:center;margin-bottom:20px;"><div style="font-family:'Outfit';font-size:13px;color:#a08888;margin-bottom:8px;">成就进度</div><div style="font-family:'Outfit';font-size:32px;font-weight:800;color:#5a4a4a;">${unlocked}<span style="font-size:16px;color:#b09898;">/${total}</span></div><div style="height:6px;border-radius:3px;background:rgba(219,147,158,0.15);overflow:hidden;margin:12px 20px 0;"><div style="height:100%;border-radius:3px;width:${unlocked/total*100}%;background:linear-gradient(90deg,#a3b0c4,#c4868e,#d4a840);transition:width 0.5s ease;"></div></div></div>`;
+  h+=renderCardCarousel();
+  const cats=["生活","学业","德语","身心","恶女","成长","彩蛋"];const ro=["legend","epic","rare","normal"];
+  cats.forEach(cat=>{const ca=ACHS.filter(a=>a.cat===cat);if(!ca.length)return;const cu=ca.filter(a=>S.ach[a.id]).length;
+  h+=`<div style="margin-bottom:20px;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><div class="section-title" style="color:#8a6a6e;">${cat}</div><div style="font-size:12px;color:#b09898;font-family:'Outfit';">${cu}/${ca.length}</div></div>`;
+  const sorted=[...ca].sort((a,b)=>{const aU=S.ach[a.id]?1:0,bU=S.ach[b.id]?1:0;if(aU!==bU)return bU-aU;return ro.indexOf(a.r)-ro.indexOf(b.r);});
+  sorted.forEach(a=>{const r=ACH_R[a.r];if(S.ach[a.id]){const d=fmtDate(S.ach[a.id].d);h+=`<div class="ach-wall-card ${r.wc}"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;"><div style="font-size:14px;font-weight:600;color:#5a4a4a;">「${a.name}」</div><div style="font-size:11px;color:${r.color};font-family:'Outfit';font-weight:600;">${r.stars}</div></div><div style="font-size:12px;color:#8a7a7a;line-height:1.6;margin-bottom:6px;">${a.msg}</div><div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:11px;color:#b09898;">${d}</span><span style="font-size:12px;font-weight:700;font-family:'Outfit';color:${r.color};">+${a.pts}</span></div></div>`;}else{h+=`<div class="ach-wall-card ach-locked-${a.r}"><div style="display:flex;justify-content:space-between;align-items:center;"><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:18px;opacity:${a.r==='legend'?0.5:a.r==='epic'?0.4:0.25};">🔒</span><span style="font-size:13px;color:${a.r==='legend'?'rgba(196,134,142,0.5)':a.r==='epic'?'rgba(212,168,64,0.45)':a.r==='rare'?'rgba(168,168,184,0.45)':'rgba(163,176,196,0.4)'};">${a.r==='legend'?'— ? ? ? —':a.r==='epic'?'· · ·':'???'}</span></div><div style="font-size:11px;color:${a.r==='legend'?'rgba(196,134,142,0.5)':a.r==='epic'?'rgba(212,168,64,0.45)':a.r==='rare'?'rgba(168,168,184,0.45)':'rgba(163,176,196,0.4)'};font-family:'Outfit';">${r.stars}</div></div></div>`;}});
+  h+=`</div>`;});
+  document.getElementById("content-achieve").innerHTML=h;
+  setTimeout(initCarouselDots,50);
+}
 /* ═══════ INIT ═══════ */
-loadState();render();
+loadState();render();setTimeout(checkCardFragments,500);
 </script>
-</body>
-</html>
+</body></html>
