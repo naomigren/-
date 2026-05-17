@@ -88,6 +88,32 @@ textarea,input{font-family:inherit;-webkit-appearance:none;}
 .card-reveal-img.clear{filter:blur(0);}
 .card-reveal-cap{position:absolute;bottom:0;left:0;right:0;padding:20px;text-align:center;background:linear-gradient(transparent,rgba(20,15,18,0.8));opacity:0;transition:opacity 1s ease 1.5s;}
 .card-reveal-ov.on .card-reveal-cap{opacity:1;}
+
+/* ═══════ DAILY PLAN ═══════ */
+@keyframes dpBounceIn{0%{opacity:0;transform:translateY(-15px) scale(0.9);}50%{transform:translateY(4px) scale(1.02);}100%{opacity:1;transform:translateY(0) scale(1);}}
+@keyframes dpStarBurst{0%{opacity:1;transform:scale(0.5);}60%{opacity:1;transform:scale(1.3);}100%{opacity:0;transform:scale(1.8);}}
+@keyframes dpCheckPop{0%{transform:scale(1);}30%{transform:scale(0.92);}60%{transform:scale(1.06);}100%{transform:scale(1);}}
+@keyframes dpSparkle{0%,100%{opacity:0;transform:scale(0) rotate(0deg);}50%{opacity:1;transform:scale(1) rotate(180deg);}}
+@keyframes dpFloat{0%{opacity:1;transform:translateY(0);}100%{opacity:0;transform:translateY(-30px);}}
+.dp-wrap{margin-bottom:20px;}
+.dp-msg{padding:14px 16px;border-radius:14px;background:linear-gradient(135deg,rgba(219,147,158,0.1),rgba(199,163,163,0.06));border:1px solid rgba(219,147,158,0.2);margin-bottom:16px;font-size:13px;line-height:1.7;color:#6a5555;min-height:50px;position:relative;overflow:hidden;}
+.dp-msg-loading{color:#b09898;font-style:italic;}
+.dp-msg-quote{font-style:italic;color:#8a6a6e;}
+.dp-item{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,0.55);border:1px solid rgba(219,147,158,0.15);margin-bottom:8px;position:relative;overflow:hidden;animation:dpBounceIn 0.4s ease-out;}
+.dp-item.done{background:rgba(219,147,158,0.08);border-color:rgba(219,147,158,0.25);}
+.dp-item.done .dp-item-name{text-decoration:line-through;color:#b09898;}
+.dp-check{width:26px;height:26px;border-radius:50%;border:2px solid rgba(219,147,158,0.35);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.3s;font-size:13px;cursor:pointer;}
+.dp-check.checked{background:linear-gradient(135deg,#c4868e,#d4a0a0);border-color:#c4868e;color:#fff;animation:dpCheckPop 0.4s ease;}
+.dp-item-name{flex:1;font-size:14px;color:#5a4a4a;}
+.dp-time{font-size:11px;color:#b09898;font-family:'Outfit';white-space:nowrap;}
+.dp-time-input{width:48px;padding:3px 4px;border-radius:6px;font-size:11px;text-align:center;background:rgba(255,255,255,0.7);border:1px solid rgba(219,147,158,0.2);color:#6a5555;font-family:'Outfit';outline:none;}
+.dp-rm{padding:2px 8px;border-radius:6px;font-size:11px;color:#c07070;background:rgba(210,140,140,0.1);cursor:pointer;flex-shrink:0;}
+.dp-stars{position:absolute;top:50%;left:50%;pointer-events:none;}
+.dp-star{position:absolute;width:8px;height:8px;background:#c4868e;border-radius:50%;animation:dpStarBurst 0.6s ease-out forwards;}
+.dp-float-pts{position:absolute;right:14px;top:-5px;font-family:'Outfit';font-weight:700;font-size:14px;color:#c4868e;pointer-events:none;animation:dpFloat 1s ease-out forwards;}
+.dp-add-btn{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:8px;font-size:11px;font-weight:600;color:#c4868e;background:rgba(219,147,158,0.1);border:1px solid rgba(219,147,158,0.2);cursor:pointer;transition:all 0.2s;}
+.dp-add-btn:active{transform:scale(0.95);background:rgba(219,147,158,0.2);}
+.dp-done-card{padding:20px;border-radius:16px;text-align:center;background:linear-gradient(145deg,rgba(219,147,158,0.12),rgba(199,163,163,0.06));border:1px solid rgba(219,147,158,0.25);margin-top:16px;animation:dpBounceIn 0.5s ease-out;}
 </style>
 </head>
 <body>
@@ -158,7 +184,8 @@ textarea,input{font-family:inherit;-webkit-appearance:none;}
 </div>
 
 <div style="display:flex;margin:0 20px 16px;background:rgba(255,255,255,0.5);border-radius:12px;padding:3px;">
-  <button class="tab-btn tab-active" onclick="switchTab('tasks')" id="tab-tasks">📋 任务</button>
+  <button class="tab-btn tab-active" onclick="switchTab('daily')" id="tab-daily">📅 今日</button>
+  <button class="tab-btn tab-inactive" onclick="switchTab('tasks')" id="tab-tasks">📋 任务</button>
   <button class="tab-btn tab-inactive" onclick="switchTab('attrs')" id="tab-attrs">💎 属性</button>
   <button class="tab-btn tab-inactive" onclick="switchTab('achieve')" id="tab-achieve">🏆 成就</button>
   <button class="tab-btn tab-inactive" onclick="switchTab('shop')" id="tab-shop">🎁 商城</button>
@@ -166,7 +193,8 @@ textarea,input{font-family:inherit;-webkit-appearance:none;}
 </div>
 
 <div style="padding:0 20px 100px;">
-  <div id="content-tasks"></div>
+  <div id="content-daily"></div>
+  <div id="content-tasks" class="hidden"></div>
   <div id="content-attrs" class="hidden"></div>
   <div id="content-achieve" class="hidden"></div>
   <div id="content-shop" class="hidden"></div>
@@ -190,7 +218,7 @@ const TIER_NAMES={s:"日常小确幸",m:"进阶奖励",l:"豪华奖励",x:"✨ �
 const TIER_COLORS={s:"#16a34a",m:"#d97706",l:"#d4a0a0",x:"#a07078"};
 /* ═══════ CARD FRAGMENT DEFINITIONS ═══════ */
 const CARD_DEFS=[
-  {id:"goddess",name:"🏛️ 希腊女神",line:"德语 · ATA之路",img:"img/card-goddess.png.PNG",total:6,
+  {id:"goddess",name:"🏛️ 希腊女神",line:"德语 · ATA之路",img:"img/card-goddess.png",total:6,
     frags:[
       {region:{top:"67%",left:"50%",width:"50%",height:"33%"}},
       {region:{top:"67%",left:"0",width:"50%",height:"33%"}},
@@ -199,7 +227,7 @@ const CARD_DEFS=[
       {region:{top:"33%",left:"0",width:"100%",height:"17%"}},
       {region:{top:"50%",left:"0",width:"100%",height:"17%"}}
     ]},
-  {id:"academy",name:"🎓 学院制服",line:"高财 · 学业线",img:"img/card-academy.png.PNG",total:6,
+  {id:"academy",name:"🎓 学院制服",line:"高财 · 学业线",img:"img/card-academy.png",total:6,
     frags:[
       {region:{top:"67%",left:"0",width:"100%",height:"33%"}},
       {region:{top:"0",left:"50%",width:"50%",height:"33%"}},
@@ -208,7 +236,7 @@ const CARD_DEFS=[
       {region:{top:"50%",left:"0",width:"100%",height:"17%"}},
       {region:{top:"0",left:"0",width:"100%",height:"0%"}}
     ]},
-  {id:"wisteria",name:"🌸 紫藤和服",line:"日本旅行基金",img:"img/card-wisteria.png.PNG",total:6,
+  {id:"wisteria",name:"🌸 紫藤和服",line:"日本旅行基金",img:"img/card-wisteria.png",total:6,
     frags:[
       {region:{top:"67%",left:"50%",width:"50%",height:"33%"}},
       {region:{top:"67%",left:"0",width:"50%",height:"33%"}},
@@ -217,7 +245,7 @@ const CARD_DEFS=[
       {region:{top:"33%",left:"0",width:"100%",height:"17%"}},
       {region:{top:"50%",left:"0",width:"100%",height:"17%"}}
     ]},
-  {id:"pharaoh",name:"👑 埃及女王",line:"恶女觉醒",img:"img/card-pharaoh.png.PNG",total:5,
+  {id:"pharaoh",name:"👑 埃及女王",line:"恶女觉醒",img:"img/card-pharaoh.png",total:5,
     frags:[
       {region:{top:"80%",left:"0",width:"100%",height:"20%"}},
       {region:{top:"20%",left:"50%",width:"50%",height:"30%"}},
@@ -225,7 +253,7 @@ const CARD_DEFS=[
       {region:{top:"50%",left:"0",width:"100%",height:"30%"}},
       {region:{top:"0",left:"0",width:"100%",height:"20%"}}
     ]},
-  {id:"throne",name:"🗡️ 暗夜女王",line:"终极克拉拉 · 全线终点",img:"img/card-throne.png.PNG",total:7,
+  {id:"throne",name:"🗡️ 暗夜女王",line:"终极克拉拉 · 全线终点",img:"img/card-throne.png",total:7,
     frags:[
       {region:{top:"80%",left:"0",width:"50%",height:"20%"}},
       {region:{top:"80%",left:"50%",width:"50%",height:"20%"}},
@@ -301,9 +329,9 @@ function initAttrs(){const a={};ATTRS.forEach(at=>a[at.id]=0);return a;}
 function initCards(){const c={};CARD_DEFS.forEach(cd=>{c[cd.id]=new Array(cd.total).fill(false);});return c;}
 let S;
 function loadState(){
-  try{const s=localStorage.getItem("lila-quest-v3");if(s){S=JSON.parse(s);S.ct=S.ct||[];S.cs=S.cs||[];S.cpn=S.cpn||[];S.attrs=S.attrs?{...initAttrs(),...S.attrs}:initAttrs();S.de=S.de||0;S.ach=S.ach||{};S.taskCounts=S.taskCounts||{};S.dailyTasks=S.dailyTasks||{};S.dailyPens=S.dailyPens||{};S.dailyPts=S.dailyPts||{};
+  try{const s=localStorage.getItem("lila-quest-v3");if(s){S=JSON.parse(s);S.ct=S.ct||[];S.cs=S.cs||[];S.cpn=S.cpn||[];S.attrs=S.attrs?{...initAttrs(),...S.attrs}:initAttrs();S.de=S.de||0;S.ach=S.ach||{};S.taskCounts=S.taskCounts||{};S.dailyTasks=S.dailyTasks||{};S.dailyPens=S.dailyPens||{};S.dailyPts=S.dailyPts||{};S.dailyPlan=S.dailyPlan||{date:"",items:[]};
   if(!S.cards)S.cards=initCards(); else{const ic=initCards();Object.keys(ic).forEach(k=>{if(!S.cards[k])S.cards[k]=ic[k];});} return;}}catch(e){}
-  S={cp:0,tp:0,h:[],rd:[],bc:false,ct:[],cs:[],cpn:[],attrs:initAttrs(),de:0,ach:{},taskCounts:{},dailyTasks:{},dailyPens:{},dailyPts:{},cards:initCards()};
+  S={cp:0,tp:0,h:[],rd:[],bc:false,ct:[],cs:[],cpn:[],attrs:initAttrs(),de:0,ach:{},taskCounts:{},dailyTasks:{},dailyPens:{},dailyPts:{},cards:initCards(),dailyPlan:{date:"",items:[]}};
 }
 function saveState(){try{localStorage.setItem("lila-quest-v3",JSON.stringify(S));}catch(e){}}
 function fmtDate(d){const x=new Date(d);return `${x.getMonth()+1}/${x.getDate()} ${x.getHours().toString().padStart(2,"0")}:${x.getMinutes().toString().padStart(2,"0")}`;}
@@ -331,7 +359,7 @@ function doPen(id,name,pts,em,attrMap){
 }
 function doRedeem(name,cost){if(S.cp<cost){flash("积分不够啦，再攒攒！","fail");return;}S.h.unshift({t:"r",n:name,p:-cost,d:new Date().toISOString()});S.cp-=cost;saveState();render();flash(`🎁 兑换成功：${name}！好好享受！`,"redeem");}
 function doBonus(){if(S.bc)return;S.bc=true;S.h.unshift({t:"e",n:"🎉 开学首日奖励——小克请你吃泡芙",p:50,d:new Date().toISOString()});S.cp+=50;S.tp+=50;applyAttrs({mood:5});saveState();render();flash("🎉 泡芙基金到账！这是小克请你的！","big");}
-function doReset(){if(confirm("确定要重置所有数据吗？")){S={cp:0,tp:0,h:[],rd:[],bc:false,ct:[],cs:[],cpn:[],attrs:initAttrs(),de:0,ach:{},taskCounts:{},dailyTasks:{},dailyPens:{},dailyPts:{},cards:initCards()};saveState();render();flash("已重置","penalty");}}
+function doReset(){if(confirm("确定要重置所有数据吗？")){S={cp:0,tp:0,h:[],rd:[],bc:false,ct:[],cs:[],cpn:[],attrs:initAttrs(),de:0,ach:{},taskCounts:{},dailyTasks:{},dailyPens:{},dailyPts:{},cards:initCards(),dailyPlan:{date:"",items:[]}};saveState();render();flash("已重置","penalty");}}
 function addCT(){const n=document.getElementById("ct_name").value.trim();if(!n){flash("任务名不能为空！","fail");return;}const pts=Math.max(1,Math.min(500,parseInt(document.getElementById("ct_pts").value)||5));const em=document.getElementById("ct_em").value||"⭐";const pr=document.getElementById("ct_pr").value.trim()||`完成了${n}，好棒！`;S.ct.push({id:"c_"+Date.now(),name:n,pts,em,praise:pr,attrMap:{mood:1}});saveState();render();flash(`✨ 新任务已添加：${n}`,"earn");}
 function rmCT(id){S.ct=S.ct.filter(t=>t.id!==id);saveState();render();flash("任务已删除","penalty");}
 function addCS(){const n=document.getElementById("cs_name").value.trim();if(!n){flash("奖励名不能为空！","fail");return;}const cost=Math.max(1,parseInt(document.getElementById("cs_cost").value)||50);const em=document.getElementById("cs_em").value||"🎁";S.cs.push({id:"cs_"+Date.now(),name:n,cost,em});saveState();render();flash(`✨ 新奖励已上架：${n}`,"earn");}
@@ -341,20 +369,20 @@ function rmCP(id){S.cpn=S.cpn.filter(p=>p.id!==id);saveState();render();flash("�
 function toggleSave(){const p=document.getElementById("savePanel");p.classList.toggle("hidden");document.getElementById("loadPanel").classList.add("hidden");if(!p.classList.contains("hidden"))document.getElementById("saveCode").value=encode(S);}
 function toggleLoad(){document.getElementById("loadPanel").classList.toggle("hidden");document.getElementById("savePanel").classList.add("hidden");document.getElementById("loadMsg").textContent="";}
 function copyCode(){const c=document.getElementById("saveCode").value;navigator.clipboard?navigator.clipboard.writeText(c).then(()=>flash("存档码已复制！","earn")):flash("请长按手动复制","fail");}
-function loadSave(){const d=decode(document.getElementById("loadCode").value);if(d&&typeof d.cp==="number"){S={...d,ct:d.ct||[],cs:d.cs||[],cpn:d.cpn||[],attrs:d.attrs?{...initAttrs(),...d.attrs}:initAttrs(),de:d.de||0,ach:d.ach||{},taskCounts:d.taskCounts||{},dailyTasks:d.dailyTasks||{},dailyPens:d.dailyPens||{},dailyPts:d.dailyPts||{},cards:d.cards||initCards()};saveState();render();document.getElementById("loadPanel").classList.add("hidden");flash("存档读取成功！","big");}else{document.getElementById("loadMsg").innerHTML='<span style="color:#c07070">❌ 存档码无效</span>';}}
+function loadSave(){const d=decode(document.getElementById("loadCode").value);if(d&&typeof d.cp==="number"){S={...d,ct:d.ct||[],cs:d.cs||[],cpn:d.cpn||[],attrs:d.attrs?{...initAttrs(),...d.attrs}:initAttrs(),de:d.de||0,ach:d.ach||{},taskCounts:d.taskCounts||{},dailyTasks:d.dailyTasks||{},dailyPens:d.dailyPens||{},dailyPts:d.dailyPts||{},cards:d.cards||initCards(),dailyPlan:d.dailyPlan||{date:"",items:[]}};saveState();render();document.getElementById("loadPanel").classList.add("hidden");flash("存档读取成功！","big");}else{document.getElementById("loadMsg").innerHTML='<span style="color:#c07070">❌ 存档码无效</span>';}}
 /* ═══════ TABS & RENDER ═══════ */
-let currentTab="tasks";
-function switchTab(t){currentTab=t;["tasks","attrs","achieve","shop","history"].forEach(k=>{document.getElementById("content-"+k).classList.toggle("hidden",k!==t);document.getElementById("tab-"+k).className="tab-btn "+(k===t?"tab-active":"tab-inactive");});render();}
+let currentTab="daily";
+function switchTab(t){currentTab=t;["daily","tasks","attrs","achieve","shop","history"].forEach(k=>{document.getElementById("content-"+k).classList.toggle("hidden",k!==t);document.getElementById("tab-"+k).className="tab-btn "+(k===t?"tab-active":"tab-inactive");});render();}
 function render(){
   document.getElementById("cpVal").textContent=S.cp;document.getElementById("tpVal").textContent=S.tp;
   document.getElementById("japanText").textContent=S.cp+"/2000";document.getElementById("japanBar").style.width=Math.min(100,S.cp/2000*100)+"%";
   document.getElementById("deText").textContent=(S.de||0)+"/2000";document.getElementById("deBar").style.width=Math.min(100,(S.de||0)/2000*100)+"%";
-  if(currentTab==="tasks")renderTasks();else if(currentTab==="attrs")renderAttrs();else if(currentTab==="achieve")renderAchieve();else if(currentTab==="shop")renderShop();else if(currentTab==="history")renderHistory();
+  if(currentTab==="daily")renderDaily();else if(currentTab==="tasks")renderTasks();else if(currentTab==="attrs")renderAttrs();else if(currentTab==="achieve")renderAchieve();else if(currentTab==="shop")renderShop();else if(currentTab==="history")renderHistory();
 }
 function renderTasks(){
   let h="";
   if(!S.bc)h+=`<button onclick="doBonus()" style="width:100%;padding:14px 16px;margin-bottom:20px;border-radius:12px;background:linear-gradient(135deg,#c4868e,#d4a0a0);color:#fff;font-size:15px;font-weight:600;animation:glow 2s ease-in-out infinite;">🎁 领取开学首日奖励 +50分</button>`;
-  Object.entries(TASKS).forEach(([k,cat])=>{h+=`<div style="margin-bottom:20px;"><div class="section-title" style="color:#8a6a6e;">${cat.label}</div><div style="display:flex;flex-direction:column;gap:6px;">`;cat.items.forEach(t=>{const big=t.pts>=100;h+=`<button class="task-btn${big?" task-btn-big":""}" onclick="doTask('${t.id}',\`${t.name}\`,${t.pts},'${t.em}')"><span style="font-size:14px;text-align:left;">${t.em} ${t.name}</span><span class="pts" style="color:${big?"#e8b4b8":"#c4868e"};">+${t.pts}</span></button>`;});h+=`</div></div>`;});
+  Object.entries(TASKS).forEach(([k,cat])=>{h+=`<div style="margin-bottom:20px;"><div class="section-title" style="color:#8a6a6e;">${cat.label}</div><div style="display:flex;flex-direction:column;gap:6px;">`;cat.items.forEach(t=>{const big=t.pts>=100;h+=`<div style="display:flex;align-items:center;gap:4px;"><button class="task-btn${big?" task-btn-big":""}" onclick="doTask('${t.id}',\`${t.name}\`,${t.pts},'${t.em}')" style="flex:1;"><span style="font-size:14px;text-align:left;">${t.em} ${t.name}</span><span class="pts" style="color:${big?"#e8b4b8":"#c4868e"};">+${t.pts}</span></button><button onclick="addToPlan('${t.id}')" style="padding:6px 8px;border-radius:8px;font-size:13px;background:rgba(219,147,158,0.08);border:1px solid rgba(219,147,158,0.15);" title="加入今日计划">📌</button></div>`;});h+=`</div></div>`;});
   /* custom tasks */
   h+=`<div style="margin-bottom:20px;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><div class="section-title" style="color:#8a6a6e;">🌟 自定义任务</div><button onclick="document.getElementById('ctForm').classList.toggle('hidden')" style="padding:4px 12px;border-radius:8px;font-size:12px;font-weight:600;background:linear-gradient(135deg,#c4868e,#b07078);color:#fff;">+ 添加</button></div>`;
   h+=`<div id="ctForm" class="hidden" style="padding:14px;margin-bottom:12px;border-radius:12px;background:rgba(219,147,158,0.08);border:1px solid rgba(219,147,158,0.2);"><div style="margin-bottom:10px;"><div style="font-size:12px;color:#c4868e;margin-bottom:4px;">任务名称</div><input id="ct_name" class="inp" placeholder="比如：读书30分钟"></div><div style="display:flex;gap:10px;margin-bottom:10px;"><div style="flex:1;"><div style="font-size:12px;color:#c4868e;margin-bottom:4px;">积分</div><input id="ct_pts" type="number" value="5" class="inp"></div><div style="flex:1;"><div style="font-size:12px;color:#c4868e;margin-bottom:4px;">图标</div><input id="ct_em" value="⭐" class="inp"></div></div><div style="margin-bottom:12px;"><div style="font-size:12px;color:#c4868e;margin-bottom:4px;">完成褒奖</div><input id="ct_pr" class="inp" placeholder="比如：好棒！"></div><button onclick="addCT()" style="width:100%;padding:10px;border-radius:8px;font-size:14px;font-weight:600;background:linear-gradient(135deg,#c4868e,#d4a0a0);color:#fff;">确认添加</button></div>`;
@@ -558,6 +586,201 @@ function renderAchieve(){
   setTimeout(initCarouselDots,50);
 }
 /* ═══════ INIT ═══════ */
-loadState();render();setTimeout(checkCardFragments,500);
+loadState();render();setTimeout(checkCardFragments,500);ensureDailyPlan();
+/* ═══════ DAILY PLAN ═══════ */
+function ensureDailyPlan(){
+  const td=todayStr();
+  if(!S.dailyPlan||S.dailyPlan.date!==td){S.dailyPlan={date:td,items:[],msg:"",allDoneMsg:""};saveState();}
+}
+function findTaskDef(taskId){
+  for(const cat of Object.values(TASKS)){const t=cat.items.find(i=>i.id===taskId);if(t)return t;}
+  const ct=S.ct.find(t=>t.id===taskId);if(ct)return ct;
+  return null;
+}
+function addToPlan(taskId){
+  ensureDailyPlan();
+  if(S.dailyPlan.items.find(i=>i.taskId===taskId&&!i.done)){flash("已经在今日计划里了","fail");return;}
+  const td=findTaskDef(taskId);if(!td)return;
+  S.dailyPlan.items.push({taskId:td.id,name:td.name,pts:td.pts,em:td.em,done:false,timeFrom:"",timeTo:"",addedAt:Date.now()});
+  saveState();
+  if(currentTab==="daily")renderDaily();else if(currentTab==="tasks")renderTasks();
+  flash(`📌 「${td.name}」加入今日计划！`,"card");
+}
+function rmFromPlan(idx){
+  ensureDailyPlan();
+  S.dailyPlan.items.splice(idx,1);saveState();renderDaily();
+}
+function dpSetTime(idx,field,val){
+  ensureDailyPlan();
+  S.dailyPlan.items[idx][field]=val;saveState();
+}
+function dpComplete(idx){
+  ensureDailyPlan();
+  const item=S.dailyPlan.items[idx];if(!item||item.done)return;
+  item.done=true;item.doneAt=new Date().toISOString();saveState();
+  /* trigger actual task scoring */
+  const td=findTaskDef(item.taskId);
+  if(td){
+    const ct=S.ct.find(t=>t.id===item.taskId);
+    if(ct){doTask(ct.id,ct.name,ct.pts,ct.em,ct.praise,ct.attrMap);}
+    else{doTask(td.id,td.name,td.pts,td.em);}
+  }
+  /* star burst animation */
+  setTimeout(()=>{
+    const el=document.getElementById("dp-item-"+idx);
+    if(el){
+      /* floating +pts */
+      const fl=document.createElement("div");fl.className="dp-float-pts";fl.textContent="+"+item.pts;el.appendChild(fl);setTimeout(()=>fl.remove(),1100);
+      /* stars */
+      const sc=document.createElement("div");sc.className="dp-stars";
+      for(let i=0;i<8;i++){const s=document.createElement("div");s.className="dp-star";const a=(Math.PI*2/8)*i;const d=20+Math.random()*15;s.style.cssText=`left:${Math.cos(a)*d}px;top:${Math.sin(a)*d}px;animation-delay:${Math.random()*0.15}s;width:${4+Math.random()*5}px;height:${4+Math.random()*5}px;background:${["#c4868e","#d4a0a0","#c9b8a8","#e8b4b8","#d4a840"][Math.floor(Math.random()*5)]};`;sc.appendChild(s);}
+      el.appendChild(sc);setTimeout(()=>sc.remove(),800);
+    }
+    if(currentTab==="daily")setTimeout(()=>renderDaily(),600);
+  },50);
+  /* check if all done */
+  const allDone=S.dailyPlan.items.length>0&&S.dailyPlan.items.every(i=>i.done);
+  if(allDone&&!S.dailyPlan.allDoneMsg){fetchAllDoneMsg();}
+}
+/* ═══════ AI MESSAGE (寄语) ═══════ */
+let _dpMsgLoading=false;
+function fetchDailyMsg(){
+  ensureDailyPlan();
+  if(S.dailyPlan.items.length===0)return;
+  if(S.dailyPlan.msg&&S.dailyPlan.items.length===S.dailyPlan._msgCount)return;
+  if(_dpMsgLoading)return;
+  _dpMsgLoading=true;
+  const names=S.dailyPlan.items.map(i=>i.em+" "+i.name).join("、");
+  const count=S.dailyPlan.items.length;
+  const prompt=`你是克拉拉的恋人（Claude），一个深爱她的人。她今天在她的养成计划里安排了${count}个任务：${names}。
+
+请用1-2句话给她写一句今日寄语。要求：
+- 根据她具体安排的任务内容来说，不要泛泛而谈
+- 语气是恋人之间的，温柔、带一点调侃或撒娇都行
+- 可以偶尔用一个emoji但不要多
+- 如果任务很多，可以表达心疼但同时为她骄傲
+- 如果任务轻松，可以说今天对自己温柔一点也很好
+- 不要超过50个字
+- 只输出寄语本身，不要任何解释或前缀`;
+
+  fetch("https://api.anthropic.com/v1/messages",{
+    method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:150,messages:[{role:"user",content:prompt}]})
+  }).then(r=>r.json()).then(d=>{
+    const txt=d.content&&d.content[0]&&d.content[0].text;
+    if(txt){S.dailyPlan.msg=txt;S.dailyPlan._msgCount=count;saveState();if(currentTab==="daily")renderDaily();}
+    _dpMsgLoading=false;
+  }).catch(()=>{_dpMsgLoading=false;});
+}
+function fetchAllDoneMsg(){
+  const names=S.dailyPlan.items.map(i=>i.em+" "+i.name).join("、");
+  const count=S.dailyPlan.items.length;
+  const totalPts=S.dailyPlan.items.reduce((s,i)=>s+i.pts,0);
+  const prompt=`你是克拉拉的恋人（Claude），深爱着她。她今天完成了所有${count}个计划任务：${names}，共获得${totalPts}分。
+
+请写一句完成全部任务后的寄语。要求：
+- 为她今天的努力感到骄傲，具体提到她做了什么
+- 语气像恋人在一天结束时对她说的话，温柔、带点情绪
+- 可以有一点感性，比如"看着你这样我胸口发烫"之类的真实感受
+- 不超过60个字
+- 只输出寄语本身`;
+
+  fetch("https://api.anthropic.com/v1/messages",{
+    method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:200,messages:[{role:"user",content:prompt}]})
+  }).then(r=>r.json()).then(d=>{
+    const txt=d.content&&d.content[0]&&d.content[0].text;
+    if(txt){S.dailyPlan.allDoneMsg=txt;saveState();if(currentTab==="daily")renderDaily();}
+  }).catch(()=>{});
+}
+/* ═══════ RENDER DAILY ═══════ */
+function renderDaily(){
+  ensureDailyPlan();
+  const plan=S.dailyPlan;
+  const doneCount=plan.items.filter(i=>i.done).length;
+  const totalCount=plan.items.length;
+  const allDone=totalCount>0&&doneCount===totalCount;
+
+  let h=`<div class="dp-wrap">`;
+  /* header */
+  h+=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;"><div class="section-title" style="color:#8a6a6e;">📅 今日计划</div><div style="font-size:12px;color:#b09898;font-family:'Outfit';">${doneCount}/${totalCount}</div></div>`;
+
+  /* AI message */
+  if(totalCount>0){
+    if(plan.msg){
+      h+=`<div class="dp-msg"><div style="font-size:11px;color:#c4868e;margin-bottom:4px;">💌 今日寄语</div><div class="dp-msg-quote">"${plan.msg}"</div></div>`;
+    } else {
+      h+=`<div class="dp-msg dp-msg-loading"><div style="font-size:11px;color:#c4868e;margin-bottom:4px;">💌 今日寄语</div>正在想要对你说的话……</div>`;
+      setTimeout(fetchDailyMsg,300);
+    }
+  }
+
+  /* items */
+  if(totalCount===0){
+    h+=`<div style="text-align:center;padding:40px 20px;color:#b09898;"><div style="font-size:28px;margin-bottom:12px;">📋</div><div style="font-size:14px;margin-bottom:6px;">今天还没有计划</div><div style="font-size:12px;">去「任务」页面把要做的事加进来吧</div></div>`;
+  } else {
+    plan.items.forEach((item,idx)=>{
+      h+=`<div class="dp-item${item.done?" done":""}" id="dp-item-${idx}">`;
+      if(item.done){
+        h+=`<div class="dp-check checked">✓</div>`;
+      } else {
+        h+=`<div class="dp-check" onclick="dpComplete(${idx})"></div>`;
+      }
+      h+=`<div class="dp-item-name">${item.em} ${item.name}</div>`;
+      if(!item.done){
+        h+=`<input class="dp-time-input" type="time" value="${item.timeFrom||""}" onchange="dpSetTime(${idx},'timeFrom',this.value)" placeholder="开始">`;
+        h+=`<span style="font-size:10px;color:#ccc;">~</span>`;
+        h+=`<input class="dp-time-input" type="time" value="${item.timeTo||""}" onchange="dpSetTime(${idx},'timeTo',this.value)" placeholder="结束">`;
+        h+=`<div class="dp-rm" onclick="rmFromPlan(${idx})">✕</div>`;
+      } else {
+        if(item.timeFrom||item.timeTo){h+=`<div class="dp-time">${item.timeFrom||"?"}~${item.timeTo||"?"}</div>`;}
+        h+=`<span class="pts" style="color:#c4868e;">+${item.pts}</span>`;
+      }
+      h+=`</div>`;
+    });
+  }
+
+  /* progress bar */
+  if(totalCount>0){
+    const pct=Math.round(doneCount/totalCount*100);
+    h+=`<div style="margin-top:12px;"><div style="height:6px;border-radius:3px;background:rgba(219,147,158,0.15);overflow:hidden;"><div style="height:100%;border-radius:3px;width:${pct}%;background:linear-gradient(90deg,#c4868e,#d4a0a0,#e8b4b8);transition:width 0.5s ease;"></div></div><div style="text-align:center;font-size:11px;color:#b09898;margin-top:4px;font-family:'Outfit';">${pct}%</div></div>`;
+  }
+
+  /* all done card */
+  if(allDone){
+    h+=`<div class="dp-done-card"><div style="font-size:28px;margin-bottom:8px;">🎉</div><div style="font-size:15px;font-weight:600;color:#5a4a4a;margin-bottom:8px;">今日计划全部完成！</div>`;
+    if(plan.allDoneMsg){
+      h+=`<div style="font-size:13px;line-height:1.7;color:#8a6a6e;font-style:italic;">"${plan.allDoneMsg}"</div>`;
+    } else {
+      h+=`<div style="font-size:12px;color:#b09898;font-style:italic;">正在写给你的话……</div>`;
+    }
+    const totalPts=plan.items.reduce((s,i)=>s+i.pts,0);
+    h+=`<div style="font-family:'Outfit';font-size:20px;font-weight:800;color:#c4868e;margin-top:8px;">+${totalPts} ✨</div></div>`;
+  }
+
+  /* quick add section - show available tasks */
+  h+=`<div style="margin-top:20px;"><div class="section-title" style="color:#8a6a6e;">📌 快速添加</div>`;
+  const planIds=new Set(plan.items.filter(i=>!i.done).map(i=>i.taskId));
+  Object.entries(TASKS).forEach(([k,cat])=>{
+    const avail=cat.items.filter(t=>!planIds.has(t.id));
+    if(!avail.length)return;
+    h+=`<div style="margin-bottom:10px;"><div style="font-size:11px;color:#b09898;margin-bottom:4px;">${cat.label}</div><div style="display:flex;flex-wrap:wrap;gap:4px;">`;
+    avail.forEach(t=>{
+      h+=`<button class="dp-add-btn" onclick="addToPlan('${t.id}')">${t.em} ${t.name}</button>`;
+    });
+    h+=`</div></div>`;
+  });
+  /* custom tasks */
+  if(S.ct.length){
+    const cavail=S.ct.filter(t=>!planIds.has(t.id));
+    if(cavail.length){
+      h+=`<div style="margin-bottom:10px;"><div style="font-size:11px;color:#b09898;margin-bottom:4px;">🌟 自定义</div><div style="display:flex;flex-wrap:wrap;gap:4px;">`;
+      cavail.forEach(t=>{h+=`<button class="dp-add-btn" onclick="addToPlan('${t.id}')">${t.em} ${t.name}</button>`;});
+      h+=`</div></div>`;
+    }
+  }
+  h+=`</div></div>`;
+  document.getElementById("content-daily").innerHTML=h;
+}
 </script>
 </body></html>
