@@ -39,10 +39,10 @@ textarea,input{font-family:inherit;-webkit-appearance:none;}
 @keyframes pulseGlow{0%,100%{box-shadow:0 0 8px rgba(163,176,196,0.3);}50%{box-shadow:0 0 16px rgba(163,176,196,0.5);}}
 .achieve-overlay{position:fixed;top:0;left:0;width:100%;height:100%;z-index:2000;display:flex;align-items:center;justify-content:center;}
 .achieve-overlay-bg{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);}
-.achieve-card{position:relative;z-index:2001;width:85vw;max-width:340px;border-radius:20px;padding:28px 24px;text-align:center;animation:achieveSlideIn 0.5s ease-out;}
+.achieve-card{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2001;width:85vw;max-width:340px;border-radius:20px;padding:28px 24px;text-align:center;}
 .achieve-card-normal{background:linear-gradient(145deg,#e8edf3,#d5dce6);border:2px solid #a3b0c4;box-shadow:0 8px 32px rgba(163,176,196,0.4);}
-.achieve-card-rare{background:linear-gradient(145deg,#e8e8ef,#d8d8e2);border:2px solid #a8a8b8;box-shadow:0 8px 32px rgba(168,168,184,0.4);animation:achieveSlideIn 0.5s ease-out,pulseGlow 2s ease-in-out infinite;}
-.achieve-card-epic{background:linear-gradient(145deg,#faf5eb,#f0e8d8);border:2px solid #d4a840;box-shadow:0 8px 32px rgba(212,168,64,0.4);animation:achieveSlideIn 0.5s ease-out,achieveGlow 2s ease-in-out infinite;}
+.achieve-card-rare{background:linear-gradient(145deg,#e8e8ef,#d8d8e2);border:2px solid #a8a8b8;box-shadow:0 8px 32px rgba(168,168,184,0.4);animation:pulseGlow 2s ease-in-out infinite;}
+.achieve-card-epic{background:linear-gradient(145deg,#faf5eb,#f0e8d8);border:2px solid #d4a840;box-shadow:0 8px 32px rgba(212,168,64,0.4);animation:achieveGlow 2s ease-in-out infinite;}
 .achieve-card-legend{background:linear-gradient(145deg,#f5ede8,#efe4de);border:2px solid transparent;box-shadow:0 12px 48px rgba(196,134,142,0.5);animation:achieveSlideIn 0.5s ease-out;}
 .confetti-piece{position:fixed;top:-10px;z-index:2002;pointer-events:none;animation:confettiFall linear forwards;}
 .epic-flash{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1999;pointer-events:none;animation:epicFlash 0.6s ease-out forwards;}
@@ -493,12 +493,20 @@ const ACHS=[
 function spawnConfetti(n,cols){const c=document.getElementById("confettiContainer");for(let i=0;i<n;i++){const p=document.createElement("div");p.className="confetti-piece";const sz=Math.random()*8+4;p.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}vw;background:${cols[Math.floor(Math.random()*cols.length)]};border-radius:${Math.random()>0.5?"50%":"2px"};animation-duration:${Math.random()*2+2}s;animation-delay:${Math.random()*0.5}s`;c.appendChild(p);setTimeout(()=>p.remove(),4500);}}
 function showAchPopup(a){
   const r=ACH_R[a.r];const o=document.getElementById("achieveOverlay");
-  if(a.r==="normal"){spawnConfetti(20,["#a3b0c4","#c4d0e0","#8a9bb5"]);document.body.style.animation="shakeIt 0.3s ease";setTimeout(()=>document.body.style.animation="",400);}
-  else if(a.r==="rare"){spawnConfetti(50,["#a8a8b8","#c8c8d8","#d8d8e8"]);}
-  else if(a.r==="epic"){spawnConfetti(100,["#d4a840","#e8c860","#c49830","#f0d878"]);const f=document.createElement("div");f.className="epic-flash";f.style.background="#d4a840";document.body.appendChild(f);setTimeout(()=>f.remove(),700);}
-  else{spawnConfetti(150,["#c4868e","#d4a0a0","#c9b8a8","#a3b0c4","#d4a840"]);const f=document.createElement("div");f.className="epic-flash";f.style.background="linear-gradient(135deg,#c4868e,#d4a0a0)";document.body.appendChild(f);setTimeout(()=>f.remove(),700);}
+  /* Step 1: confetti & flash first */
+  if(a.r==="normal"){spawnConfetti(30,["#a3b0c4","#c4d0e0","#8a9bb5"]);document.body.style.animation="shakeIt 0.3s ease";setTimeout(()=>document.body.style.animation="",400);}
+  else if(a.r==="rare"){spawnConfetti(60,["#a8a8b8","#c8c8d8","#d8d8e8"]);spawnConfetti(30,["#a8a8b8","#c8c8d8","#d8d8e8"]);}
+  else if(a.r==="epic"){spawnConfetti(120,["#d4a840","#e8c860","#c49830","#f0d878"]);const f=document.createElement("div");f.className="epic-flash";f.style.background="#d4a840";document.body.appendChild(f);setTimeout(()=>f.remove(),700);setTimeout(()=>spawnConfetti(60,["#d4a840","#f0d878"]),500);}
+  else{spawnConfetti(180,["#c4868e","#d4a0a0","#c9b8a8","#a3b0c4","#d4a840"]);const f=document.createElement("div");f.className="epic-flash";f.style.background="linear-gradient(135deg,#c4868e,#d4a0a0)";document.body.appendChild(f);setTimeout(()=>f.remove(),700);setTimeout(()=>spawnConfetti(80,["#c4868e","#d4a0a0","#e8b4b8"]),600);setTimeout(()=>spawnConfetti(50,["#c4868e","#c9b8a8"]),1200);}
   const pc=a.r==="legend"?"#c4868e":a.r==="epic"?"#d4a840":a.r==="rare"?"#a8a8b8":"#a3b0c4";
-  o.innerHTML=`<div class="achieve-overlay" onclick="closeAch()"><div class="achieve-overlay-bg"></div><div class="achieve-card ${r.cc}" onclick="event.stopPropagation()"><div style="font-size:20px;letter-spacing:4px;margin-bottom:8px;">${r.stars}</div><div style="font-size:11px;letter-spacing:2px;color:${r.color};margin-bottom:8px;">${r.label}成就</div><div style="font-family:'Outfit';font-size:20px;font-weight:700;color:#5a4a4a;margin-bottom:12px;">「${a.name}」</div><div style="font-size:14px;line-height:1.7;color:#6a5a5a;margin-bottom:16px;">${a.msg}</div><div style="font-family:'Outfit';font-size:24px;font-weight:800;color:${pc};margin-bottom:16px;">+${a.pts}</div><button onclick="closeAch()" style="padding:10px 28px;border-radius:10px;font-size:14px;font-weight:600;color:#fff;background:linear-gradient(135deg,#c4868e,#d4a0a0);">收下</button></div></div>`;
+  /* Step 2: show overlay bg immediately, card delayed */
+  o.innerHTML=`<div class="achieve-overlay"><div class="achieve-overlay-bg"></div><div id="achCardInner" class="achieve-card ${r.cc}" style="opacity:0;transform:translate(-50%,-50%) scale(0.5);" onclick="event.stopPropagation()"><div style="font-size:20px;letter-spacing:4px;margin-bottom:8px;">${r.stars}</div><div style="font-size:11px;letter-spacing:2px;color:${r.color};margin-bottom:8px;">${r.label}成就</div><div style="font-family:'Outfit';font-size:20px;font-weight:700;color:#5a4a4a;margin-bottom:12px;">「${a.name}」</div><div style="font-size:14px;line-height:1.7;color:#6a5a5a;margin-bottom:16px;">${a.msg}</div><div style="font-family:'Outfit';font-size:24px;font-weight:800;color:${pc};margin-bottom:16px;">+${a.pts}</div><button onclick="closeAch()" style="padding:10px 28px;border-radius:10px;font-size:14px;font-weight:600;color:#fff;background:linear-gradient(135deg,#c4868e,#d4a0a0);">收下</button></div></div>`;
+  /* Step 3: card flies in after delay */
+  const delay=a.r==="legend"?800:a.r==="epic"?600:a.r==="rare"?400:200;
+  setTimeout(()=>{
+    const card=document.getElementById("achCardInner");
+    if(card){card.style.transition="opacity 0.6s ease, transform 0.6s cubic-bezier(0.16,1,0.3,1)";card.style.opacity="1";card.style.transform="translate(-50%,-50%) scale(1)";}
+  },delay);
 }
 function closeAch(){document.getElementById("achieveOverlay").innerHTML="";if(_achQ.length)setTimeout(()=>showAchPopup(_achQ.shift()),400);}
 let _achQ=[];
