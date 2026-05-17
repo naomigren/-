@@ -603,7 +603,7 @@ function addToPlan(taskId){
   const td=findTaskDef(taskId);if(!td)return;
   S.dailyPlan.items.push({taskId:td.id,name:td.name,pts:td.pts,em:td.em,done:false,timeFrom:"",timeTo:"",addedAt:Date.now()});
   saveState();
-  if(currentTab==="daily")renderDaily();else if(currentTab==="tasks")renderTasks();
+  renderDaily();if(currentTab==="tasks")renderTasks();
   flash(`📌 「${td.name}」加入今日计划！`,"card");
 }
 function rmFromPlan(idx){
@@ -636,7 +636,7 @@ function dpComplete(idx){
       for(let i=0;i<8;i++){const s=document.createElement("div");s.className="dp-star";const a=(Math.PI*2/8)*i;const d=20+Math.random()*15;s.style.cssText=`left:${Math.cos(a)*d}px;top:${Math.sin(a)*d}px;animation-delay:${Math.random()*0.15}s;width:${4+Math.random()*5}px;height:${4+Math.random()*5}px;background:${["#c4868e","#d4a0a0","#c9b8a8","#e8b4b8","#d4a840"][Math.floor(Math.random()*5)]};`;sc.appendChild(s);}
       el.appendChild(sc);setTimeout(()=>sc.remove(),800);
     }
-    if(currentTab==="daily")setTimeout(()=>renderDaily(),600);
+    setTimeout(()=>renderDaily(),600);
   },50);
   /* check if all done */
   const allDone=S.dailyPlan.items.length>0&&S.dailyPlan.items.every(i=>i.done);
