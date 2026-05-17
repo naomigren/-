@@ -643,7 +643,7 @@ function dpComplete(idx){
   if(allDone&&!S.dailyPlan.allDoneMsg){fetchAllDoneMsg();}
 }
 /* ═══════ AI MESSAGE (寄语) ═══════ */
-let _dpMsgLoading=false;
+var _dpMsgLoading=false;
 function fetchDailyMsg(){
   ensureDailyPlan();
   if(S.dailyPlan.items.length===0)return;
@@ -694,7 +694,7 @@ function fetchAllDoneMsg(){
   }).catch(()=>{});
 }
 /* ═══════ RENDER DAILY (always-visible top section) ═══════ */
-let _dpExpanded=true;
+var _dpExpanded=true;
 function toggleDpExpand(){_dpExpanded=!_dpExpanded;renderDaily();}
 function renderDaily(){
   ensureDailyPlan();
