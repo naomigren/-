@@ -774,5 +774,11 @@ function renderDaily(){
   h+=`</div>`;
   document.getElementById("content-daily").innerHTML=h;
 }
+  /* ★ 23:00日期翻转 */
+todayStr=function(){var d=new Date();if(d.getHours()>=23){d.setDate(d.getDate()+1);}return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
+yesterdayStr=function(){var d=new Date();if(d.getHours()<23){d.setDate(d.getDate()-1);}return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
+(function(){function _sr(){var n=new Date(),t=new Date(n.getFullYear(),n.getMonth(),n.getDate(),23,0,0,0);if(n>=t)t.setDate(t.getDate()+1);setTimeout(function(){ensureDailyPlan();render();_sr();},t-n);}_sr();})();
+
 </script>
 </body></html>
+
