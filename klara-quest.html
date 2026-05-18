@@ -427,8 +427,8 @@ function renderHistory(){
   document.getElementById("content-history").innerHTML=h;
 }
 /* ═══════ ACHIEVEMENT HELPERS ═══════ */
-function todayStr(){return new Date().toISOString().slice(0,10);}
-function yesterdayStr(){const d=new Date();d.setDate(d.getDate()-1);return d.toISOString().slice(0,10);}
+function todayStr(){var d=new Date();if(d.getHours()>=23){d.setDate(d.getDate()+1);}return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function yesterdayStr(){var d=new Date();if(d.getHours()<23){d.setDate(d.getDate()-1);}return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function daysBetween(a,b){return Math.floor((new Date(b)-new Date(a))/86400000);}
 function tList(){return S.dailyTasks[todayStr()]||[];}
 function hasPenToday(id){return(S.dailyPens[todayStr()]||[]).includes(id);}
@@ -594,7 +594,7 @@ function renderAchieve(){
   setTimeout(initCarouselDots,50);
 }
 /* ═══════ INIT ═══════ */
-try{loadState();render();setTimeout(checkCardFragments,500);ensureDailyPlan();}catch(e){document.body.innerHTML+='<pre style="color:red;padding:20px;font-size:12px;">ERROR: '+e.message+'\n'+e.stack+'</pre>';}
+try{loadState();render();setTimeout(checkCardFragments,500);ensureDailyPlan();(function(){function _sr(){var n=new Date(),t=new Date(n.getFullYear(),n.getMonth(),n.getDate(),23,0,0,0);if(n>=t)t.setDate(t.getDate()+1);setTimeout(function(){ensureDailyPlan();render();_sr();},t-n);}_sr();})();}catch(e){document.body.innerHTML+='<pre style="color:red;padding:20px;font-size:12px;">ERROR: '+e.message+'\n'+e.stack+'</pre>';}
 /* ═══════ DAILY PLAN ═══════ */
 function ensureDailyPlan(){
   const td=todayStr();
@@ -774,11 +774,5 @@ function renderDaily(){
   h+=`</div>`;
   document.getElementById("content-daily").innerHTML=h;
 }
-  /* ★ 23:00日期翻转 */
-todayStr=function(){var d=new Date();if(d.getHours()>=23){d.setDate(d.getDate()+1);}return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
-yesterdayStr=function(){var d=new Date();if(d.getHours()<23){d.setDate(d.getDate()-1);}return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
-(function(){function _sr(){var n=new Date(),t=new Date(n.getFullYear(),n.getMonth(),n.getDate(),23,0,0,0);if(n>=t)t.setDate(t.getDate()+1);setTimeout(function(){ensureDailyPlan();render();_sr();},t-n);}_sr();})();
-
 </script>
 </body></html>
-
