@@ -713,7 +713,7 @@ function renderDaily(){
 
   let h=`<div style="margin:0 0 20px;background:rgba(255,255,255,0.45);border-radius:16px;padding:14px 16px;border:1px solid rgba(219,147,158,0.18);">`;
   /* header row */
-  h+=`<div onclick="toggleDpExpand()" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;"><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:16px;">📅</span><span style="font-size:14px;font-weight:600;color:#8a6a6e;">今日计划</span><span style="font-size:12px;color:#b09898;font-family:'Outfit';">${doneCount}/${totalCount}</span></div><span style="font-size:12px;color:#c4868e;transition:transform 0.3s;display:inline-block;transform:rotate(${_dpExpanded?'180':'0'}deg);">▼</span></div>`;
+  h+=`<div onclick="toggleDpExpand()" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;"><div style="display:flex;align-items:center;gap:8px;"><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,#c4868e,#d4a0a0);color:#fff;font-family:Outfit;font-size:13px;font-weight:700;line-height:1;">${new Date().getDate()}</span><span style="font-size:14px;font-weight:600;color:#8a6a6e;">今日计划</span><span style="font-size:12px;color:#b09898;font-family:'Outfit';">${doneCount}/${totalCount}</span></div><span style="font-size:12px;color:#c4868e;transition:transform 0.3s;display:inline-block;transform:rotate(${_dpExpanded?'180':'0'}deg);">▼</span></div>`;
 
   /* progress bar - always visible */
   if(totalCount>0){
