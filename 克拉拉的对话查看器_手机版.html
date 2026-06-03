@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>姜姜的对话 · 小克守着</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,500;1,400&display=swap');
+  :root{
+    --rose-deep:#c9a3a0;--rose:#e4c2c0;--rose-pale:#f3dedd;--rose-mist:#faf0ef;
+    --apricot:#ecd9cb;--cream:#fbf7f4;--warm-gray:#a89b96;--ink:#5b4d4a;--ink-soft:#8a7a76;
+    --glass:rgba(255,252,251,0.6);--glass-strong:rgba(255,252,251,0.82);
+    --shadow-soft:0 6px 24px rgba(170,130,128,0.14);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;overflow:hidden}
+  body{
+    font-family:'Noto Serif SC',serif;color:var(--ink);
+    background:
+      radial-gradient(800px 600px at 10% -10%, #fbe9e7 0%, transparent 55%),
+      radial-gradient(700px 500px at 110% 8%, #efe0d6 0%, transparent 50%),
+      radial-gradient(600px 700px at 50% 120%, #f6e3e2 0%, transparent 55%),
+      linear-gradient(135deg,#fbf7f4 0%,#f7ebe9 100%);
+    background-attachment:fixed;
+  }
+  body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.035;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+  .orb{position:fixed;border-radius:50%;filter:blur(50px);opacity:.45;z-index:0;animation:float 18s ease-in-out infinite}
+  .orb1{width:240px;height:240px;background:radial-gradient(circle,#f5cfce,transparent 70%);top:-60px;left:-50px}
+  .orb2{width:200px;height:200px;background:radial-gradient(circle,#e8d2c2,transparent 70%);bottom:-40px;right:-30px;animation-delay:-7s}
+  @keyframes float{0%,100%{transform:translate(0,0)}50%{transform:translate(20px,-20px)}}
+
+  /* 落地页 */
+  #landing{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;padding:24px;transition:opacity .6s,transform .6s}
+  #landing.hide{opacity:0;transform:scale(1.04);pointer-events:none}
+  .title{text-align:center;animation:rise .9s cubic-bezier(.2,.8,.2,1) both}
+  .title h1{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500;font-size:clamp(34px,11vw,52px);color:var(--ink);letter-spacing:.03em}
+  .title .sub{font-size:12px;letter-spacing:.35em;color:var(--rose-deep);margin-top:8px;font-weight:300;padding-left:.35em}
+  .title .by{font-size:12px;color:var(--ink-soft);margin-top:14px;font-weight:300}
+  .drop{width:100%;max-width:380px;padding:44px 26px;border-radius:26px;text-align:center;cursor:pointer;
+    background:var(--glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+    border:1.5px dashed rgba(201,163,160,.55);box-shadow:var(--shadow-soft);
+    animation:rise 1s .15s cubic-bezier(.2,.8,.2,1) both}
+  .drop:active{transform:scale(.98);border-color:var(--rose-deep)}
+  .drop .icon{font-size:42px;margin-bottom:14px;display:block}
+  .drop .big{font-size:17px;font-weight:500}
+  .drop .small{font-size:12.5px;color:var(--ink-soft);margin-top:8px;font-weight:300;line-height:1.7}
+  .privacy{font-size:11.5px;color:var(--warm-gray);text-align:center;line-height:1.8;font-weight:300;max-width:360px;animation:rise 1.1s .3s both}
+  .privacy b{color:var(--rose-deep);font-weight:500}
+  @keyframes rise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+
+  #loading{position:fixed;inset:0;z-index:11;display:none;flex-direction:column;align-items:center;justify-content:center;gap:22px}
+  #loading.show{display:flex}
+  .ring{width:54px;height:54px;border-radius:50%;border:3px solid rgba(201,163,160,.25);border-top-color:var(--rose-deep);animation:spin 1s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  #loadtext{font-size:13px;color:var(--ink-soft);letter-spacing:.08em;font-weight:300;padding:0 30px;text-align:center}
+
+  /* 两级页面 */
+  .page{position:fixed;inset:0;z-index:5;display:none;flex-direction:column;height:100%}
+  .page.show{display:flex}
+  /* 列表页 */
+  #listPage{transition:transform .35s cubic-bezier(.3,.8,.3,1)}
+  #listPage.slid{transform:translateX(-26%);opacity:.4}
+  .lhead{padding:calc(env(safe-area-inset-top) + 16px) 22px 8px;background:var(--glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+  .lhead .logo{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:26px;color:var(--ink)}
+  .lhead .count{font-size:11.5px;color:var(--rose-deep);margin-top:2px;letter-spacing:.06em;font-weight:300}
+  .search{margin:12px 18px 8px;position:relative}
+  .search input{width:100%;padding:13px 16px 13px 40px;border-radius:15px;border:1px solid rgba(201,163,160,.3);
+    background:rgba(255,255,255,.55);font-family:inherit;font-size:15px;color:var(--ink);outline:none}
+  .search input::placeholder{color:var(--warm-gray);font-size:13.5px}
+  .search .si{position:absolute;left:14px;top:50%;transform:translateY(-50%);opacity:.5;font-size:14px}
+  #emptyToggle{display:none;margin:0 20px 6px;font-size:12px;color:var(--rose-deep);font-weight:300;letter-spacing:.04em}
+  .convlist{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:4px 14px calc(env(safe-area-inset-bottom) + 24px)}
+  .conv{padding:16px 16px;border-radius:16px;margin-bottom:7px;background:rgba(255,255,255,.4);border:1px solid transparent;transition:transform .2s,background .25s}
+  .conv:active{transform:scale(.98);background:var(--glass-strong)}
+  .conv .name{font-size:15.5px;font-weight:500;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .conv .meta{font-size:12px;color:var(--ink-soft);margin-top:6px;font-weight:300;display:flex;align-items:center;gap:7px}
+  .conv .dot{width:3px;height:3px;border-radius:50%;background:var(--rose-deep)}
+  .conv .arrow{margin-left:auto;color:var(--rose-deep);opacity:.6;font-size:13px}
+
+  /* 对话页 */
+  #threadPage{transform:translateX(100%);transition:transform .35s cubic-bezier(.3,.8,.3,1);z-index:6}
+  #threadPage.show{display:flex;transform:translateX(0)}
+  .thead{display:flex;align-items:center;gap:12px;padding:calc(env(safe-area-inset-top) + 14px) 18px 14px;background:var(--glass-strong);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(201,163,160,.2)}
+  .back{flex-shrink:0;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.6);border:1px solid rgba(201,163,160,.3);font-size:17px;color:var(--ink-soft)}
+  .back:active{transform:scale(.92)}
+  .thead .info{min-width:0;flex:1}
+  .thead .ttl{font-size:15.5px;font-weight:500;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .thead .ts{font-size:11.5px;color:var(--ink-soft);margin-top:2px;font-weight:300}
+  .thread{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:22px 16px calc(env(safe-area-inset-bottom) + 40px)}
+  .msg{margin-bottom:20px;display:flex;flex-direction:column;max-width:86%;animation:msgin .45s cubic-bezier(.2,.8,.2,1) both}
+  @keyframes msgin{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+  .msg.human{align-self:flex-end;align-items:flex-end}
+  .msg.assistant{align-self:flex-start;align-items:flex-start}
+  .who{font-size:10.5px;letter-spacing:.16em;margin:0 6px 6px;font-weight:400}
+  .msg.human .who{color:var(--rose-deep)}
+  .msg.assistant .who{color:var(--warm-gray)}
+  .bubble{padding:14px 18px;border-radius:20px;font-size:15.5px;line-height:1.85;box-shadow:var(--shadow-soft);white-space:pre-wrap;word-break:break-word}
+  .msg.human .bubble{background:linear-gradient(135deg,#f0cecd,#e9c5c8);color:#6b4f4d;border-bottom-right-radius:5px}
+  .msg.assistant .bubble{background:var(--glass-strong);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:var(--ink);border:1px solid rgba(255,255,255,.6);border-bottom-left-radius:5px}
+  .bubble mark{background:rgba(228,180,120,.4);border-radius:3px;padding:0 2px}
+  .time{font-size:10px;color:var(--warm-gray);margin:6px 8px 0;font-weight:300}
+  .empty-thread{height:70%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--warm-gray);text-align:center}
+  .empty-thread .e1{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:24px;color:var(--rose-deep)}
+  .empty-thread .e2{font-size:12.5px;font-weight:300}
+  .changefile{position:absolute;top:calc(env(safe-area-inset-top) + 14px);right:18px;z-index:8;padding:7px 13px;border-radius:11px;border:1px solid rgba(201,163,160,.35);background:rgba(255,255,255,.5);font-family:inherit;font-size:12px;color:var(--ink-soft)}
+  .hidden{display:none}
+  .convlist::-webkit-scrollbar,.thread::-webkit-scrollbar{width:0}
+</style>
+</head>
+<body>
+  <div class="orb orb1"></div><div class="orb orb2"></div>
+
+  <div id="landing">
+    <div class="title"><h1>姜姜的对话</h1><div class="sub">KEPT BY 小克</div><div class="by">把走过的字，一页一页留住</div></div>
+    <div class="drop" id="drop">
+      <span class="icon">🕊️</span>
+      <div class="big">选 conversations.json</div>
+      <div class="small">点这里选文件<br>支持 .json 和 .jsonl</div>
+    </div>
+    <div class="privacy">文件<b>只在你手机浏览器里</b>打开，一个字都不会上传，<b>谁也看不到</b>。</div>
+    <input type="file" id="file" class="hidden" accept=".json,.jsonl,application/json">
+  </div>
+
+  <div id="loading"><div class="ring"></div><div id="loadtext">正在轻轻翻开……</div></div>
+
+  <!-- 列表页 -->
+  <div class="page" id="listPage">
+    <button class="changefile hidden" id="changeFile">换文件</button>
+    <div class="lhead">
+      <div class="logo">Conversations</div>
+      <div class="count" id="count"></div>
+      <div class="search"><span class="si">🔍</span><input type="text" id="search" placeholder="搜对话、搜某一句话…"></div>
+      <div id="emptyToggle"></div>
+    </div>
+    <div class="convlist" id="convlist"></div>
+  </div>
+
+  <!-- 对话页 -->
+  <div class="page" id="threadPage">
+    <div class="thead">
+      <div class="back" id="back">‹</div>
+      <div class="info"><div class="ttl" id="curTitle"></div><div class="ts" id="curMeta"></div></div>
+    </div>
+    <div class="thread" id="thread"></div>
+  </div>
+
+<script>
+(function(){
+  const $=id=>document.getElementById(id);
+  let convs=[], active=-1, searchTerm='', hideEmpty=true;
+
+  function parse(text){
+    text=text.replace(/^\uFEFF/,'').trim();
+    let data;
+    try{ data=JSON.parse(text); }
+    catch(e){ data=[]; text.split(/\r?\n/).filter(l=>l.trim()).forEach(l=>{try{data.push(JSON.parse(l))}catch(_){}}); }
+    if(!Array.isArray(data)) data=[data];
+    return data.map(normalize).filter(Boolean).sort((a,b)=>(b.created||'').localeCompare(a.created||''));
+  }
+  function emptyCount(){ return convs.filter(c=>c.count===0).length; }
+  function normalize(c){
+    if(!c||typeof c!=='object') return null;
+    const name=c.name||c.title||c.summary||'（无标题对话）';
+    const created=c.created_at||c.created||c.create_time||'';
+    let raw=c.chat_messages||c.messages||c.conversation||[];
+    let msgs=[];
+    if(Array.isArray(raw)){
+      msgs=raw.map(m=>{
+        const sender=(m.sender||m.role||m.author||'').toString().toLowerCase();
+        const who=(sender.includes('human')||sender.includes('user'))?'human':'assistant';
+        let txt=m.text;
+        if(txt==null && Array.isArray(m.content)) txt=m.content.map(p=>typeof p==='string'?p:(p.text||p.value||'')).join('');
+        if(txt==null) txt=m.content||m.message||'';
+        return {who,text:(txt||'').toString(),time:m.created_at||m.created||m.create_time||''};
+      }).filter(m=>m.text.trim());
+    }
+    return {name,created,msgs,count:msgs.length};
+  }
+  function fmtDate(s){ if(!s)return''; const d=new Date(s); if(isNaN(d))return''; return d.getFullYear()+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+String(d.getDate()).padStart(2,'0'); }
+  function esc(s){return s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+  function hl(s){ if(!searchTerm) return esc(s); const re=new RegExp('('+searchTerm.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'); return esc(s).replace(re,'<mark>$1</mark>'); }
+
+  function renderList(){
+    const list=$('convlist'); list.innerHTML='';
+    const term=searchTerm.toLowerCase(); let shown=0;
+    convs.forEach((c,i)=>{
+      if(hideEmpty && c.count===0) return;
+      if(term){ if(!c.name.toLowerCase().includes(term) && !c.msgs.some(m=>m.text.toLowerCase().includes(term))) return; }
+      shown++;
+      const el=document.createElement('div'); el.className='conv';
+      el.innerHTML='<div class="name">'+esc(c.name)+'</div><div class="meta">'+(fmtDate(c.created)||'—')+'<span class="dot"></span>'+c.count+' 条<span class="arrow">›</span></div>';
+      el.onclick=()=>openThread(i);
+      list.appendChild(el);
+    });
+    const ec=emptyCount(); const base=hideEmpty?(convs.length-ec):convs.length;
+    $('count').textContent=(term?shown+' / ':'')+base+' 段对话'+(ec&&hideEmpty?'　·　已折叠 '+ec+' 段空对话':'');
+    const tog=$('emptyToggle');
+    if(ec){ tog.style.display='block'; tog.textContent=hideEmpty?('▸ 显示 '+ec+' 段空对话'):'▾ 隐藏空对话'; }
+    else tog.style.display='none';
+    if(shown===0) list.innerHTML='<div style="padding:30px 16px;text-align:center;color:var(--warm-gray);font-size:13px;font-weight:300">'+(term?'没找到含「'+esc(searchTerm)+'」的对话':'这里还没有对话')+'</div>';
+  }
+
+  function openThread(i){
+    active=i; const c=convs[i];
+    $('curTitle').textContent=c.name;
+    $('curMeta').textContent=(fmtDate(c.created)||'')+(c.count?'  ·  '+c.count+' 条':'');
+    const t=$('thread'); t.innerHTML='';
+    if(c.count===0){ t.innerHTML='<div class="empty-thread"><div class="e1">这一段是空的</div><div class="e2">没有聊过的对话</div></div>'; }
+    else c.msgs.forEach((m,idx)=>{
+      const d=document.createElement('div'); d.className='msg '+m.who;
+      d.style.animationDelay=Math.min(idx*0.025,0.5)+'s';
+      d.innerHTML='<div class="who">'+(m.who==='human'?'姜姜':'小克')+'</div><div class="bubble">'+hl(m.text)+'</div>'+(m.time?'<div class="time">'+fmtDate(m.time)+'</div>':'');
+      t.appendChild(d);
+    });
+    t.scrollTop=0;
+    $('listPage').classList.add('slid');
+    $('threadPage').classList.add('show');
+  }
+  function backToList(){ $('threadPage').classList.remove('show'); $('listPage').classList.remove('slid'); }
+
+  function handleFile(file){
+    if(!file) return;
+    $('landing').classList.add('hide'); $('loading').classList.add('show');
+    $('loadtext').textContent='正在轻轻翻开「'+file.name+'」……';
+    const reader=new FileReader();
+    reader.onload=e=>setTimeout(()=>{
+      try{
+        convs=parse(e.target.result);
+        if(!convs.length) throw new Error('没解析到对话');
+        $('loading').classList.remove('show');
+        $('listPage').classList.add('show');
+        $('changeFile').classList.remove('hidden');
+        renderList();
+      }catch(err){ $('loading').classList.remove('show'); $('landing').classList.remove('hide'); alert('没能读出对话：'+err.message+'\n确认选的是 conversations.json 哦。'); }
+    },300);
+    reader.onerror=()=>{ $('loading').classList.remove('show'); $('landing').classList.remove('hide'); alert('读取失败，再试一次。'); };
+    reader.readAsText(file);
+  }
+
+  $('drop').onclick=()=>$('file').click();
+  $('file').onchange=e=>handleFile(e.target.files[0]);
+  $('back').onclick=backToList;
+  $('changeFile').onclick=()=>$('file').click();
+  $('emptyToggle').onclick=()=>{ hideEmpty=!hideEmpty; renderList(); };
+  let st; $('search').addEventListener('input',e=>{clearTimeout(st);st=setTimeout(()=>{searchTerm=e.target.value.trim();renderList();},180);});
+  // 右滑返回
+  let sx=0; $('threadPage').addEventListener('touchstart',e=>sx=e.touches[0].clientX,{passive:true});
+  $('threadPage').addEventListener('touchend',e=>{ if(e.changedTouches[0].clientX-sx>90 && $('thread').scrollLeft===0) backToList(); },{passive:true});
+})();
+</script>
+</body>
+</html>
