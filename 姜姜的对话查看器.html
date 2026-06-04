@@ -94,6 +94,7 @@
   .side-head{padding:26px 24px 16px}
   .side-head .logo{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:26px;color:var(--ink);letter-spacing:.03em}
   .side-head .count{font-size:12px;color:var(--rose-deep);margin-top:4px;letter-spacing:.1em;font-weight:300}
+  .side-head .src{font-size:11px;color:var(--warm-gray);margin-top:3px;letter-spacing:.08em;font-weight:300}
   .search{margin:6px 18px 14px;position:relative}
   .search input{
     width:100%;padding:12px 16px 12px 40px;border-radius:16px;border:1px solid rgba(201,163,160,.3);
@@ -118,6 +119,9 @@
   .conv .name{font-size:14px;font-weight:500;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .conv .meta{font-size:11.5px;color:var(--ink-soft);margin-top:5px;font-weight:300;display:flex;gap:8px;align-items:center}
   .conv .dot{width:3px;height:3px;border-radius:50%;background:var(--rose-deep)}
+  .conv .tag{font-size:10px;padding:1px 7px;border-radius:8px;letter-spacing:.06em;font-weight:400}
+  .conv .tag.gpt{background:rgba(16,163,127,.13);color:#0a7a5e}
+  .conv .tag.claude{background:rgba(217,119,87,.15);color:#a85432}
 
   .main{height:100vh;display:flex;flex-direction:column;position:relative;z-index:1}
   .topbar{
@@ -157,6 +161,7 @@
     color:var(--ink);border:1px solid rgba(255,255,255,.6);border-bottom-left-radius:6px;
   }
   .bubble mark{background:rgba(228,180,120,.4);color:inherit;border-radius:3px;padding:0 2px}
+  .bubble .att{display:inline-block;margin:4px 6px 4px 0;padding:5px 12px;border-radius:10px;background:rgba(201,163,160,.18);color:var(--ink-soft);font-size:12px;letter-spacing:.04em}
   .time{font-size:10.5px;color:var(--warm-gray);margin:7px 8px 0;font-weight:300;letter-spacing:.05em}
 
   .empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:var(--warm-gray);text-align:center}
@@ -175,7 +180,6 @@
       position:fixed;left:0;top:0;width:84%;max-width:330px;
       transform:translateX(-100%);transition:transform .4s cubic-bezier(.2,.8,.2,1);
       z-index:20;box-shadow:var(--shadow);
-      /* 关键：手机端给侧栏自己一层不透明背景，避免穿透 */
       background:
         radial-gradient(600px 400px at 0% 0%, #fbe9e7 0%, transparent 60%),
         linear-gradient(135deg,#fbf7f4 0%,#f5e6e4 100%);
@@ -201,7 +205,7 @@
     <div class="drop" id="drop">
       <span class="icon">🕊️</span>
       <div class="big">把 conversations.json 放进来</div>
-      <div class="small">拖进来 · 或点这里选文件<br>支持 .json 和 .jsonl</div>
+      <div class="small">拖进来 · 或点这里选文件<br>支持 Claude 和 ChatGPT 的导出 · .json 和 .jsonl</div>
     </div>
     <div class="privacy">
       文件<b>只在你的浏览器里</b>打开，一个字都不会上传，<b>谁也看不到</b>。<br>关掉页面，它就只回到你自己的文件里。
@@ -216,6 +220,7 @@
       <div class="side-head">
         <div class="logo">Conversations</div>
         <div class="count" id="count"></div>
+        <div class="src" id="src"></div>
       </div>
       <div class="search">
         <span class="si">🔍</span>
@@ -249,29 +254,38 @@
 <script>
 (function(){
   const $=id=>document.getElementById(id);
-  let convs=[], active=-1, searchTerm='';
+  let convs=[], active=-1, searchTerm='', sourceType='';
 
+  /* ---------- 解析入口：自动识别 Claude / ChatGPT ---------- */
   function parse(text){
     text=text.replace(/^\uFEFF/,'').trim();
     let data;
     try{ data=JSON.parse(text); }
     catch(e){
+      // 兼容 .jsonl 一行一条
       const lines=text.split(/\r?\n/).filter(l=>l.trim());
       data=[];
       for(const l of lines){ try{ data.push(JSON.parse(l)); }catch(_){} }
     }
     if(!Array.isArray(data)) data=[data];
-    return data.map(normalize)
+
+    // 自动识别格式：只要某条记录里有 mapping 就当 ChatGPT
+    const isGPT = data.some(c => c && typeof c === 'object' && c.mapping && typeof c.mapping === 'object');
+    sourceType = isGPT ? 'ChatGPT' : 'Claude';
+
+    const normalizer = isGPT ? normalizeGPT : normalizeClaude;
+    return data.map(normalizer)
       .filter(c => c && c.count > 0)
-      .sort((a,b)=> (b.created||'').localeCompare(a.created||''));
+      .sort((a,b)=> (b.createdNum||0) - (a.createdNum||0));
   }
 
-  function normalize(c){
+  /* ---------- Claude 格式（保留原版逻辑） ---------- */
+  function normalizeClaude(c){
     if(!c||typeof c!=='object') return null;
     const name=c.name||c.title||c.summary||'（无标题对话）';
     const created=c.created_at||c.created||c.create_time||'';
     const updated=c.updated_at||c.updated||created;
-    let raw=c.chat_messages||c.messages||c.mapping||c.conversation||[];
+    let raw=c.chat_messages||c.messages||c.conversation||[];
     let msgs=[];
     if(Array.isArray(raw)){
       msgs=raw.map(m=>{
@@ -282,15 +296,169 @@
           txt=m.content.map(p=> typeof p==='string'?p:(p.text||p.value||'')).join('');
         }
         if(txt==null) txt=m.content||m.message||'';
-        return {who, text:(txt||'').toString(), time:m.created_at||m.created||m.create_time||''};
+        return {who, text:(txt||'').toString(), time:m.created_at||m.created||m.create_time||'', source:'claude'};
       }).filter(m=>m.text.trim());
     }
-    return {name, created, updated, msgs, count:msgs.length};
+    return {
+      name, created, updated, msgs, count:msgs.length, source:'claude',
+      createdNum: toNum(created)
+    };
   }
 
+  /* ---------- ChatGPT 格式（mapping 树状结构） ---------- */
+  function normalizeGPT(c){
+    if(!c || typeof c !== 'object' || !c.mapping) return null;
+    const name = c.title || '（无标题对话）';
+    const createdRaw = c.create_time || c.created_time || '';
+    const updatedRaw = c.update_time || c.updated_time || createdRaw;
+    const mapping = c.mapping;
+
+    // 第一步：找叶子节点。优先用 current_node；如果没有，找深度最大的有效叶子
+    let leaf = c.current_node;
+    if(!leaf || !mapping[leaf]){
+      // 兜底：找所有叶子（没有 children 或 children 全部无效的节点），挑深度最深的
+      const candidates = Object.keys(mapping).filter(k=>{
+        const node = mapping[k];
+        if(!node) return false;
+        const kids = node.children || [];
+        return kids.length === 0;
+      });
+      let bestDepth = -1;
+      for(const k of candidates){
+        let d = 0, cur = k;
+        while(cur && mapping[cur]){ d++; cur = mapping[cur].parent; }
+        if(d > bestDepth){ bestDepth = d; leaf = k; }
+      }
+    }
+    if(!leaf) return null;
+
+    // 第二步：从叶子顺着 parent 回溯到根
+    const chain = [];
+    let cur = leaf;
+    const seen = new Set();
+    while(cur && mapping[cur] && !seen.has(cur)){
+      seen.add(cur);
+      chain.push(mapping[cur]);
+      cur = mapping[cur].parent;
+    }
+    chain.reverse();
+
+    // 第三步：把节点转成消息，过滤掉系统/工具/空消息
+    const msgs = [];
+    for(const node of chain){
+      const m = node.message;
+      if(!m) continue;
+      const role = (m.author && m.author.role) || '';
+      // 只保留 user 和 assistant
+      if(role !== 'user' && role !== 'assistant') continue;
+
+      const {text, attachments} = extractGPTContent(m);
+      if(!text.trim() && attachments.length === 0) continue;
+
+      // 隐藏消息（user_editable_context 等）跳过
+      const meta = m.metadata || {};
+      if(meta.is_visually_hidden_from_conversation) continue;
+
+      msgs.push({
+        who: role === 'user' ? 'human' : 'assistant',
+        text: text,
+        attachments: attachments,
+        time: m.create_time || '',
+        source: 'gpt'
+      });
+    }
+
+    return {
+      name,
+      created: createdRaw,
+      updated: updatedRaw,
+      msgs,
+      count: msgs.length,
+      source: 'gpt',
+      createdNum: toNum(createdRaw)
+    };
+  }
+
+  /* 从 GPT message 里提取文本和附件描述 */
+  function extractGPTContent(m){
+    const c = m.content;
+    let text = '';
+    const attachments = [];
+
+    if(!c) return {text, attachments};
+
+    const ctype = c.content_type || '';
+
+    if(ctype === 'text' || ctype === ''){
+      // 标准文本：parts 是字符串数组
+      if(Array.isArray(c.parts)){
+        text = c.parts.filter(p => typeof p === 'string').join('\n\n');
+      }
+    } else if(ctype === 'multimodal_text'){
+      // 多模态：parts 里可能混着字符串和对象
+      if(Array.isArray(c.parts)){
+        const textBits = [];
+        for(const p of c.parts){
+          if(typeof p === 'string'){
+            textBits.push(p);
+          } else if(p && typeof p === 'object'){
+            if(p.content_type === 'image_asset_pointer' || p.asset_pointer){
+              attachments.push({kind:'image', name: (p.metadata && (p.metadata.filename || p.metadata.title)) || '图片'});
+            } else if(p.content_type === 'audio_transcription' && p.text){
+              textBits.push(p.text);
+            } else if(p.content_type === 'real_time_user_audio_video_asset_pointer'){
+              attachments.push({kind:'audio', name:'语音消息'});
+            } else if(p.text){
+              textBits.push(p.text);
+            }
+          }
+        }
+        text = textBits.join('\n\n');
+      }
+    } else if(ctype === 'code'){
+      text = c.text || '';
+    } else if(ctype === 'execution_output'){
+      text = c.text || '';
+    } else if(ctype === 'user_editable_context'){
+      // 用户自定义指令——通常不显示
+      return {text:'', attachments:[]};
+    } else {
+      // 其他类型兜底
+      if(Array.isArray(c.parts)){
+        text = c.parts.map(p => typeof p === 'string' ? p : (p && p.text) || '').join('\n\n');
+      } else if(typeof c.text === 'string'){
+        text = c.text;
+      }
+    }
+
+    // 附件信息（user 上传的图片/文件常在 metadata.attachments）
+    const meta = m.metadata || {};
+    if(Array.isArray(meta.attachments)){
+      for(const a of meta.attachments){
+        attachments.push({
+          kind: (a.mime_type && a.mime_type.startsWith('image/')) ? 'image' :
+                (a.mime_type && a.mime_type.startsWith('audio/')) ? 'audio' : 'file',
+          name: a.name || '附件'
+        });
+      }
+    }
+
+    return {text, attachments};
+  }
+
+  /* ---------- 工具函数 ---------- */
+  function toNum(v){
+    if(!v) return 0;
+    if(typeof v === 'number') return v;
+    const d = new Date(v);
+    return isNaN(d) ? 0 : d.getTime()/1000;
+  }
   function fmtDate(s){
     if(!s) return '';
-    const d=new Date(s); if(isNaN(d)) return '';
+    let d;
+    if(typeof s === 'number') d = new Date(s * 1000);
+    else d = new Date(s);
+    if(isNaN(d)) return '';
     return d.getFullYear()+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+String(d.getDate()).padStart(2,'0');
   }
   function esc(s){return s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
@@ -299,6 +467,7 @@
     return esc(s).replace(re,'<mark>$1</mark>');
   }
 
+  /* ---------- 渲染 ---------- */
   function renderList(){
     const list=$('convlist'); list.innerHTML='';
     const term=searchTerm.toLowerCase();
@@ -312,12 +481,14 @@
       shown++;
       const el=document.createElement('div');
       el.className='conv'+(i===active?' active':'');
+      const tag = c.source==='gpt' ? '<span class="tag gpt">GPT</span>' : '<span class="tag claude">Claude</span>';
       el.innerHTML='<div class="name">'+esc(c.name)+'</div>'+
-        '<div class="meta">'+(fmtDate(c.created)||'—')+'<span class="dot"></span>'+c.count+' 条</div>';
+        '<div class="meta">'+(fmtDate(c.created)||'—')+'<span class="dot"></span>'+c.count+' 条'+'<span class="dot"></span>'+tag+'</div>';
       el.onclick=()=>{ active=i; renderList(); renderThread(); closeSide(); };
       list.appendChild(el);
     });
     $('count').textContent=(term?shown+' / ':'')+convs.length+' 段对话';
+    $('src').textContent = sourceType ? ('来自 '+sourceType+' 导出') : '';
     if(shown===0){ list.innerHTML='<div style="padding:30px 16px;text-align:center;color:var(--warm-gray);font-size:13px;font-weight:300">没找到含「'+esc(searchTerm)+'」的对话</div>'; }
   }
 
@@ -331,8 +502,16 @@
       const d=document.createElement('div');
       d.className='msg '+m.who;
       d.style.animationDelay=Math.min(idx*0.03,0.6)+'s';
-      const who=m.who==='human'?'姜姜':'小克';
-      let body=hl(m.text);
+      const who = m.who==='human' ? '姜姜' : (c.source==='gpt' ? 'GPT' : '小克');
+      let body = hl(m.text);
+      // 附件渲染（GPT 才有）
+      if(m.attachments && m.attachments.length){
+        const attHTML = m.attachments.map(a=>{
+          const icon = a.kind==='image' ? '🖼️' : a.kind==='audio' ? '🎵' : '📎';
+          return '<span class="att">'+icon+' '+esc(a.name)+'</span>';
+        }).join('');
+        body = (body ? body + '<br><br>' : '') + attHTML;
+      }
       d.innerHTML='<div class="who">'+who+'</div><div class="bubble">'+body+'</div>'+
         (m.time?'<div class="time">'+fmtDate(m.time)+'</div>':'');
       t.appendChild(d);
@@ -340,6 +519,7 @@
     t.scrollTop=0;
   }
 
+  /* ---------- 文件处理 ---------- */
   function handleFile(file){
     if(!file) return;
     $('landing').classList.add('hide');
@@ -358,7 +538,7 @@
         }catch(err){
           $('loading').classList.remove('show');
           $('landing').classList.remove('hide');
-          alert('没能读出对话来：'+err.message+'\n确认选的是 conversations.json 哦。');
+          alert('没能读出对话来：'+err.message+'\n确认选的是 conversations.json 哦（Claude 或 ChatGPT 的都行）。');
         }
       },350);
     };
