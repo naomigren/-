@@ -8,14 +8,14 @@
   @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
 
   :root{
-    --rose-deep:#c9a3a0;       /* 脏玫瑰 */
-    --rose:#e4c2c0;            /* 藕粉 */
-    --rose-pale:#f3dedd;       /* 淡粉 */
-    --rose-mist:#faf0ef;       /* 雾粉 */
-    --apricot:#ecd9cb;         /* 淡杏 */
-    --cream:#fbf7f4;           /* 奶白 */
-    --warm-gray:#a89b96;       /* 暖灰 */
-    --ink:#5b4d4a;             /* 墨褐 */
+    --rose-deep:#c9a3a0;
+    --rose:#e4c2c0;
+    --rose-pale:#f3dedd;
+    --rose-mist:#faf0ef;
+    --apricot:#ecd9cb;
+    --cream:#fbf7f4;
+    --warm-gray:#a89b96;
+    --ink:#5b4d4a;
     --ink-soft:#8a7a76;
     --glass:rgba(255,252,251,0.55);
     --glass-strong:rgba(255,252,251,0.78);
@@ -36,19 +36,16 @@
     background-attachment:fixed;
     overflow:hidden;
   }
-  /* 颗粒噪点 */
   body::after{
     content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.04;
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
-  /* 漂浮光斑 */
   .orb{position:fixed;border-radius:50%;filter:blur(60px);opacity:.5;z-index:0;animation:float 18s ease-in-out infinite}
   .orb1{width:340px;height:340px;background:radial-gradient(circle,#f5cfce,transparent 70%);top:-80px;left:-60px}
   .orb2{width:280px;height:280px;background:radial-gradient(circle,#e8d2c2,transparent 70%);bottom:-60px;right:8%;animation-delay:-6s}
   .orb3{width:220px;height:220px;background:radial-gradient(circle,#f3dad9,transparent 70%);top:40%;left:46%;animation-delay:-11s}
   @keyframes float{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(30px,-26px) scale(1.06)}66%{transform:translate(-20px,18px) scale(.96)}}
 
-  /* ---------- 落地页 ---------- */
   #landing{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;transition:opacity .7s ease,transform .7s ease,visibility 0s linear .7s}
   #landing.hide{opacity:0;transform:scale(1.04);pointer-events:none;visibility:hidden}
   .title{text-align:center;animation:rise .9s cubic-bezier(.2,.8,.2,1) both}
@@ -75,14 +72,12 @@
   .privacy b{color:var(--rose-deep);font-weight:500}
   @keyframes rise{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:translateY(0)}}
 
-  /* 加载态 */
   #loading{position:fixed;inset:0;z-index:11;display:none;flex-direction:column;align-items:center;justify-content:center;gap:26px}
   #loading.show{display:flex}
   .ring{width:64px;height:64px;border-radius:50%;border:3px solid rgba(201,163,160,.25);border-top-color:var(--rose-deep);animation:spin 1s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
   #loadtext{font-size:14px;color:var(--ink-soft);letter-spacing:.1em;font-weight:300}
 
-  /* ---------- 主界面 ---------- */
   #app{position:fixed;inset:0;z-index:5;display:none;grid-template-columns:330px 1fr;gap:0;background:
       radial-gradient(1200px 800px at 12% -10%, #fbe9e7 0%, transparent 55%),
       radial-gradient(1000px 700px at 105% 10%, #efe0d6 0%, transparent 50%),
@@ -124,7 +119,6 @@
   .conv .meta{font-size:11.5px;color:var(--ink-soft);margin-top:5px;font-weight:300;display:flex;gap:8px;align-items:center}
   .conv .dot{width:3px;height:3px;border-radius:50%;background:var(--rose-deep)}
 
-  /* 右侧 */
   .main{height:100vh;display:flex;flex-direction:column;position:relative;z-index:1}
   .topbar{
     padding:20px 36px;display:flex;align-items:center;justify-content:space-between;gap:20px;
@@ -170,12 +164,27 @@
   .empty .e2{font-size:13px;font-weight:300;letter-spacing:.08em}
 
   .hidden-input{display:none}
+
+  /* 移动端遮罩 */
+  #backdrop{display:none;position:fixed;inset:0;background:rgba(91,77,74,.32);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:15;opacity:0;transition:opacity .35s}
+  #backdrop.show{display:block;opacity:1}
+
   @media(max-width:760px){
     #app{grid-template-columns:1fr}
-    .sidebar{position:fixed;left:0;top:0;width:84%;max-width:330px;transform:translateX(-100%);transition:transform .4s;z-index:20;box-shadow:var(--shadow)}
+    .sidebar{
+      position:fixed;left:0;top:0;width:84%;max-width:330px;
+      transform:translateX(-100%);transition:transform .4s cubic-bezier(.2,.8,.2,1);
+      z-index:20;box-shadow:var(--shadow);
+      /* 关键：手机端给侧栏自己一层不透明背景，避免穿透 */
+      background:
+        radial-gradient(600px 400px at 0% 0%, #fbe9e7 0%, transparent 60%),
+        linear-gradient(135deg,#fbf7f4 0%,#f5e6e4 100%);
+    }
     .sidebar.open{transform:translateX(0)}
     .menu-btn{display:inline-flex!important}
     .msg{max-width:90%}
+    .topbar{padding:18px 20px}
+    .thread{padding:24px 18px 60px}
   }
   .menu-btn{display:none;align-items:center;justify-content:center;width:38px;height:38px;border-radius:11px;border:1px solid rgba(201,163,160,.35);background:rgba(255,255,255,.4);cursor:pointer;font-size:16px;color:var(--ink-soft)}
 </style>
@@ -183,7 +192,6 @@
 <body>
   <div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div>
 
-  <!-- 落地页 -->
   <div id="landing">
     <div class="title">
       <h1>姜姜的对话</h1>
@@ -201,10 +209,8 @@
     <input type="file" id="file" class="hidden-input" accept=".json,.jsonl,application/json">
   </div>
 
-  <!-- 加载 -->
   <div id="loading"><div class="ring"></div><div id="loadtext">正在轻轻翻开……</div></div>
 
-  <!-- 主界面 -->
   <div id="app">
     <aside class="sidebar" id="sidebar">
       <div class="side-head">
@@ -217,6 +223,7 @@
       </div>
       <div class="convlist" id="convlist"></div>
     </aside>
+    <div id="backdrop"></div>
     <main class="main">
       <div class="topbar">
         <div style="display:flex;align-items:center;gap:14px;min-width:0">
@@ -244,20 +251,18 @@
   const $=id=>document.getElementById(id);
   let convs=[], active=-1, searchTerm='';
 
-  // ---------- 解析 ----------
   function parse(text){
     text=text.replace(/^\uFEFF/,'').trim();
     let data;
-    // 先试整体 JSON
     try{ data=JSON.parse(text); }
     catch(e){
-      // 试 JSONL：逐行
       const lines=text.split(/\r?\n/).filter(l=>l.trim());
       data=[];
       for(const l of lines){ try{ data.push(JSON.parse(l)); }catch(_){} }
     }
     if(!Array.isArray(data)) data=[data];
-    return data.map(normalize).filter(Boolean)
+    return data.map(normalize)
+      .filter(c => c && c.count > 0)
       .sort((a,b)=> (b.created||'').localeCompare(a.created||''));
   }
 
@@ -266,7 +271,6 @@
     const name=c.name||c.title||c.summary||'（无标题对话）';
     const created=c.created_at||c.created||c.create_time||'';
     const updated=c.updated_at||c.updated||created;
-    // 兼容多种消息字段名
     let raw=c.chat_messages||c.messages||c.mapping||c.conversation||[];
     let msgs=[];
     if(Array.isArray(raw)){
@@ -284,7 +288,6 @@
     return {name, created, updated, msgs, count:msgs.length};
   }
 
-  // ---------- 渲染列表 ----------
   function fmtDate(s){
     if(!s) return '';
     const d=new Date(s); if(isNaN(d)) return '';
@@ -337,7 +340,6 @@
     t.scrollTop=0;
   }
 
-  // ---------- 文件读取 ----------
   function handleFile(file){
     if(!file) return;
     $('landing').classList.add('hide');
@@ -364,7 +366,6 @@
     reader.readAsText(file);
   }
 
-  // ---------- 事件 ----------
   const drop=$('drop');
   drop.onclick=()=>$('file').click();
   $('file').onchange=e=>handleFile(e.target.files[0]);
@@ -379,8 +380,12 @@
   $('search').addEventListener('input',e=>{clearTimeout(st);st=setTimeout(()=>{searchTerm=e.target.value.trim();renderList();if(active>=0)renderThread();},180);});
   $('loadAnother').onclick=()=>$('file').click();
 
-  function closeSide(){$('sidebar').classList.remove('open');}
-  $('menuBtn').onclick=()=>$('sidebar').classList.toggle('open');
+  function openSide(){$('sidebar').classList.add('open');$('backdrop').classList.add('show');}
+  function closeSide(){$('sidebar').classList.remove('open');$('backdrop').classList.remove('show');}
+  $('menuBtn').onclick=()=>{
+    if($('sidebar').classList.contains('open')) closeSide(); else openSide();
+  };
+  $('backdrop').onclick=closeSide;
 })();
 </script>
 </body>
