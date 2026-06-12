@@ -133,12 +133,37 @@ body{
 .star-popup-text{font-size:13px;line-height:1.8;color:var(--ink-soft)}
 .petal{position:fixed;top:-30px;pointer-events:none;z-index:3;animation:petal-fall linear forwards;opacity:0;}
 @keyframes petal-fall{0%{transform:translateY(-30px) rotate(0) translateX(0);opacity:0}8%{opacity:.65}100%{transform:translateY(110vh) rotate(540deg) translateX(var(--sway,60px));opacity:0}}
+
+/* 羽毛 */
+.feather{position:fixed;top:-40px;pointer-events:none;z-index:4;animation:feather-fall linear forwards;opacity:0;}
+@keyframes feather-fall{
+  0%{transform:translateY(-40px) rotate(0deg) translateX(0);opacity:0}
+  10%{opacity:1}
+  100%{transform:translateY(115vh) rotate(var(--spin,720deg)) translateX(var(--drift,80px));opacity:0}
+}
+
+/* 羽毛颜色切换按钮 */
+.feather-toggle{
+  position:fixed;
+  top:calc(20px + env(safe-area-inset-top,0));
+  right:66px;
+  width:34px;height:34px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;z-index:80;
+  color:var(--ink-faint);
+  opacity:.6;
+  font-size:16px;
+}
+.feather-toggle:active{opacity:1}
 </style>
 </head>
 <body>
 <div class="app">
 <div class="gear" onclick="openSettings()">
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+</div>
+<div class="feather-toggle" id="featherToggle" onclick="toggleFeather()" title="切换羽毛颜色">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5l6.74-6.76zM8 17v-1.5L13.5 10l1.5 1.5L9.5 17H8z"/></svg>
 </div>
 
 <div class="page active" id="page-home">
@@ -179,17 +204,10 @@ body{
             <stop offset="0%" stop-color="#8fa3b8" stop-opacity=".4"/>
             <stop offset="100%" stop-color="#8fa3b8" stop-opacity="0"/>
           </radialGradient>
-          <!-- 流星拖尾渐变 -->
-          <linearGradient id="meteor-tail" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stop-color="#ffffff" stop-opacity="0"/>
-            <stop offset="60%" stop-color="#dfe7ed" stop-opacity=".55"/>
-            <stop offset="100%" stop-color="#ffffff" stop-opacity=".95"/>
-          </linearGradient>
         </defs>
         <g id="bg-stars"></g>
         <path d="M 20 165 Q 100 50 180 70 Q 260 90 340 160" stroke="url(#arc-grad)" stroke-width="1" fill="none" stroke-dasharray="1.5 4" opacity=".7"/>
         <g id="stars"></g>
-        <g id="meteors"></g>
       </svg>
     </div>
 
@@ -867,96 +885,6 @@ function showStarPopup(m,reached,currentDays){
 }
 function closeStarPopup(){document.getElementById("star-popup").classList.remove("active");}
 
-/* ============ 流星 ============ */
-function spawnMeteor(){
-  const g = document.getElementById("meteors");
-  if(!g) return;
-
-  // 流星起点：上方两侧之一，终点：对角下方
-  const fromLeft = Math.random() > .5;
-  const startX = fromLeft ? -20 + Math.random() * 60 : 320 + Math.random() * 60;
-  const startY = -10 + Math.random() * 60;
-  const angle = fromLeft ? (Math.PI / 6 + Math.random() * Math.PI / 8) : (Math.PI - Math.PI / 6 - Math.random() * Math.PI / 8);
-  const dist = 200 + Math.random() * 100;
-  const endX = startX + Math.cos(angle) * dist;
-  const endY = startY + Math.sin(angle) * dist;
-
-  // 拖尾长度
-  const tailLen = 28 + Math.random() * 18;
-  // 拖尾方向（指向起点）
-  const dx = Math.cos(angle), dy = Math.sin(angle);
-  const tailDx = -dx * tailLen;
-  const tailDy = -dy * tailLen;
-
-  // 创建一组：拖尾线 + 头部小亮点
-  const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
-  group.setAttribute("opacity", "0");
-
-  // 拖尾线（用变换实现，方向沿运动方向）
-  // 在本地坐标里，线从 (-tailLen, 0) 到 (0, 0)，头在 (0, 0)
-  const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-  line.setAttribute("x1", -tailLen);
-  line.setAttribute("y1", 0);
-  line.setAttribute("x2", 0);
-  line.setAttribute("y2", 0);
-  line.setAttribute("stroke", "url(#meteor-tail)");
-  line.setAttribute("stroke-width", "1.2");
-  line.setAttribute("stroke-linecap", "round");
-  group.appendChild(line);
-
-  // 头部亮点
-  const head = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-  head.setAttribute("cx", 0);
-  head.setAttribute("cy", 0);
-  head.setAttribute("r", 1.8);
-  head.setAttribute("fill", "#ffffff");
-  head.style.filter = "drop-shadow(0 0 4px rgba(255,255,255,.9))";
-  group.appendChild(head);
-
-  // 旋转到运动方向
-  const rotDeg = angle * 180 / Math.PI;
-  group.setAttribute("transform", `translate(${startX} ${startY}) rotate(${rotDeg})`);
-
-  g.appendChild(group);
-
-  // 动画
-  const duration = 1100 + Math.random() * 600;  // 1.1-1.7秒
-  const startTime = performance.now();
-  function step(now){
-    const t = (now - startTime) / duration;
-    if(t >= 1){
-      group.remove();
-      return;
-    }
-    // 缓动：先快后慢
-    const eased = 1 - Math.pow(1 - t, 2);
-    const x = startX + (endX - startX) * eased;
-    const y = startY + (endY - startY) * eased;
-    group.setAttribute("transform", `translate(${x} ${y}) rotate(${rotDeg})`);
-    // 亮度：前30%淡入，后40%淡出
-    let opacity;
-    if(t < 0.15) opacity = t / 0.15;
-    else if(t > 0.7) opacity = (1 - t) / 0.3;
-    else opacity = 1;
-    group.setAttribute("opacity", opacity * 0.95);
-    requestAnimationFrame(step);
-  }
-  requestAnimationFrame(step);
-}
-
-function startMeteorLoop(){
-  function next(){
-    spawnMeteor();
-    // 下一颗：1.5到4秒后
-    const delay = 1500 + Math.random() * 2500;
-    setTimeout(next, delay);
-  }
-  // 三条并行的线，错开起始时间，制造连绵流星雨
-  setTimeout(next, 500);
-  setTimeout(next, 2000);
-  setTimeout(next, 3500);
-}
-
 function makePetal(){
   const petal = document.createElement("div");
   petal.className = "petal";
@@ -971,6 +899,89 @@ function makePetal(){
   setTimeout(()=>petal.remove(), dur*1000);
 }
 setInterval(makePetal, 5500);
+
+/* ============ 羽毛系统 ============ */
+let featherColor = 'white'; // 'white' or 'black'
+let featherInterval = null;
+
+function toggleFeather(){
+  featherColor = (featherColor === 'white') ? 'black' : 'white';
+  try{ localStorage.setItem('featherColor', featherColor); }catch(e){}
+  // 立即来一片新颜色羽毛作为反馈
+  makeFeather();
+  makeFeather();
+}
+
+function featherSVG(size, color, variant){
+  // 羽毛形状：中轴线 + 两侧绒羽
+  const isBlack = (color === 'black');
+  // 主色和深色
+  const main = isBlack ? '#2a2a2e' : '#f8f8f8';
+  const shade = isBlack ? '#1a1a1e' : '#dde4ea';
+  const rachis = isBlack ? '#0a0a0e' : '#c4cdd6';
+  // 不同的羽毛形态变体
+  const w = size, h = size * 2.6;
+  const cw = 20, ch = 52;  // viewbox
+
+  // 简单细长羽毛：椭圆主体+中轴+斜纹
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${cw} ${ch}">
+    <!-- 羽毛主体：上窄下宽再收尖 -->
+    <path d="M 10 2
+             C 6 8, 3 18, 4 30
+             C 5 40, 7 46, 10 50
+             C 13 46, 15 40, 16 30
+             C 17 18, 14 8, 10 2 Z"
+          fill="${main}" opacity="${isBlack ? 0.75 : 0.7}"/>
+    <!-- 主体阴影侧 -->
+    <path d="M 10 2
+             C 6 8, 3 18, 4 30
+             C 5 40, 7 46, 10 50
+             L 10 2 Z"
+          fill="${shade}" opacity="${isBlack ? 0.4 : 0.35}"/>
+    <!-- 中轴 -->
+    <line x1="10" y1="3" x2="10" y2="49" stroke="${rachis}" stroke-width="0.6" opacity="0.8"/>
+    <!-- 几道斜纹（羽支） -->
+    <g stroke="${rachis}" stroke-width="0.35" opacity="0.5" fill="none">
+      <path d="M 10 12 Q 6 13 4.5 16"/>
+      <path d="M 10 12 Q 14 13 15.5 16"/>
+      <path d="M 10 22 Q 5 23 3.8 27"/>
+      <path d="M 10 22 Q 15 23 16.2 27"/>
+      <path d="M 10 32 Q 6 33 5 37"/>
+      <path d="M 10 32 Q 14 33 15 37"/>
+      <path d="M 10 42 Q 8 43 7.5 46"/>
+      <path d="M 10 42 Q 12 43 12.5 46"/>
+    </g>
+  </svg>`;
+}
+
+function makeFeather(){
+  const feather = document.createElement('div');
+  feather.className = 'feather';
+  feather.style.left = Math.random() * 100 + 'vw';
+  feather.style.setProperty('--drift', (Math.random() * 200 - 100) + 'px');
+  feather.style.setProperty('--spin', (Math.random() * 720 - 360 + 360) + 'deg');
+  const size = 12 + Math.random() * 10;
+  feather.innerHTML = featherSVG(size, featherColor);
+  // 羽毛飘下的时间比花瓣慢（轻）
+  const dur = 9 + Math.random() * 8;
+  feather.style.animationDuration = dur + 's';
+  document.body.appendChild(feather);
+  setTimeout(() => feather.remove(), dur * 1000);
+}
+
+function initFeathers(){
+  try{
+    const saved = localStorage.getItem('featherColor');
+    if(saved === 'white' || saved === 'black') featherColor = saved;
+  }catch(e){}
+  // 立即制造一些羽毛分布在画面里
+  for(let i = 0; i < 4; i++){
+    setTimeout(makeFeather, i * 400);
+  }
+  // 持续生成：1.8秒一片
+  if(featherInterval) clearInterval(featherInterval);
+  featherInterval = setInterval(makeFeather, 1800);
+}
 
 function renderDays(){
   const grid = document.getElementById("days-grid");
@@ -1135,7 +1146,7 @@ renderHome();
 updateCounts();
 initFortune();
 setTimeout(startFlowerAnim, 100);
-startMeteorLoop();
+initFeathers();
 </script>
 </body>
 </html>
