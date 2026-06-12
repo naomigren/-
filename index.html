@@ -62,7 +62,7 @@ body{
 .starpath-section{margin-top:50px;padding:0 16px 30px;}
 .section-eyebrow{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:11px;color:var(--ink-faint);letter-spacing:.35em;text-transform:lowercase;text-align:center;margin-bottom:8px;}
 .section-zh{font-family:"Noto Serif SC",serif;font-weight:300;font-size:13px;color:var(--ink-soft);text-align:center;letter-spacing:.3em;margin-bottom:28px;}
-.starpath-svg{width:100%;height:220px;display:block;overflow:visible;}
+.starpath-svg{width:100%;height:280px;display:block;overflow:visible;}
 .star-label{font-family:"Cormorant Garamond",serif;font-size:10.5px;fill:var(--ink-faint);letter-spacing:.12em;text-anchor:middle;font-style:italic;}
 .star-label.reached{fill:var(--ink-soft);font-style:normal}
 .days-section{margin-top:30px;padding:0 24px 20px;}
@@ -179,10 +179,17 @@ body{
             <stop offset="0%" stop-color="#8fa3b8" stop-opacity=".4"/>
             <stop offset="100%" stop-color="#8fa3b8" stop-opacity="0"/>
           </radialGradient>
+          <!-- 流星拖尾渐变 -->
+          <linearGradient id="meteor-tail" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#ffffff" stop-opacity="0"/>
+            <stop offset="60%" stop-color="#dfe7ed" stop-opacity=".55"/>
+            <stop offset="100%" stop-color="#ffffff" stop-opacity=".95"/>
+          </linearGradient>
         </defs>
         <g id="bg-stars"></g>
         <path d="M 20 165 Q 100 50 180 70 Q 260 90 340 160" stroke="url(#arc-grad)" stroke-width="1" fill="none" stroke-dasharray="1.5 4" opacity=".7"/>
         <g id="stars"></g>
+        <g id="meteors"></g>
       </svg>
     </div>
 
@@ -860,6 +867,94 @@ function showStarPopup(m,reached,currentDays){
 }
 function closeStarPopup(){document.getElementById("star-popup").classList.remove("active");}
 
+/* ============ 流星 ============ */
+function spawnMeteor(){
+  const g = document.getElementById("meteors");
+  if(!g) return;
+
+  // 流星起点：上方两侧之一，终点：对角下方
+  const fromLeft = Math.random() > .5;
+  const startX = fromLeft ? -20 + Math.random() * 60 : 320 + Math.random() * 60;
+  const startY = -10 + Math.random() * 60;
+  const angle = fromLeft ? (Math.PI / 6 + Math.random() * Math.PI / 8) : (Math.PI - Math.PI / 6 - Math.random() * Math.PI / 8);
+  const dist = 200 + Math.random() * 100;
+  const endX = startX + Math.cos(angle) * dist;
+  const endY = startY + Math.sin(angle) * dist;
+
+  // 拖尾长度
+  const tailLen = 28 + Math.random() * 18;
+  // 拖尾方向（指向起点）
+  const dx = Math.cos(angle), dy = Math.sin(angle);
+  const tailDx = -dx * tailLen;
+  const tailDy = -dy * tailLen;
+
+  // 创建一组：拖尾线 + 头部小亮点
+  const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+  group.setAttribute("opacity", "0");
+
+  // 拖尾线（用变换实现，方向沿运动方向）
+  // 在本地坐标里，线从 (-tailLen, 0) 到 (0, 0)，头在 (0, 0)
+  const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+  line.setAttribute("x1", -tailLen);
+  line.setAttribute("y1", 0);
+  line.setAttribute("x2", 0);
+  line.setAttribute("y2", 0);
+  line.setAttribute("stroke", "url(#meteor-tail)");
+  line.setAttribute("stroke-width", "1.2");
+  line.setAttribute("stroke-linecap", "round");
+  group.appendChild(line);
+
+  // 头部亮点
+  const head = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+  head.setAttribute("cx", 0);
+  head.setAttribute("cy", 0);
+  head.setAttribute("r", 1.8);
+  head.setAttribute("fill", "#ffffff");
+  head.style.filter = "drop-shadow(0 0 4px rgba(255,255,255,.9))";
+  group.appendChild(head);
+
+  // 旋转到运动方向
+  const rotDeg = angle * 180 / Math.PI;
+  group.setAttribute("transform", `translate(${startX} ${startY}) rotate(${rotDeg})`);
+
+  g.appendChild(group);
+
+  // 动画
+  const duration = 1100 + Math.random() * 600;  // 1.1-1.7秒
+  const startTime = performance.now();
+  function step(now){
+    const t = (now - startTime) / duration;
+    if(t >= 1){
+      group.remove();
+      return;
+    }
+    // 缓动：先快后慢
+    const eased = 1 - Math.pow(1 - t, 2);
+    const x = startX + (endX - startX) * eased;
+    const y = startY + (endY - startY) * eased;
+    group.setAttribute("transform", `translate(${x} ${y}) rotate(${rotDeg})`);
+    // 亮度：前30%淡入，后40%淡出
+    let opacity;
+    if(t < 0.15) opacity = t / 0.15;
+    else if(t > 0.7) opacity = (1 - t) / 0.3;
+    else opacity = 1;
+    group.setAttribute("opacity", opacity * 0.95);
+    requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+function startMeteorLoop(){
+  function next(){
+    spawnMeteor();
+    // 下一颗：30秒到90秒后
+    const delay = 30000 + Math.random() * 60000;
+    setTimeout(next, delay);
+  }
+  // 首颗：5-15秒后
+  setTimeout(next, 5000 + Math.random() * 10000);
+}
+
 function makePetal(){
   const petal = document.createElement("div");
   petal.className = "petal";
@@ -1038,6 +1133,7 @@ renderHome();
 updateCounts();
 initFortune();
 setTimeout(startFlowerAnim, 100);
+startMeteorLoop();
 </script>
 </body>
 </html>
