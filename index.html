@@ -947,12 +947,14 @@ function spawnMeteor(){
 function startMeteorLoop(){
   function next(){
     spawnMeteor();
-    // 下一颗：30秒到90秒后
-    const delay = 30000 + Math.random() * 60000;
+    // 下一颗：1.5到4秒后
+    const delay = 1500 + Math.random() * 2500;
     setTimeout(next, delay);
   }
-  // 首颗：5-15秒后
-  setTimeout(next, 5000 + Math.random() * 10000);
+  // 三条并行的线，错开起始时间，制造连绵流星雨
+  setTimeout(next, 500);
+  setTimeout(next, 2000);
+  setTimeout(next, 3500);
 }
 
 function makePetal(){
