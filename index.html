@@ -1021,11 +1021,14 @@ function saveRoomNote(){state.roomNote = document.getElementById("room-note").va
 /* === 心情星点系统 === */
 const MOOD_COLORS = [
   // 莫兰迪色，跟his room深银蓝背景搭，不媚俗也不淡
+  {id:'joy',     name:'开心',  color:'#9eb09a'},  // 鼠尾草绿
   {id:'still',   name:'平静',  color:'#a8b8c8'},  // 雾银蓝
-  {id:'warm',    name:'暖',    color:'#d4b896'},  // 灰米杏
-  {id:'soft',    name:'柔',    color:'#c5a8b8'},  // 雾粉藕
-  {id:'misty',   name:'怅',    color:'#9ca0b8'},  // 灰薰衣草
-  {id:'hollow',  name:'空',    color:'#7d8a99'},  // 深岩蓝
+  {id:'warm',    name:'温柔',  color:'#d4b896'},  // 灰米杏
+  {id:'miss',    name:'想他',  color:'#c5a8b8'},  // 雾粉藕
+  {id:'anxious', name:'焦虑',  color:'#c4b078'},  // 芥末黄
+  {id:'anger',   name:'愤怒',  color:'#b88478'},  // 砖红
+  {id:'misty',   name:'失落',  color:'#9ca0b8'},  // 灰薰衣草
+  {id:'hollow',  name:'沉重',  color:'#7d8a99'},  // 深岩蓝
 ];
 
 function ensureMoodState(){
