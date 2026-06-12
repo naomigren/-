@@ -36,13 +36,12 @@ body{
   background:transparent;
 }
 .flower-canvas-wrap canvas{width:100%;height:100%;display:block;}
-/* 底部蒙版：让草自然消失在背景里，不切硬边 */
+/* 底部柔化：让草根隐入背景，不切硬边 */
 .flower-canvas-wrap::after{
-  content:'';position:absolute;left:0;right:0;bottom:0;height:90px;
+  content:'';position:absolute;left:0;right:0;bottom:0;height:50px;
   background:linear-gradient(180deg,
     rgba(238,243,246,0) 0%,
-    rgba(238,243,246,.6) 50%,
-    rgba(238,243,246,1) 100%);
+    rgba(238,243,246,.4) 100%);
   pointer-events:none;
 }
 
@@ -354,16 +353,16 @@ function initFlowers(){
   floatSeeds = [];
 
   // === 银草 ===
-  const bladeCount = 48;
+  const bladeCount = 65;
   for(let i = 0; i < bladeCount; i++){
     blades.push({
       x: srand() * canvasW,
-      height: 55 + srand() * 85,
+      height: 70 + srand() * 100,
       tilt: (srand() - .5) * 0.3,
       phase: srand() * Math.PI * 2,
       sway: 0.3 + srand() * 0.5,
       swayAmt: 0.04 + srand() * 0.04,
-      isFar: i < 26,
+      isFar: i < 35,
       hue: srand(),
     });
   }
@@ -440,18 +439,18 @@ function drawBlade(b, time){
   ctx.save();
   if(b.isFar) ctx.filter = 'blur(1px)';
   const baseX = b.x;
-  const baseY = canvasH + 50;  // 根部延伸到画布下方，被蒙版盖住
+  const baseY = canvasH - 8;  // 根部略缩在画布内，让蒙版柔化
   const tipX = baseX + Math.sin(b.tilt + sw) * b.height * 0.4;
   const tipY = baseY - b.height;
   const grad = ctx.createLinearGradient(baseX, baseY, tipX, tipY);
   if(b.hue < .5){
     // 银蓝草
-    grad.addColorStop(0, b.isFar ? 'rgba(125,146,168,.45)' : 'rgba(125,146,168,.7)');
-    grad.addColorStop(1, b.isFar ? 'rgba(199,213,222,.25)' : 'rgba(199,213,222,.5)');
+    grad.addColorStop(0, b.isFar ? 'rgba(110,130,155,.55)' : 'rgba(96,116,140,.8)');
+    grad.addColorStop(1, b.isFar ? 'rgba(174,191,208,.3)' : 'rgba(174,191,208,.55)');
   } else {
     // 薰衣草草
-    grad.addColorStop(0, b.isFar ? 'rgba(165,160,180,.42)' : 'rgba(165,160,180,.62)');
-    grad.addColorStop(1, b.isFar ? 'rgba(213,209,224,.25)' : 'rgba(213,209,224,.5)');
+    grad.addColorStop(0, b.isFar ? 'rgba(143,138,165,.52)' : 'rgba(131,126,153,.72)');
+    grad.addColorStop(1, b.isFar ? 'rgba(201,197,220,.3)' : 'rgba(201,197,220,.55)');
   }
   ctx.strokeStyle = grad;
   ctx.lineWidth = b.isFar ? 0.9 : 1.5;
