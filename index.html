@@ -321,6 +321,19 @@ body{
 // ===== 银草 + 蒲公英 系统 =====
 // 莫兰迪银蓝调，渲染稍强但保持淡雅
 
+let canvas, ctx;
+let canvasW = 0, canvasH = 0;
+let windStr = 1, windTgt = 1;
+let animId = null;
+
+// 固定种子的伪随机，保证每次刷新画面都一样
+let _seed = 20260612;
+function srand(){
+  _seed = (_seed * 9301 + 49297) % 233280;
+  return _seed / 233280;
+}
+function resetSeed(){ _seed = 20260612; }
+
 let blades = [];
 let dandelions = [];
 let floatSeeds = [];
