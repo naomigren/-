@@ -478,36 +478,57 @@ function drawDandelion(d, time){
   ctx.save();
   if(d.isFar) ctx.filter = 'blur(0.8px)';
 
-  // 中心透明球（光晕）- 加深一档
+  // === 茎：从画布底部长上来，到绒球底部 ===
+  const stemBaseX = d.x - sw * 8;  // 茎根固定在草丛里
+  const stemBaseY = canvasH - 4;   // 草丛底部
+  const stemTopX = cx;
+  const stemTopY = cy + d.R + 2;   // 接到绒球底
+  // 茎曲线：自然弯曲
+  ctx.strokeStyle = d.isFar ? 'rgba(125,146,168,.55)' : 'rgba(110,128,155,.75)';
+  ctx.lineWidth = d.isFar ? 1.1 : 1.6;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(stemBaseX, stemBaseY);
+  const ctrlX = (stemBaseX + stemTopX) / 2 + sw * 18;
+  const ctrlY = (stemBaseY + stemTopY) / 2;
+  ctx.quadraticCurveTo(ctrlX, ctrlY, stemTopX, stemTopY);
+  ctx.stroke();
+  // 花托（茎顶部小膨大）
+  ctx.fillStyle = d.isFar ? 'rgba(125,146,168,.5)' : 'rgba(110,128,155,.7)';
+  ctx.beginPath();
+  ctx.ellipse(stemTopX, stemTopY, 3, 1.5, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // === 中心透明球（光晕，淡紫调）===
   const ballGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, d.R);
-  ballGrad.addColorStop(0, 'rgba(244,247,249,.28)');
-  ballGrad.addColorStop(.6, 'rgba(244,247,249,.12)');
-  ballGrad.addColorStop(1, 'rgba(244,247,249,0)');
+  ballGrad.addColorStop(0, 'rgba(229,225,236,.32)');
+  ballGrad.addColorStop(.6, 'rgba(229,225,236,.14)');
+  ballGrad.addColorStop(1, 'rgba(229,225,236,0)');
   ctx.fillStyle = ballGrad;
   ctx.beginPath();
   ctx.arc(cx, cy, d.R, 0, Math.PI * 2);
   ctx.fill();
 
-  // 中心小核（加深一点点）
-  ctx.fillStyle = d.isFar ? 'rgba(110,130,155,.55)' : 'rgba(96,116,140,.75)';
+  // 中心小核（薰衣草深紫）
+  ctx.fillStyle = d.isFar ? 'rgba(143,138,170,.6)' : 'rgba(131,126,160,.8)';
   ctx.beginPath();
   ctx.arc(cx, cy, 2.2, 0, Math.PI * 2);
   ctx.fill();
 
-  // 纤毛
+  // === 纤毛（淡紫色）===
   d.seeds.forEach(s => {
     const ex = cx + s.x * d.R * s.len;
     const ey = cy + s.y * d.R * s.len;
     const depth = 0.55 + (s.z + 1) * 0.25;
-    // 纤毛茎（加深）
-    ctx.strokeStyle = `rgba(125,146,168,${(d.isFar ? .38 : .55) * depth})`;
+    // 纤毛茎
+    ctx.strokeStyle = `rgba(165,160,195,${(d.isFar ? .4 : .58) * depth})`;
     ctx.lineWidth = d.isFar ? 0.5 : 0.75;
     ctx.beginPath();
     ctx.moveTo(cx + s.x * 2, cy + s.y * 2);
     ctx.lineTo(ex, ey);
     ctx.stroke();
-    // 顶端绒毛点（加亮）
-    ctx.fillStyle = `rgba(232,238,243,${(d.isFar ? .65 : .9) * depth})`;
+    // 顶端绒毛点
+    ctx.fillStyle = `rgba(220,212,232,${(d.isFar ? .7 : .92) * depth})`;
     ctx.beginPath();
     ctx.arc(ex, ey, d.isFar ? 0.9 : 1.4, 0, Math.PI * 2);
     ctx.fill();
@@ -522,15 +543,15 @@ function drawFloatSeed(s, time){
   ctx.save();
   ctx.translate(x, y);
   ctx.rotate(Math.sin(time * 0.001 + s.phase) * 0.5);
-  // 加深一点
-  ctx.fillStyle = 'rgba(232,238,243,.8)';
+  // 淡紫调
+  ctx.fillStyle = 'rgba(220,212,232,.82)';
   for(let i = 0; i < 6; i++){
     ctx.save();
     ctx.rotate(Math.PI * 2 / 6 * i);
     ctx.fillRect(-0.45, 0, 0.9, s.size);
     ctx.restore();
   }
-  ctx.fillStyle = '#c4d2db';
+  ctx.fillStyle = '#c9c5d4';
   ctx.beginPath();
   ctx.arc(0, 0, 1.1, 0, Math.PI * 2);
   ctx.fill();
