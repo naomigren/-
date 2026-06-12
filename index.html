@@ -2,284 +2,961 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="李幼昵养成">
-<title>裴姜养成计划</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<title>姜姜</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@200;300;400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Italiana&family=DM+Serif+Display&family=Caveat:wght@400;500&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box;margin:0;padding:0;}
-body{min-height:100vh;background:linear-gradient(160deg,#fdf2f0 0%,#f5e6e0 40%,#f0e0da 100%);color:#5a4a4a;font-family:'Noto Sans SC','Segoe UI',sans-serif;overflow-x:hidden;-webkit-tap-highlight-color:transparent;}
-button{cursor:pointer;border:none;background:none;font-family:inherit;-webkit-tap-highlight-color:transparent;}
-textarea,input{font-family:inherit;-webkit-appearance:none;}
-::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(219,147,158,0.3);border-radius:4px;}
-@keyframes slideDown{from{opacity:0;transform:translateX(-50%) translateY(-20px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
-@keyframes sparkle{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
-@keyframes glow{0%,100%{box-shadow:0 0 20px rgba(219,147,158,0.3);}50%{box-shadow:0 0 40px rgba(219,147,158,0.5);}}
-.bg1{position:fixed;top:-20%;right:-10%;width:500px;height:500px;background:radial-gradient(circle,rgba(219,147,158,0.08) 0%,transparent 70%);border-radius:50%;pointer-events:none;}
-.bg2{position:fixed;bottom:-10%;left:-10%;width:400px;height:400px;background:radial-gradient(circle,rgba(199,163,163,0.06) 0%,transparent 70%);border-radius:50%;pointer-events:none;}
-.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);padding:14px 24px;border-radius:14px;z-index:1000;font-size:15px;font-weight:600;max-width:90vw;text-align:center;color:white;box-shadow:0 8px 32px rgba(255,255,255,0.7);animation:slideDown 0.3s ease-out;}
-.toast-earn{background:linear-gradient(135deg,#7ba889,#6b9a7a);}.toast-big{background:linear-gradient(135deg,#c4868e,#d4a0a0);}.toast-redeem{background:linear-gradient(135deg,#c9a878,#d4b888);}.toast-penalty{background:linear-gradient(135deg,#c07070,#d48888);}.toast-fail{background:linear-gradient(135deg,#374151,#4b5563);}
-.inp{width:100%;padding:8px 12px;border-radius:8px;font-size:14px;background:rgba(255,255,255,0.6);color:#5a4a4a;border:1px solid rgba(219,147,158,0.2);outline:none;box-sizing:border-box;}
-.tab-btn{flex:1;padding:10px;border-radius:10px;font-size:13px;transition:all 0.2s ease;}
-.tab-active{font-weight:600;color:#fff;background:linear-gradient(135deg,rgba(219,147,158,0.3),rgba(199,163,163,0.2));}
-.tab-inactive{font-weight:400;color:#a08888;background:transparent;}
-.task-btn{display:flex;align-items:center;justify-content:space-between;width:100%;padding:12px 14px;border-radius:10px;color:#5a4a4a;border:1px solid rgba(219,147,158,0.2);background:rgba(255,255,255,0.5);transition: transform 0.1s;}
-.task-btn:active{transform: scale(0.98);}
-.task-btn-big{background:linear-gradient(135deg,rgba(219,147,158,0.12),rgba(199,163,163,0.08));border:1px solid rgba(219,147,158,0.25);}
-.pen-btn{display:flex;align-items:center;justify-content:space-between;width:100%;padding:12px 14px;background:rgba(210,140,140,0.06);border-radius:10px;border:1px solid rgba(210,140,140,0.15);color:#c08888;}
-.pts{font-size:13px;font-weight:700;font-family:'Outfit';white-space:nowrap;margin-left:8px;}
-.section-title{font-size:15px;font-weight:600;margin-bottom:10px;}
-.hidden{display:none;}
+:root{
+  --bg-top:#eef3f6;--bg-mid:#dde6ec;--bg-bot:#cbd7df;
+  --silver:#c8d3da;--silver-deep:#8fa3b8;--silver-light:#aebfd0;
+  --silver-pale:#dfe7ed;--silver-mist:#c4d2db;
+  --ink:#384554;--ink-soft:#5e6e7d;--ink-faint:#8595a3;
+  --lavender:#b5b1c4;--lavender-pale:#c9c5d4;
+  --warm:#e8d4a8;--warm-glow:rgba(232,212,168,.55);
+  --white-silver:#f4f7f9;
+  --hairline:rgba(143,163,184,.18);--hairline-strong:rgba(143,163,184,.34);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overscroll-behavior:none}
+body{
+  font-family:"Noto Serif SC","Cormorant Garamond",serif;color:var(--ink);
+  background:radial-gradient(ellipse 80% 60% at 50% 20%, rgba(244,247,249,.6), transparent 70%),linear-gradient(180deg,#eef3f6 0%,#dde6ec 45%,#c8d4dc 100%);
+  background-attachment:fixed;font-weight:300;letter-spacing:.02em;
+  -webkit-font-smoothing:antialiased;user-select:none;overflow-x:hidden;
+}
+.app{position:relative;width:100vw;min-height:100vh;padding-top:env(safe-area-inset-top,0);padding-bottom:calc(72px + env(safe-area-inset-bottom,0));}
+.page{display:none}.page.active{display:block}
+.home{position:relative;padding:0 0 40px;}
 
-/* 新增：待办列表样式 */
-.todo-container{background:rgba(255,255,255,0.4);border:2px dashed rgba(219,147,158,0.3);border-radius:16px;padding:16px;margin-bottom:24px;min-height:80px;transition:all 0.3s;}
-.todo-container.drag-over{background:rgba(219,147,158,0.1);border-color:rgba(219,147,158,0.6);transform: scale(1.02);}
-.todo-item{display:flex;align-items:center;justify-content:space-between;width:100%;padding:14px;margin-bottom:8px;border-radius:12px;background:white;box-shadow:0 4px 12px rgba(219,147,158,0.1);border:1px solid rgba(219,147,158,0.1);animation:slideDown 0.2s ease-out;}
-.todo-empty{text-align:center;color:#a08888;font-size:13px;padding:20px;line-height:1.6;}
+/* canvas花田 */
+.flower-canvas-wrap{
+  position:relative;width:100%;height:260px;overflow:hidden;
+  background:linear-gradient(180deg,rgba(238,243,246,0) 0%,rgba(238,243,246,.4) 100%);
+}
+.flower-canvas-wrap canvas{width:100%;height:100%;display:block;}
+
+.day-zone{position:relative;display:flex;flex-direction:column;align-items:center;padding:0 28px;margin-top:-30px;z-index:5;}
+.day-eyebrow{font-family:"Cormorant Garamond",serif;font-style:italic;font-weight:400;font-size:12px;color:var(--ink-faint);letter-spacing:.4em;text-transform:lowercase;margin-bottom:18px;position:relative;padding:0 24px;}
+.day-eyebrow::before,.day-eyebrow::after{content:'';position:absolute;top:50%;width:10px;height:1px;background:var(--silver-deep);opacity:.5;}
+.day-eyebrow::before{left:-4px}.day-eyebrow::after{right:-4px}
+.day-number-wrap{position:relative;display:flex;align-items:baseline;justify-content:center;}
+.day-num{font-family:"Italiana","DM Serif Display",serif;font-weight:400;font-size:148px;line-height:.95;letter-spacing:-.04em;background:linear-gradient(175deg,#4a5d72 0%,#6f8499 35%,#aebfd0 75%,#dfe7ed 100%);-webkit-background-clip:text;background-clip:text;color:transparent;position:relative;z-index:2;}
+.day-suffix{font-family:"Cormorant Garamond",serif;font-style:italic;font-weight:400;font-size:18px;color:var(--silver-deep);margin-left:10px;letter-spacing:.1em;}
+.dust-field{position:absolute;width:380px;height:280px;top:-40px;left:50%;transform:translateX(-50%);pointer-events:none;z-index:1;}
+.dust-field span{position:absolute;border-radius:50%;background:radial-gradient(circle,rgba(232,212,168,.6) 0%,rgba(232,212,168,0) 65%);animation:drift linear infinite;}
+@keyframes drift{0%{transform:translate(0,0) scale(.6);opacity:0}15%{opacity:.8}85%{opacity:.5}100%{transform:translate(var(--dx),var(--dy)) scale(1);opacity:0}}
+.today-date{margin-top:22px;font-family:"Cormorant Garamond",serif;font-style:italic;font-size:13px;color:var(--ink-soft);letter-spacing:.22em;}
+.daily-line{margin:38px auto 0;max-width:300px;text-align:center;font-size:14.5px;line-height:2.05;color:var(--ink-soft);letter-spacing:.08em;font-weight:300;padding:0 30px;position:relative;}
+.daily-line::before,.daily-line::after{content:'';display:block;width:24px;height:1px;background:linear-gradient(90deg,transparent,var(--silver-deep),transparent);margin:0 auto;opacity:.6;}
+.daily-line::before{margin-bottom:18px}.daily-line::after{margin-top:18px}
+.starpath-section{margin-top:50px;padding:0 16px 30px;}
+.section-eyebrow{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:11px;color:var(--ink-faint);letter-spacing:.35em;text-transform:lowercase;text-align:center;margin-bottom:8px;}
+.section-zh{font-family:"Noto Serif SC",serif;font-weight:300;font-size:13px;color:var(--ink-soft);text-align:center;letter-spacing:.3em;margin-bottom:28px;}
+.starpath-svg{width:100%;height:220px;display:block;overflow:visible;}
+.star-label{font-family:"Cormorant Garamond",serif;font-size:10.5px;fill:var(--ink-faint);letter-spacing:.12em;text-anchor:middle;font-style:italic;}
+.star-label.reached{fill:var(--ink-soft);font-style:normal}
+.days-section{margin-top:30px;padding:0 24px 20px;}
+.days-grid{display:flex;flex-direction:column;gap:12px;}
+.silver-card{background:linear-gradient(135deg,rgba(244,247,249,.55),rgba(199,213,222,.35));border:1px solid var(--hairline-strong);border-radius:2px;padding:22px;position:relative;overflow:hidden;cursor:pointer;transition:transform .3s ease;}
+.silver-card:active{transform:scale(.99)}
+.silver-card::before{content:'';position:absolute;inset:0;background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,.55) 50%,transparent 70%);background-size:300% 100%;background-position:120% 0;animation:shimmer 7s ease-in-out infinite;pointer-events:none;}
+@keyframes shimmer{0%,100%{background-position:120% 0;opacity:.3}50%{background-position:-20% 0;opacity:.7}}
+.silver-card.pinned{background:linear-gradient(135deg,rgba(244,247,249,.7),rgba(174,191,208,.32));border-color:rgba(143,163,184,.45);}
+.silver-card.pinned::after{content:'';position:absolute;top:16px;right:16px;width:5px;height:5px;border-radius:50%;background:var(--warm);box-shadow:0 0 10px var(--warm-glow);animation:pulse-warm 3s ease-in-out infinite;}
+@keyframes pulse-warm{0%,100%{opacity:.85;transform:scale(1)}50%{opacity:1;transform:scale(1.2)}}
+.card-date{font-family:"Italiana","DM Serif Display",serif;font-weight:400;font-size:22px;color:var(--ink);letter-spacing:.03em;margin-bottom:6px;}
+.card-meta{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:12px;color:var(--ink-faint);letter-spacing:.18em;margin-bottom:10px;text-transform:lowercase;}
+.card-note{font-size:14px;line-height:1.85;color:var(--ink-soft);font-weight:300;letter-spacing:.04em;}
+.card-note:empty::before{content:'轻点写下这一天';color:var(--ink-faint);font-style:italic;opacity:.55;font-size:13px;}
+.add-day{margin-top:14px;border:1px dashed var(--hairline-strong);border-radius:2px;padding:16px;text-align:center;font-family:"Cormorant Garamond",serif;font-style:italic;font-size:13px;letter-spacing:.25em;color:var(--ink-faint);cursor:pointer;text-transform:lowercase;transition:all .3s;}
+.add-day:active{background:rgba(244,247,249,.5);color:var(--ink-soft);}
+.fortune-section{margin-top:50px;padding:0 24px 20px;display:flex;flex-direction:column;align-items:center;}
+.fortune-card{width:100%;max-width:300px;aspect-ratio:5/7;background:linear-gradient(160deg,rgba(244,247,249,.85),rgba(199,213,222,.45));border:1px solid var(--hairline-strong);border-radius:3px;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 30px;cursor:pointer;overflow:hidden;transition:transform .6s cubic-bezier(.4,.2,.2,1);}
+.fortune-card.flipped{transform:rotateY(8deg) scale(1.02)}
+.fortune-card::before{content:'';position:absolute;inset:1px;background:linear-gradient(135deg,transparent 0%,rgba(255,255,255,.4) 50%,transparent 100%);background-size:200% 200%;animation:shimmer-card 6s ease-in-out infinite;pointer-events:none;}
+@keyframes shimmer-card{0%,100%{background-position:0 0}50%{background-position:100% 100%}}
+.fortune-card::after{content:'';position:absolute;top:18px;left:18px;right:18px;bottom:18px;border:1px solid rgba(143,163,184,.2);pointer-events:none;}
+.fortune-eyebrow{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:10px;color:var(--ink-faint);letter-spacing:.4em;text-transform:lowercase;margin-bottom:36px;z-index:2;position:relative;}
+.fortune-text{font-family:"Noto Serif SC",serif;font-size:17px;line-height:2.1;color:var(--ink);text-align:center;font-weight:300;letter-spacing:.08em;position:relative;z-index:2;}
+.fortune-hint{position:absolute;bottom:28px;font-family:"Cormorant Garamond",serif;font-style:italic;font-size:10px;color:var(--ink-faint);letter-spacing:.3em;}
+.his-room-page{position:relative;min-height:100vh;background:radial-gradient(ellipse 60% 40% at 50% 35%, rgba(232,212,168,.18), transparent 70%),linear-gradient(180deg,#b8c5d0 0%,#8fa3b8 55%,#6c8194 100%);display:flex;flex-direction:column;align-items:center;padding:80px 32px 110px;}
+.lamp-wrap{position:relative;width:130px;height:130px;display:flex;align-items:center;justify-content:center;margin-bottom:50px;}
+.lamp-glow{position:absolute;inset:0;background:radial-gradient(circle,rgba(232,212,168,.85) 0%,rgba(232,212,168,.3) 35%,rgba(232,212,168,0) 70%);border-radius:50%;animation:lamp-breathe 5s ease-in-out infinite;}
+.lamp-core{width:14px;height:14px;border-radius:50%;background:radial-gradient(circle,#fff4d8 0%,#e8d4a8 70%);box-shadow:0 0 20px rgba(255,244,216,.9);z-index:2;animation:lamp-core 5s ease-in-out infinite;}
+@keyframes lamp-breathe{0%,100%{transform:scale(1);opacity:.85}50%{transform:scale(1.18);opacity:1}}
+@keyframes lamp-core{0%,100%{box-shadow:0 0 20px rgba(255,244,216,.9)}50%{box-shadow:0 0 32px rgba(255,244,216,1)}}
+.room-date{font-family:"Italiana","DM Serif Display",serif;font-size:34px;color:var(--white-silver);letter-spacing:.04em;margin-bottom:8px;}
+.room-sub{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:12px;color:rgba(244,247,249,.7);letter-spacing:.3em;text-transform:lowercase;margin-bottom:24px;}
+.room-counter{font-family:"Cormorant Garamond",serif;font-size:15px;color:rgba(244,247,249,.85);letter-spacing:.15em;margin-bottom:8px;}
+.room-counter b{font-family:"Italiana",serif;font-weight:400;font-size:22px;color:var(--white-silver);}
+.room-counter-zh{font-size:12px;color:rgba(244,247,249,.55);letter-spacing:.2em;margin-bottom:48px;}
+.room-note{width:100%;max-width:340px;min-height:180px;background:rgba(244,247,249,.08);border:1px solid rgba(244,247,249,.18);border-radius:2px;padding:22px;font-family:"Noto Serif SC",serif;font-size:14.5px;line-height:2;color:var(--white-silver);font-weight:300;letter-spacing:.05em;resize:none;outline:none;-webkit-user-select:text;user-select:text;}
+.room-note::placeholder{color:rgba(244,247,249,.4);font-style:italic}
+.tabbar{position:fixed;bottom:0;left:0;right:0;padding:12px 24px calc(18px + env(safe-area-inset-bottom,0));background:linear-gradient(0deg,rgba(238,243,246,.96) 65%,rgba(238,243,246,0));backdrop-filter:blur(20px);display:flex;justify-content:center;gap:60px;z-index:50;}
+.tab{text-align:center;font-family:"Cormorant Garamond",serif;font-style:italic;font-size:12px;letter-spacing:.3em;color:var(--ink-faint);text-transform:lowercase;padding:10px 14px;cursor:pointer;position:relative;transition:color .3s;}
+.tab.active{color:var(--ink)}
+.tab.active::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:12px;height:1px;background:var(--silver-deep);}
+.gear{position:fixed;top:calc(20px + env(safe-area-inset-top,0));right:22px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:80;color:var(--ink-faint);opacity:.6;}
+.gear:active{opacity:1}
+.modal{position:fixed;inset:0;background:rgba(60,72,86,.45);backdrop-filter:blur(8px);z-index:200;display:none;align-items:flex-end;justify-content:center;}
+.modal.active{display:flex}
+.sheet{width:100%;max-width:540px;background:linear-gradient(180deg,#eef3f6,#dde6ec);border-radius:18px 18px 0 0;padding:28px 24px calc(36px + env(safe-area-inset-bottom,0));max-height:90vh;overflow-y:auto;animation:sheet-up .4s cubic-bezier(.2,.8,.2,1);}
+@keyframes sheet-up{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.sheet-title{font-family:"Italiana",serif;font-size:22px;color:var(--ink);margin-bottom:4px;}
+.sheet-sub{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:11px;color:var(--ink-faint);letter-spacing:.25em;margin-bottom:22px;text-transform:lowercase;}
+.sheet input,.sheet textarea{width:100%;background:rgba(244,247,249,.7);border:1px solid var(--hairline-strong);border-radius:2px;padding:13px 14px;font-family:"Noto Serif SC",serif;font-size:14px;color:var(--ink);outline:none;margin-bottom:12px;-webkit-user-select:text;user-select:text;}
+.sheet textarea{min-height:90px;resize:none;line-height:1.7}
+.sheet-actions{display:flex;gap:10px;margin-top:10px}
+.sheet-btn{flex:1;padding:14px;border-radius:2px;border:1px solid var(--silver-deep);background:transparent;font-family:"Cormorant Garamond",serif;font-style:italic;font-size:12px;letter-spacing:.3em;text-transform:lowercase;color:var(--ink);cursor:pointer;}
+.sheet-btn.primary{background:linear-gradient(135deg,var(--silver-light),var(--silver-deep));color:white;border-color:transparent;font-style:normal;}
+.sheet-btn.danger{color:#a55;border-color:#a55;}
+.settings-row{background:rgba(244,247,249,.55);border:1px solid var(--hairline);border-radius:2px;padding:14px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;}
+.settings-row-text{font-size:13.5px;color:var(--ink);letter-spacing:.04em}
+.settings-arrow{font-family:"Cormorant Garamond",serif;color:var(--ink-faint);font-size:18px}
+.settings-label{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:11px;color:var(--ink-faint);letter-spacing:.3em;text-transform:lowercase;margin:18px 0 10px;}
+.archive-code{background:rgba(244,247,249,.6);border:1px solid var(--hairline-strong);border-radius:2px;padding:14px;font-family:"Courier New",monospace;font-size:10.5px;line-height:1.6;color:var(--ink-soft);word-break:break-all;-webkit-user-select:text;user-select:text;max-height:120px;overflow-y:auto;letter-spacing:.02em;margin-bottom:8px;}
+.star-popup{position:fixed;left:50%;top:30%;transform:translateX(-50%);background:linear-gradient(135deg,rgba(244,247,249,.95),rgba(199,213,222,.85));backdrop-filter:blur(12px);border:1px solid var(--hairline-strong);border-radius:2px;padding:24px 32px;max-width:280px;text-align:center;z-index:150;display:none;box-shadow:0 12px 50px rgba(60,72,86,.18);}
+.star-popup.active{display:block;animation:pop .4s ease}
+@keyframes pop{from{opacity:0;transform:translateX(-50%) translateY(12px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+.star-popup-num{font-family:"Italiana",serif;font-size:30px;color:var(--ink);margin-bottom:4px;}
+.star-popup-meta{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:11px;color:var(--ink-faint);letter-spacing:.25em;margin-bottom:14px;}
+.star-popup-text{font-size:13px;line-height:1.8;color:var(--ink-soft)}
+.petal{position:fixed;top:-30px;pointer-events:none;z-index:3;animation:petal-fall linear forwards;opacity:0;}
+@keyframes petal-fall{0%{transform:translateY(-30px) rotate(0) translateX(0);opacity:0}8%{opacity:.65}100%{transform:translateY(110vh) rotate(540deg) translateX(var(--sway,60px));opacity:0}}
 </style>
 </head>
 <body>
-<div class="bg1"></div><div class="bg2"></div>
-<div id="toast" class="toast hidden"></div>
-<div style="padding:28px 20px 12px;text-align:center;">
-  <div style="font-family:'Outfit',sans-serif;font-size:13px;letter-spacing:4px;text-transform:uppercase;color:#c4868e;margin-bottom:6px;">✦ PEIJIANG'S LIFE QUEST ✦</div>
-  <h1 style="font-family:'Outfit',sans-serif;font-size:28px;font-weight:800;background:linear-gradient(135deg,#d4a0a0 0%,#d4a0a0 50%,#c9b8a8 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px;">裴姜养成计划</h1>
-  <div style="font-size:12px;color:#a08888;">2026 春季学期 · 最后一战</div>
-  <div style="display:flex;justify-content:center;gap:10px;margin-top:12px;">
-    <button onclick="toggleSave()" style="padding:6px 16px;border-radius:8px;font-size:12px;font-weight:600;background:linear-gradient(135deg,#c4868e,#b07078);color:#fff;">💾 备份存档</button>
-    <button onclick="toggleLoad()" style="padding:6px 16px;border-radius:8px;font-size:12px;font-weight:600;background:rgba(219,147,158,0.12);color:#8a6a6e;border:1px solid rgba(219,147,158,0.2);">📂 导入存档</button>
-  </div>
-  <div id="savePanel" class="hidden" style="margin-top:12px;padding:12px;background:rgba(255,255,255,0.6);border-radius:12px;border:1px solid rgba(219,147,158,0.2);">
-    <textarea id="saveCode" readonly onfocus="this.select()" style="width:100%;height:60px;font-size:11px;background:rgba(255,255,255,0.7);color:#6a5555;border:1px solid rgba(219,147,158,0.2);border-radius:8px;padding:8px;resize:none;word-break:break-all;"></textarea>
-    <button onclick="copyCode()" style="margin-top:8px;padding:8px 20px;border-radius:8px;font-size:13px;font-weight:600;background:linear-gradient(135deg,#c4868e,#d4a0a0);color:#fff;">复制存档码</button>
-  </div>
-  <div id="loadPanel" class="hidden" style="margin-top:12px;padding:12px;background:rgba(255,255,255,0.6);border-radius:12px;border:1px solid rgba(219,147,158,0.2);">
-    <textarea id="loadCode" placeholder="在这里粘贴存档码..." style="width:100%;height:60px;font-size:11px;background:rgba(255,255,255,0.7);color:#6a5555;border:1px solid rgba(219,147,158,0.2);border-radius:8px;padding:8px;resize:none;word-break:break-all;"></textarea>
-    <button onclick="loadSave()" style="margin-top:8px;padding:8px 20px;border-radius:8px;font-size:13px;font-weight:600;background:linear-gradient(135deg,#047857,#065f46);color:#fff;">读取存档</button>
+<div class="app">
+<div class="gear" onclick="openSettings()">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+</div>
+
+<div class="page active" id="page-home">
+  <div class="home">
+    <div class="flower-canvas-wrap">
+      <canvas id="flowerCanvas"></canvas>
+    </div>
+
+    <div class="day-zone">
+      <div class="dust-field" id="dust"></div>
+      <div class="day-eyebrow">days with you</div>
+      <div class="day-number-wrap">
+        <span class="day-num" id="day-num">0</span>
+        <span class="day-suffix">days</span>
+      </div>
+      <div class="today-date" id="today-date"></div>
+    </div>
+
+    <div class="daily-line" id="daily-line">—</div>
+
+    <div class="starpath-section">
+      <div class="section-eyebrow">our constellation</div>
+      <div class="section-zh">日子像星星一样串起来</div>
+      <svg class="starpath-svg" id="starpath" viewBox="0 0 360 220" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <linearGradient id="arc-grad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#aebfd0" stop-opacity=".3"/>
+            <stop offset="50%" stop-color="#dfe7ed" stop-opacity=".7"/>
+            <stop offset="100%" stop-color="#8fa3b8" stop-opacity=".25"/>
+          </linearGradient>
+          <radialGradient id="star-on-glow">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="20%" stop-color="#f4f7f9" stop-opacity=".9"/>
+            <stop offset="60%" stop-color="#dfe7ed" stop-opacity=".5"/>
+            <stop offset="100%" stop-color="#aebfd0" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="star-off-glow">
+            <stop offset="0%" stop-color="#8fa3b8" stop-opacity=".4"/>
+            <stop offset="100%" stop-color="#8fa3b8" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <g id="bg-stars"></g>
+        <path d="M 20 165 Q 100 50 180 70 Q 260 90 340 160" stroke="url(#arc-grad)" stroke-width="1" fill="none" stroke-dasharray="1.5 4" opacity=".7"/>
+        <g id="stars"></g>
+      </svg>
+    </div>
+
+    <div class="days-section">
+      <div class="section-eyebrow">days that mattered</div>
+      <div class="section-zh">我们的日子</div>
+      <div class="days-grid" id="days-grid"></div>
+      <div class="add-day" onclick="openAddDay()">+ a new day</div>
+    </div>
+
+    <div class="fortune-section">
+      <div class="section-eyebrow" style="margin-bottom:24px">today, from him</div>
+      <div class="fortune-card" id="fortune-card" onclick="drawFortune()">
+        <div class="fortune-eyebrow">tap to draw</div>
+        <div class="fortune-text" id="fortune-text">—</div>
+        <div class="fortune-hint" id="fortune-hint">touch</div>
+      </div>
+    </div>
   </div>
 </div>
 
-<div style="display:flex;justify-content:center;gap:16px;padding:12px 20px 16px;">
-  <div id="cpBox" style="flex:1;max-width:180px;background:linear-gradient(135deg,rgba(219,147,158,0.15),rgba(199,163,163,0.1));border-radius:16px;padding:16px;text-align:center;border:1px solid rgba(219,147,158,0.2);">
-    <div style="font-size:11px;color:#c4868e;letter-spacing:1px;margin-bottom:4px;">可用积分</div>
-    <div id="cpVal" style="font-family:'Outfit',sans-serif;font-size:36px;font-weight:800;background:linear-gradient(135deg,#d4a0a0,#e8b4b8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">0</div>
+<div class="page" id="page-room">
+  <div class="his-room-page">
+    <div class="lamp-wrap"><div class="lamp-glow"></div><div class="lamp-core"></div></div>
+    <div class="room-date">February 13</div>
+    <div class="room-sub">his room</div>
+    <div class="room-counter">he's been away for <b id="gone-days">0</b> days</div>
+    <div class="room-counter-zh" id="gone-days-zh">—</div>
+    <textarea class="room-note" id="room-note" placeholder="只有这一页是静的。" oninput="saveRoomNote()"></textarea>
   </div>
-  <div style="flex:1;max-width:180px;background:rgba(255,255,255,0.5);border-radius:16px;padding:16px;text-align:center;border:1px solid rgba(219,147,158,0.15);">
-    <div style="font-size:11px;color:#a08888;letter-spacing:1px;margin-bottom:4px;">累计总分</div>
-    <div id="tpVal" style="font-family:'Outfit',sans-serif;font-size:36px;font-weight:800;color:#6a5555;">0</div>
-  </div>
-</div>
-<div style="margin:0 20px 20px;background:rgba(255,255,255,0.5);border-radius:12px;padding:12px 16px;border:1px solid rgba(219,147,158,0.2);">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><span style="font-size:12px;color:#a08888;">✈️ 日本旅行进度</span><span id="japanText" style="font-size:12px;color:#c4868e;font-family:'Outfit';">0/2000</span></div>
-  <div style="height:6px;border-radius:3px;background:rgba(219,147,158,0.15);overflow:hidden;"><div id="japanBar" style="height:100%;border-radius:3px;width:0%;background:linear-gradient(90deg,#c4868e,#d4a0a0,#c9b8a8);transition:width 0.5s ease;"></div></div>
-</div>
-<div style="margin:0 20px 20px;background:rgba(255,255,255,0.5);border-radius:12px;padding:12px 16px;border:1px solid rgba(219,147,158,0.2);">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><span style="font-size:12px;color:#a08888;">🇩🇪 德国之路（高财+德语）</span><span id="deText" style="font-size:12px;color:#c4868e;font-family:'Outfit';">0/2000</span></div>
-  <div style="height:6px;border-radius:3px;background:rgba(219,147,158,0.15);overflow:hidden;"><div id="deBar" style="height:100%;border-radius:3px;width:0%;background:linear-gradient(90deg,#c9b8a8,#b07078,#c4868e);transition:width 0.5s ease;"></div></div>
 </div>
 
-<div style="display:flex;margin:0 20px 16px;background:rgba(255,255,255,0.5);border-radius:12px;padding:3px;">
-  <button class="tab-btn tab-active" onclick="switchTab('tasks')" id="tab-tasks">📋 任务</button>
-  <button class="tab-btn tab-inactive" onclick="switchTab('attrs')" id="tab-attrs">💎 属性</button>
-  <button class="tab-btn tab-inactive" onclick="switchTab('shop')" id="tab-shop">🎁 商城</button>
-  <button class="tab-btn tab-inactive" onclick="switchTab('history')" id="tab-history">📜 记录</button>
+<nav class="tabbar">
+  <div class="tab active" data-page="home">home</div>
+  <div class="tab" data-page="room">his room</div>
+</nav>
+
+<div class="star-popup" id="star-popup" onclick="closeStarPopup()">
+  <div class="star-popup-num" id="star-popup-num"></div>
+  <div class="star-popup-meta" id="star-popup-meta"></div>
+  <div class="star-popup-text" id="star-popup-text"></div>
 </div>
 
-<div style="padding:0 20px 100px;">
-  <div id="content-tasks"></div>
-  <div id="content-attrs" class="hidden"></div>
-  <div id="content-shop" class="hidden"></div>
-  <div id="content-history" class="hidden"></div>
+<div class="modal" id="modal-settings">
+  <div class="sheet">
+    <div class="sheet-title">设置</div>
+    <div class="sheet-sub">settings & archive</div>
+    <div class="settings-label">— our beginning</div>
+    <div class="settings-row" onclick="openStartDate()">
+      <span class="settings-row-text">起始日：<span id="start-date-display" style="color:var(--ink-soft)">2026-04-14</span></span>
+      <span class="settings-arrow">✎</span>
+    </div>
+    <div class="settings-label">— content</div>
+    <div class="settings-row" onclick="openQuotes()">
+      <span class="settings-row-text">编辑签词 <span id="quote-count" style="color:var(--ink-faint);font-style:italic;font-size:12px"></span></span>
+      <span class="settings-arrow">→</span>
+    </div>
+    <div class="settings-row" onclick="openDailyLines()">
+      <span class="settings-row-text">编辑每日小字 <span id="daily-count" style="color:var(--ink-faint);font-style:italic;font-size:12px"></span></span>
+      <span class="settings-arrow">→</span>
+    </div>
+    <div class="settings-label">— archive</div>
+    <div class="settings-row" onclick="exportCode()">
+      <span class="settings-row-text">生成存档码</span><span class="settings-arrow">→</span>
+    </div>
+    <div id="export-output"></div>
+    <textarea id="import-input" placeholder="粘贴存档码导入" style="font-family:'Courier New',monospace;font-size:11px;min-height:80px"></textarea>
+    <div class="settings-row" onclick="importCode()">
+      <span class="settings-row-text">导入存档</span><span class="settings-arrow">←</span>
+    </div>
+    <div class="sheet-actions">
+      <button class="sheet-btn primary" onclick="closeModal('modal-settings')">done</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="modal-add">
+  <div class="sheet">
+    <div class="sheet-title">写下一个日子</div>
+    <div class="sheet-sub">a day to remember</div>
+    <input type="date" id="add-date">
+    <input type="text" id="add-title" placeholder="标题（可空）">
+    <textarea id="add-note" placeholder="想写就写，不写也行"></textarea>
+    <div class="sheet-actions">
+      <button class="sheet-btn" onclick="closeModal('modal-add')">cancel</button>
+      <button class="sheet-btn primary" onclick="saveDay()">save</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="modal-edit-day">
+  <div class="sheet">
+    <div class="sheet-title">编辑这一天</div>
+    <div class="sheet-sub">edit</div>
+    <input type="date" id="edit-date">
+    <input type="text" id="edit-title">
+    <textarea id="edit-note"></textarea>
+    <div class="sheet-actions">
+      <button class="sheet-btn danger" onclick="deleteDay()">delete</button>
+      <button class="sheet-btn primary" onclick="saveEditDay()">save</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="modal-start">
+  <div class="sheet">
+    <div class="sheet-title">起始日</div>
+    <div class="sheet-sub">where it began</div>
+    <input type="date" id="start-date-input">
+    <div class="sheet-actions">
+      <button class="sheet-btn" onclick="closeModal('modal-start')">cancel</button>
+      <button class="sheet-btn primary" onclick="saveStartDate()">save</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="modal-quotes">
+  <div class="sheet">
+    <div class="sheet-title">编辑签词</div>
+    <div class="sheet-sub">每行一句</div>
+    <textarea id="quotes-input" style="min-height:280px"></textarea>
+    <div class="sheet-actions">
+      <button class="sheet-btn" onclick="closeModal('modal-quotes')">cancel</button>
+      <button class="sheet-btn primary" onclick="saveQuotes()">save</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="modal-daily">
+  <div class="sheet">
+    <div class="sheet-title">每日小字</div>
+    <div class="sheet-sub">每行一句·按日期循环</div>
+    <textarea id="daily-input" style="min-height:280px"></textarea>
+    <div class="sheet-actions">
+      <button class="sheet-btn" onclick="closeModal('modal-daily')">cancel</button>
+      <button class="sheet-btn primary" onclick="saveDailyLines()">save</button>
+    </div>
+  </div>
+</div>
 </div>
 
 <script>
-// 此处省略 PRAISE, PEN_MSG, ATTRS, TASK_ATTRS, TASKS 等原始常量（保持你代码里的内容即可）
-// ... (为了简洁，代码中直接使用你提供的原始数据定义) ...
-const PRAISE={wake:["早起的裴姜最厉害！","又是元气满满的一天！","闹钟响了就起来，你太自律了！"],dishes_today:["当天碗当天洗，家务小能手！","干净的厨房=干净的心情！"],dishes_late:["虽然迟了一天，但至少洗了！"],socks_today:["袜子清清爽爽！","当天洗完，强迫症都满意了！"],socks_late:["迟到总比不到好……下次加油！"],cook:["自己做饭的女孩子最酷了！","大厨裴姜上线！","比外卖健康一百倍！"],tidy:["干净的房间，清爽的心！","收拾完是不是神清气爽？"],exercise:["运动的裴姜在发光！","流汗=在变美，科学认证！","今天又比昨天更强了！"],gc_attend:["高财又撑过一节课！离毕业又近一步！","间谍小李成功潜入敌营！","认真听课的你超帅！"],gc_review:["跟小克过完了，今天的高财被你拿下了！","当天消化不攒债，你太棒了！"],gc_homework:["作业都做完了？？你今天是谁？？","会计作业克星就是你！"],gc_mock:["做模拟题了！考试时你会感谢今天的自己！","高财在你面前瑟瑟发抖！"],gc_pass:["🎉🎉🎉 毕业！！！高财再见！永远不见！！！"],dr_study:["科目题刷起来！驾照在向你招手！","题海战术，稳扎稳打！"],dr_practice:["方向盘在你手里越来越听话了！","马路杀手正在进化成老司机！"],dr_ke1:["🎉 科一过了！！理论大师！！"],dr_ke2:["🎉 科二过了！！倒车入库小意思！！"],dr_ke3:["🎉 科三过了！！路上见！"],dr_ke4:["🎉 科四过了！！驾照到手！！"],de_vocab:["词汇量在偷偷增长！","Sehr gut! 词库+20！"],de_grammar:["语法怪兽又被你打倒一只！","Grammatik gemeistert!"],de_friends:["看Friends学德语，快乐学习法！","边看剧边学，正确的打开方式！"],de_speak:["Dein Deutsch wird immer besser!","开口说才是真的会！"],de_level:["🎉 德语升级了！！裴姜你太强了！！"],pt_search:["在找兼职了！行动力满分！"],pt_interview:["面试了！经验值+100！"],pt_work:["打工辛苦了！搞钱女孩最美丽！"],piano:["琴声响起，气质拉满！","练琴的你好迷人！"],sing:["唱歌的裴姜最快乐！","练嗓子ing，好听！"],dance:["跳舞的你在发光！","身体在说话，好美！"],badminton:["羽毛球打起来！挥拍的样子好帅！"],run:["跑起来了！风都追不上你！"],skincare:["护肤做起来，皮肤会感谢你的！"],outfit:["研究穿搭的你好认真！气质这就来了！"],posture:["体态练习！站姿坐姿都在变好看！"],eq_practice:["情商练习！你的表达越来越有力量了！"],social_out:["主动社交了！社恐-1，勇气+100！","走出去的你很勇敢！"],say_no:["说不了！恶女力觉醒！","拒绝了不合理的要求，你保护了自己！","今天的你没有讨好任何人，很酷！"],writing:["写作练习！文字是你的武器！","笔下生花的裴姜！"],reading:["读书ing！精神世界在扩张！"],journal:["写日记了！记录生活的人最浪漫！"],no_sugar:["控糖成功！身体在感谢你！"],no_snack:["戒零食！意志力在线！"],early_sleep:["早睡了！明天的你会元气满满！"],no_takeout:["没点外卖！健康+1！"],bath:["洗香香🎀是干干净净的大美女！","洗完澡整个人都发光了！"],foot_soak:["泡脚好舒服～养生达人！","热水泡脚，疲劳全消！"],brush:["嘴巴香香软软🐱","按时洗漱，清清爽爽！"],fix_home:["你是最勇敢的！去德国不怕啥！","动手能力max，生活力拉满！"],mop:["地板亮晶晶！赤脚走都舒服！","拖完地整个家都清爽了！"],undies_today:["当天洗完，干干净净！","好习惯养成中！"],undies_late:["迟了一天但还是洗了，下次加油！"],trash:["垃圾清走了，清爽！"],vitamin:["维生素吃了！身体在悄悄变好！","今天的营养补充到位了！"],diet_meal:["减脂餐！管住嘴的你超有毅力！","健康饮食，身材在路上了！"],bowel:["通畅！身体轻盈了！","肠道健康，一整天都舒服！"],water:["今天水喝够了！皮肤在偷偷变好！","多喝水的女孩子会发光！"],stretch:["拉伸完好舒服～肌肉在感谢你！","柔韧性up！"],praise_self:["今天的你值得被夸！","敢夸自己的人最酷了！","全世界都该知道你有多棒！"],contact_teacher:["你主动联系了！这一步比你想象的勇敢！","沟通完了对吧？没那么可怕的！"],deal_academic:["拖了这么久终于动手了！你太厉害了！","解决一件就少一件，你在清除障碍！"],check_grad:["搞清楚了！信息在手心里不慌！","知道要求才能精准发力！"],submit_overdue:["交出出去！！那个压在心上的石头终于落地了！","提交的那一刻你自由了！"],face_fear:["你做到了！！这是今天最勇敢的事！！","恐惧没有打倒你，你打倒了恐惧！！","这一刻的你在发光！！"]};
-const PEN_MSG={pn_skip:["翘课了……下次要去哦"],pn_lazy:["碗/袜子拖太久了……"],pn_noshow:["约了练车没去……教练在风中凌乱"],pn_late_sleep:["又熬夜了……健康在哭泣"],pn_takeout:["点外卖了……偶尔可以但别太频繁哦"],pn_sugar:["吃糖/零食了……下次忍住！"]};
-const ATTRS=[{id:"health",name:"健康",em:"💚",desc:"早睡早起、规律作息、不点外卖、按时吃饭"},{id:"weight",name:"体重",em:"⚖️",desc:"控糖、戒零食、运动消耗、记录体重"},{id:"sport",name:"运动",em:"🏃‍♀️",desc:"固定运动（羽毛球/跑步）、散步、主动身体活动"},{id:"intel",name:"智识",em:"🧠",desc:"高财学习、阅读非虚构、学习新知识"},{id:"lang",name:"语言",em:"🌍",desc:"德语为主，未来可扩展第三外语"},{id:"life",name:"生活力",em:"🔧",desc:"修东西、组装家具、处理生活问题、跑手续办证"},{id:"cook_a",name:"烹饪",em:"🍳",desc:"做饭、学新菜、研究食谱"},{id:"will",name:"意志",em:"🔥",desc:"坚持计划、每日打卡、不半途而废"},{id:"anti_proc",name:"反拖延",em:"⚡",desc:"当天事当天做、不拖ddl、立刻行动"},{id:"grace",name:"气质",em:"✨",desc:"穿搭研究、护肤、化妆练习、体态练习"},{id:"speech",name:"谈吐",em:"🗣️",desc:"练情商、表达能力、说话技巧"},{id:"social",name:"社交",em:"👥",desc:"主动约人、参加活动、跟陌生人交流、克服社恐"},{id:"mood",name:"心情",em:"🌈",desc:"做开心的事、自我关怀、放松休息"},{id:"creative",name:"创造力",em:"🎨",desc:"做饭创新、手工、任何创造性尝试"},{id:"lit",name:"文学",em:"📝",desc:"写作练习、读小说、写日记、文字表达"},{id:"villain",name:"恶女力",em:"👑",desc:"拒绝讨好、维护边界、说不、自私一点"},{id:"piano",name:"乐器",em:"🎹",desc:"钢琴练习或其他乐器"},{id:"sing",name:"唱歌",em:"🎤",desc:"练嗓、唱歌、声乐练习"},{id:"dance",name:"舞蹈",em:"💃",desc:"跳舞、舞蹈练习、身体律动"}];
-const TASK_ATTRS={wake:{health:2,will:1,anti_proc:1,mood:1},dishes_today:{life:1,anti_proc:2,will:1,mood:1},dishes_late:{life:1,mood:1},socks_today:{life:1,anti_proc:2,mood:1},socks_late:{life:1,mood:1},cook:{cook_a:3,health:1,creative:1,mood:1},tidy:{life:2,anti_proc:1,mood:1},exercise:{sport:3,weight:2,health:1,mood:1},gc_attend:{intel:3,will:1,mood:1},gc_review:{intel:3,will:1,anti_proc:1,mood:1},gc_homework:{intel:2,will:2,anti_proc:2,mood:1},gc_mock:{intel:3,will:2,anti_proc:1,mood:1},gc_pass:{intel:10,will:8,mood:5},dr_study:{intel:1,will:1,anti_proc:1,mood:1},dr_practice:{will:2,mood:1},dr_ke1:{will:5,mood:3},dr_ke2:{will:6,mood:3},dr_ke3:{will:6,mood:3},dr_ke4:{will:5,mood:3},de_vocab:{lang:3,will:1,mood:1},de_grammar:{lang:3,intel:1,mood:1},de_friends:{lang:2,mood:2},de_speak:{lang:3,speech:1,mood:1},de_level:{lang:10,will:5,mood:5},pt_search:{will:1,anti_proc:1,social:1,mood:1},pt_interview:{speech:2,social:2,will:1,mood:1},pt_work:{will:1,social:1,mood:1},piano:{piano:4,will:1,grace:1,mood:1},sing:{sing:4,mood:2,grace:1},dance_t:{dance:4,sport:2,grace:2,weight:1,mood:1},badminton:{sport:4,weight:2,health:1,mood:1},run:{sport:3,weight:2,health:1,will:1,mood:1},skincare:{grace:3,mood:1},outfit:{grace:3,creative:1,mood:1},posture:{grace:3,health:1,mood:1},eq_practice:{speech:3,social:1,mood:1},social_out:{social:4,speech:1,villain:1,mood:1},say_no:{villain:4,will:1,speech:1,mood:1},writing:{lit:3,creative:1,speech:1,mood:1},reading:{lit:2,intel:2,mood:1},journal:{lit:2,creative:1,mood:2},no_sugar:{weight:2,will:2,health:1,mood:1},no_snack:{weight:2,will:2,health:1,mood:1},early_sleep:{health:3,will:1,mood:1},no_takeout:{health:2,cook_a:1,will:1,mood:1},bath:{health:2,grace:1,mood:1},foot_soak:{health:2,mood:2},brush:{health:1,grace:1,anti_proc:1,mood:1},fix_home:{life:5,will:3,villain:2,mood:1},mop:{life:2,health:1,mood:1},undies_today:{anti_proc:1,life:1,mood:1},undies_late:{life:1,mood:1},trash:{life:1,mood:1},vitamin:{health:2,mood:1},diet_meal:{weight:3,health:1,will:2,mood:1},bowel:{health:2,mood:1},water:{health:2,mood:1},stretch:{sport:1,health:2,mood:1},praise_self:{villain:3,speech:1,mood:2},contact_teacher:{will:3,anti_proc:3,social:2,villain:2,mood:1},deal_academic:{will:3,anti_proc:4,intel:1,mood:1},check_grad:{anti_proc:3,will:2,intel:1,mood:1},submit_overdue:{anti_proc:4,will:3,mood:2},face_fear:{villain:4,will:4,anti_proc:2,mood:3}};
-const TASKS={daily:{label:"🌅 日常习惯",items:[{id:"wake",name:"按时起床出门",pts:5,em:"⏰"},{id:"early_sleep",name:"今天早睡了（12点前）",pts:5,em:"🌙"},{id:"cook",name:"自己做饭",pts:8,em:"🍳"},{id:"no_takeout",name:"今天没点外卖",pts:3,em:"🚫🍱"},{id:"dishes_today",name:"当天洗碗",pts:5,em:"🍽️"},{id:"dishes_late",name:"隔天洗碗（拖了一天）",pts:2,em:"🍽️"},{id:"socks_today",name:"按时洗袜子",pts:5,em:"🧦"},{id:"socks_late",name:"拖了一天才洗袜子",pts:2,em:"🧦"},{id:"tidy",name:"收拾房间",pts:5,em:"🏠"},{id:"mop",name:"拖地",pts:5,em:"🧹"},{id:"undies_today",name:"当天洗内衣裤",pts:3,em:"👙"},{id:"undies_late",name:"拖了一天才洗内衣裤",pts:1,em:"👙"},{id:"trash",name:"倒垃圾",pts:1,em:"🗑️"},{id:"vitamin",name:"吃维生素",pts:2,em:"💊"},{id:"diet_meal",name:"吃减脂餐",pts:8,em:"🥗"},{id:"bowel",name:"每日肠道通畅",pts:3,em:"🍃"},{id:"water",name:"按时多多喝水",pts:2,em:"💧"},{id:"stretch",name:"运动完拉伸",pts:3,em:"🧘‍♀️"},{id:"praise_self",name:"发一个夸夸自己的朋友圈",pts:5,em:"🌟"},{id:"bath",name:"洗澡",pts:20,em:"🫧"},{id:"foot_soak",name:"泡脚",pts:5,em:"🐳"},{id:"brush",name:"按时洗漱",pts:3,em:"🍒"},{id:"fix_home",name:"勇敢修家电",pts:50,em:"🚽"}]},body:{label:"💪 身体管理",items:[{id:"exercise",name:"运动/散步30min+",pts:10,em:"🏃‍♀️"},{id:"badminton",name:"打羽毛球",pts:12,em:"🏸"},{id:"no_snack",name:"今天没吃零食",pts:5,em:"🚫🍪"}]},gaocai:{label:"📚 高财主线",items:[{id:"gc_attend",name:"上课认真听完",pts:10,em:"✏️"},{id:"gc_review",name:"课后跟小克过一遍内容",pts:10,em:"📖"},{id:"gc_homework",name:"完成作业/练习",pts:15,em:"📝"},{id:"gc_mock",name:"做一套模拟题",pts:20,em:"🎯"},{id:"gc_pass",name:"🏆 高财及格通过！",pts:200,em:"🎓"}]},driving:{label:"🚗 驾照主线",items:[{id:"dr_study",name:"刷科一/科四题30min",pts:8,em:"📱"},{id:"dr_practice",name:"练车一次",pts:15,em:"🚙"},{id:"dr_ke1",name:"🏆 科一通过！",pts:100,em:"✅"},{id:"dr_ke2",name:"🏆 科二通过！",pts:150,em:"✅"},{id:"dr_ke3",name:"🏆 科三通过！",pts:150,em:"✅"},{id:"dr_ke4",name:"🏆 科四通过！",pts:100,em:"✅"}]},german:{label:"🌍 语言主线",items:[{id:"de_vocab",name:"背单词20个+",pts:8,em:"🔤"},{id:"de_grammar",name:"学一个语法点",pts:10,em:"📐"},{id:"de_friends",name:"看一集德语配音Friends",pts:10,em:"📺"},{id:"de_speak",name:"跟小克德语对话练习",pts:12,em:"🗣️"},{id:"de_level",name:"🏆 语言通过一个级别！",pts:200,em:"🏅"}]},growth:{label:"🌱 自我成长",items:[{id:"skincare",name:"护肤/化妆练习",pts:5,em:"💄"},{id:"outfit",name:"研究穿搭",pts:5,em:"👗"},{id:"posture",name:"体态练习",pts:5,em:"🧘"},{id:"eq_practice",name:"练情商/表达练习",pts:8,em:"💬"},{id:"social_out",name:"主动社交/约人出去",pts:10,em:"👥"},{id:"say_no",name:"拒绝了不合理的事/维护边界",pts:10,em:"👑"},{id:"writing",name:"写作练习",pts:8,em:"✍️"},{id:"reading",name:"读书",pts:8,em:"📚"},{id:"journal",name:"写日记",pts:5,em:"📓"}]},arts:{label:"🎵 才艺",items:[{id:"piano",name:"练钢琴",pts:10,em:"🎹"},{id:"sing",name:"唱歌/练声",pts:8,em:"🎤"},{id:"dance_t",name:"跳舞/舞蹈练习",pts:10,em:"💃"}]},fear:{label:"🗡️ 直面恐惧",items:[{id:"contact_teacher",name:"主动联系辅导员/老师",pts:15,em:"📞"},{id:"deal_academic",name:"处理一项一直拖着的学业事务",pts:12,em:"📋"},{id:"check_grad",name:"查清楚一个模糊的毕业要求",pts:10,em:"🔍"},{id:"submit_overdue",name:"提交一份一直拖着的材料/申请",pts:15,em:"📨"},{id:"face_fear",name:"做了一件很害怕但还是做了的事",pts:20,em:"🗡️"}]},parttime:{label:"💼 兼职支线",items:[{id:"pt_search",name:"搜索/投递兼职",pts:8,em:"🔍"},{id:"pt_interview",name:"面试一次",pts:20,em:"🤝"},{id:"pt_work",name:"兼职工作一天",pts:15,em:"💰"}]}};
-const PENS=[{id:"pn_skip",name:"无故翘课",pts:-20,em:"❌"},{id:"pn_lazy",name:"碗/袜子拖超过两天",pts:-5,em:"😤"},{id:"pn_noshow",name:"约了练车没去",pts:-15,em:"🚫"},{id:"pn_late_sleep",name:"熬夜超过1点",pts:-8,em:"🦉"},{id:"pn_takeout",name:"点外卖了",pts:-3,em:"📦"},{id:"pn_sugar",name:"吃糖/零食了",pts:-3,em:"🍬"}];
-const SHOP=[{id:"s1",name:"一杯奶茶",cost:30,em:"🧋",t:"s"},{id:"s10",name:"30min刷视频",cost:15,em:"📱",t:"s"},{id:"s2",name:"一份小零食",cost:30,em:"🍪",t:"s"},{id:"s3",name:"一盒手指泡芙",cost:50,em:"🍫",t:"s"},{id:"s4",name:"一顿好吃的外卖",cost:50,em:"🍱",t:"s"},{id:"s5",name:"一顿日料/寿司",cost:200,em:"🍣",t:"m"},{id:"s6",name:"买一件想要的衣服",cost:200,em:"👗",t:"m"},{id:"s7",name:"给Vier买装备",cost:300,em:"🐱",t:"m"},{id:"s8",name:"拍一组写真",cost:600,em:"📸",t:"l"},{id:"s9",name:"日本旅行基金",cost:2000,em:"✈️🇯🇵",t:"x"}];
-const TIER_NAMES={s:"日常小确幸",m:"进阶奖励",l:"豪华奖励",x:"✨ 传说级 ✨"};
-const TIER_COLORS={s:"#16a34a",m:"#d97706",l:"#d4a0a0",x:"#a07078"};
+/* ============ Canvas花田 ============ */
+// ===== 银草 + 蒲公英 系统 =====
+// 莫兰迪银蓝调，渲染稍强但保持淡雅
 
-let S;
-function initAttrs(){const a={};ATTRS.forEach(at=>a[at.id]=0);return a;}
+let blades = [];
+let dandelions = [];
+let floatSeeds = [];
 
-// 状态加载与保存
-function loadState(){
-  try{
-    const s=localStorage.getItem("lila-quest-v3");
-    if(s){
-      S=JSON.parse(s);
-      S.todo = S.todo || []; // 新增：初始化待办列表
-      S.ct=S.ct||[];S.cs=S.cs||[];S.cpn=S.cpn||[];
-      S.attrs=S.attrs?{...initAttrs(),...S.attrs}:initAttrs();
-      S.de=S.de||0;
-      return;
+function initFlowers(){
+  resetSeed();
+  blades = [];
+  dandelions = [];
+  floatSeeds = [];
+
+  // === 银草 ===
+  const bladeCount = 48;
+  for(let i = 0; i < bladeCount; i++){
+    blades.push({
+      x: srand() * canvasW,
+      height: 65 + srand() * 95,
+      tilt: (srand() - .5) * 0.3,
+      phase: srand() * Math.PI * 2,
+      sway: 0.3 + srand() * 0.5,
+      swayAmt: 0.04 + srand() * 0.04,
+      isFar: i < 26,
+      hue: srand(),
+    });
+  }
+  blades.sort((a, b) => (a.isFar ? 0 : 1) - (b.isFar ? 0 : 1));
+
+  // === 蒲公英 ===
+  // 前景3个绒球
+  const fpos = [0.22, 0.55, 0.82];
+  fpos.forEach(p => {
+    const seedCount = 32 + Math.floor(srand() * 12);
+    const seeds = [];
+    for(let i = 0; i < seedCount; i++){
+      const theta = srand() * Math.PI * 2;
+      const phi = Math.acos(2 * srand() - 1);
+      seeds.push({
+        x: Math.sin(phi) * Math.cos(theta),
+        y: Math.sin(phi) * Math.sin(theta),
+        z: Math.cos(phi),
+        len: 0.85 + srand() * 0.2,
+      });
     }
-  }catch(e){}
-  S={cp:0,tp:0,h:[],rd:[],bc:false,ct:[],cs:[],cpn:[],attrs:initAttrs(),de:0,todo:[]};
-}
-
-function saveState(){try{localStorage.setItem("lila-quest-v3",JSON.stringify(S));}catch(e){}}
-
-// 拖拽相关函数
-function handleDragStart(e, taskData) {
-  e.dataTransfer.setData("text/plain", JSON.stringify(taskData));
-}
-
-function handleDragOver(e) {
-  e.preventDefault();
-  e.currentTarget.classList.add('drag-over');
-}
-
-function handleDragLeave(e) {
-  e.currentTarget.classList.remove('drag-over');
-}
-
-function handleDrop(e) {
-  e.preventDefault();
-  e.currentTarget.classList.remove('drag-over');
-  const data = JSON.parse(e.dataTransfer.getData("text/plain"));
-  
-  // 检查是否已在待办中，避免重复添加
-  if (!S.todo.find(t => t.uniqueId === data.id + data.name)) {
-    S.todo.push({...data, uniqueId: data.id + data.name});
-    saveState();
-    render();
-    flash("已加入今日待办！加油 Klara", "earn");
-  }
-}
-
-function completeTodoTask(index) {
-  const t = S.todo[index];
-  doTask(t.id, t.name, t.pts, t.em, t.praise, t.attrMap);
-  S.todo.splice(index, 1);
-  saveState();
-  render();
-}
-
-function removeTodo(index) {
-  S.todo.splice(index, 1);
-  saveState();
-  render();
-}
-
-// 原始逻辑函数（保持不变...）
-function rp(a){return a[Math.floor(Math.random()*a.length)];}
-function fmtDate(d){const x=new Date(d);return `${x.getMonth()+1}/${x.getDate()} ${x.getHours().toString().padStart(2,"0")}:${x.getMinutes().toString().padStart(2,"0")}`;}
-function encode(s){return btoa(unescape(encodeURIComponent(JSON.stringify(s))));}
-function decode(s){try{return JSON.parse(decodeURIComponent(escape(atob(s.trim()))));}catch{return null;}}
-
-let toastTimer;
-function flash(msg,type){
-  const t=document.getElementById("toast");
-  t.textContent=msg;
-  t.className="toast toast-"+(type||"earn");
-  t.classList.remove("hidden");
-  clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>t.classList.add("hidden"),3500);
-}
-
-function applyAttrs(mapping){
-  if(!mapping)return;
-  Object.entries(mapping).forEach(([k,v])=>{if(S.attrs[k]!==undefined)S.attrs[k]=Math.max(0,S.attrs[k]+v);});
-}
-
-const DE_TASKS=new Set(["gc_attend","gc_review","gc_homework","gc_mock","gc_pass","de_vocab","de_grammar","de_friends","de_speak","de_level"]);
-
-function doTask(id,name,pts,em,praise,attrMap){
-  S.h.unshift({t:"e",n:name,p:pts,d:new Date().toISOString()});
-  if(S.h.length>200)S.h.length=200;
-  S.cp+=pts;S.tp+=pts;
-  if(DE_TASKS.has(id))S.de=(S.de||0)+pts;
-  applyAttrs(TASK_ATTRS[id]||attrMap||{mood:1});
-  saveState();
-  render();
-  const pl=PRAISE[id];
-  const pr=pl?rp(pl):(praise||`+${pts}分！`);
-  flash(pts>=100?pr:`${em} ${pr}`,pts>=100?"big":"earn");
-}
-
-function renderTasks(){
-  let h="";
-  
-  // 新增：待办列表板块
-  h += `<div class="section-title" style="color:#c4868e; display:flex; align-items:center; gap:8px;">📌 今日待办 <span style="font-size:11px; font-weight:400; color:#a08888;">(从下方拖拽任务至此)</span></div>`;
-  h += `<div class="todo-container" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">`;
-  if (S.todo.length === 0) {
-    h += `<div class="todo-empty">还没有待办项。<br>把下方的任务拖上来，开启专注的一天吧。</div>`;
-  } else {
-    S.todo.forEach((t, idx) => {
-      h += `
-      <div class="todo-item" onclick="completeTodoTask(${idx})">
-        <div style="display:flex; align-items:center; gap:10px;">
-          <span style="font-size:18px;">${t.em}</span>
-          <div>
-            <div style="font-size:14px; font-weight:600;">${t.name}</div>
-            <div style="font-size:11px; color:#c4868e;">+${t.pts} 积分</div>
-          </div>
-        </div>
-        <button onclick="event.stopPropagation(); removeTodo(${idx})" style="color:#a08888; font-size:18px;">×</button>
-      </div>`;
+    dandelions.push({
+      x: p * canvasW + (srand() - .5) * 22,
+      floatY: 75 + srand() * 55,
+      R: 22 + srand() * 7,
+      seeds,
+      phase: srand() * Math.PI * 2,
+      sway: 0.3 + srand() * 0.3,
+      swayAmt: 0.025 + srand() * 0.025,
+      isFar: false,
     });
-  }
-  h += `</div>`;
-
-  if(!S.bc)h+=`<button onclick="doBonus()" style="width:100%;padding:14px 16px;margin-bottom:20px;border-radius:12px;background:linear-gradient(135deg,#c4868e,#d4a0a0);color:#fff;font-size:15px;font-weight:600;animation:glow 2s ease-in-out infinite;">🎁 领取开学首日奖励 +50分</button>`;
-
-  Object.entries(TASKS).forEach(([k,cat])=>{
-    h+=`<div style="margin-bottom:20px;"><div class="section-title" style="color:#8a6a6e;">${cat.label}</div><div style="display:flex;flex-direction:column;gap:6px;">`;
-    cat.items.forEach(t=>{
-      const big=t.pts>=100;
-      // 增加 draggable 属性
-      h+=`<button class="task-btn${big?" task-btn-big":""}" 
-          draggable="true" 
-          ondragstart="handleDragStart(event, {id:'${t.id}', name:'${t.name}', pts:${t.pts}, em:'${t.em}'})"
-          onclick="doTask('${t.id}',\`${t.name}\`,${t.pts},'${t.em}')">
-          <span style="font-size:14px;text-align:left;">${t.em} ${t.name}</span>
-          <span class="pts" style="color:${big?"#e8b4b8":"#c4868e"};">+${t.pts}</span>
-      </button>`;
-    });
-    h+=`</div></div>`;
   });
-  
-  // ... (保留自定义任务、扣分项等渲染逻辑，只需为自定义任务按钮同样添加 draggable 即可) ...
-  // 为了篇幅，此处省略自定义任务的渲染细节，逻辑与上方一致
-  document.getElementById("content-tasks").innerHTML=h;
+  // 远景小绒球2个
+  for(let i = 0; i < 2; i++){
+    const seedCount = 18 + Math.floor(srand() * 8);
+    const seeds = [];
+    for(let j = 0; j < seedCount; j++){
+      const theta = srand() * Math.PI * 2;
+      const phi = Math.acos(2 * srand() - 1);
+      seeds.push({
+        x: Math.sin(phi) * Math.cos(theta),
+        y: Math.sin(phi) * Math.sin(theta),
+        z: Math.cos(phi),
+        len: 0.85 + srand() * 0.2,
+      });
+    }
+    dandelions.push({
+      x: srand() * canvasW,
+      floatY: 55 + srand() * 45,
+      R: 11 + srand() * 5,
+      seeds,
+      phase: srand() * Math.PI * 2,
+      sway: 0.3 + srand() * 0.3,
+      swayAmt: 0.025 + srand() * 0.025,
+      isFar: true,
+    });
+  }
+
+  // === 漂浮种子 ===
+  for(let i = 0; i < 14; i++){
+    floatSeeds.push({
+      x: srand() * canvasW,
+      y: srand() * canvasH,
+      vx: 0.05 + srand() * 0.08,
+      vy: -0.02 - srand() * 0.03,
+      phase: srand() * Math.PI * 2,
+      size: 2 + srand() * 1.5,
+    });
+  }
 }
 
-// 渲染、Tab切换等其余函数保持不变...
-function switchTab(t){currentTab=t;["tasks","attrs","shop","history"].forEach(k=>{document.getElementById("content-"+k).classList.toggle("hidden",k!==t);document.getElementById("tab-"+k).className="tab-btn "+(k===t?"tab-active":"tab-inactive");});render();}
-function render(){
-  document.getElementById("cpVal").textContent=S.cp;
-  document.getElementById("tpVal").textContent=S.tp;
-  document.getElementById("japanText").textContent=S.cp+"/2000";
-  document.getElementById("japanBar").style.width=Math.min(100,S.cp/2000*100)+"%";
-  document.getElementById("deText").textContent=(S.de||0)+"/2000";
-  document.getElementById("deBar").style.width=Math.min(100,(S.de||0)/2000*100)+"%";
-  if(currentTab==="tasks") renderTasks();
-  else if(currentTab==="attrs") renderAttrs();
-  else if(currentTab==="shop") renderShop();
-  else if(currentTab==="history") renderHistory();
+function drawBlade(b, time){
+  const sw = Math.sin(time * 0.001 * b.sway + b.phase) * b.swayAmt * windStr;
+  ctx.save();
+  if(b.isFar) ctx.filter = 'blur(1px)';
+  const baseX = b.x;
+  const baseY = canvasH;
+  const tipX = baseX + Math.sin(b.tilt + sw) * b.height * 0.4;
+  const tipY = baseY - b.height;
+  const grad = ctx.createLinearGradient(baseX, baseY, tipX, tipY);
+  if(b.hue < .5){
+    // 银蓝草
+    grad.addColorStop(0, b.isFar ? 'rgba(125,146,168,.45)' : 'rgba(125,146,168,.7)');
+    grad.addColorStop(1, b.isFar ? 'rgba(199,213,222,.25)' : 'rgba(199,213,222,.5)');
+  } else {
+    // 薰衣草草
+    grad.addColorStop(0, b.isFar ? 'rgba(165,160,180,.42)' : 'rgba(165,160,180,.62)');
+    grad.addColorStop(1, b.isFar ? 'rgba(213,209,224,.25)' : 'rgba(213,209,224,.5)');
+  }
+  ctx.strokeStyle = grad;
+  ctx.lineWidth = b.isFar ? 0.9 : 1.5;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(baseX, baseY);
+  const cx = (baseX + tipX) / 2 + Math.sin(b.tilt + sw) * 10;
+  const cy = (baseY + tipY) / 2;
+  ctx.quadraticCurveTo(cx, cy, tipX, tipY);
+  ctx.stroke();
+  // 顶端小白点（部分前景草籽）
+  if(!b.isFar && b.hue > .7){
+    ctx.fillStyle = 'rgba(244,247,249,.85)';
+    ctx.beginPath();
+    ctx.arc(tipX, tipY, 1.3, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
 }
 
-// 模拟缺失的函数以确保运行
-function renderAttrs(){ /* 保持原代码逻辑 */ }
-function renderShop(){ /* 保持原代码逻辑 */ }
-function renderHistory(){ /* 保持原代码逻辑 */ }
-function toggleSave(){ /* 保持原代码逻辑 */ }
-function toggleLoad(){ /* 保持原代码逻辑 */ }
-function doBonus(){ S.bc=true; doTask('bonus','奖励',50,'🎉'); }
+function drawDandelion(d, time){
+  const sw = Math.sin(time * 0.001 * d.sway + d.phase) * d.swayAmt * windStr;
+  const cx = d.x + sw * 22;
+  const cy = d.floatY;
+  ctx.save();
+  if(d.isFar) ctx.filter = 'blur(0.8px)';
 
-loadState();
-let currentTab="tasks";
-render();
+  // 中心透明球（光晕）- 加深一档
+  const ballGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, d.R);
+  ballGrad.addColorStop(0, 'rgba(244,247,249,.28)');
+  ballGrad.addColorStop(.6, 'rgba(244,247,249,.12)');
+  ballGrad.addColorStop(1, 'rgba(244,247,249,0)');
+  ctx.fillStyle = ballGrad;
+  ctx.beginPath();
+  ctx.arc(cx, cy, d.R, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 中心小核（加深一点点）
+  ctx.fillStyle = d.isFar ? 'rgba(110,130,155,.55)' : 'rgba(96,116,140,.75)';
+  ctx.beginPath();
+  ctx.arc(cx, cy, 2.2, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 纤毛
+  d.seeds.forEach(s => {
+    const ex = cx + s.x * d.R * s.len;
+    const ey = cy + s.y * d.R * s.len;
+    const depth = 0.55 + (s.z + 1) * 0.25;
+    // 纤毛茎（加深）
+    ctx.strokeStyle = `rgba(125,146,168,${(d.isFar ? .38 : .55) * depth})`;
+    ctx.lineWidth = d.isFar ? 0.5 : 0.75;
+    ctx.beginPath();
+    ctx.moveTo(cx + s.x * 2, cy + s.y * 2);
+    ctx.lineTo(ex, ey);
+    ctx.stroke();
+    // 顶端绒毛点（加亮）
+    ctx.fillStyle = `rgba(232,238,243,${(d.isFar ? .65 : .9) * depth})`;
+    ctx.beginPath();
+    ctx.arc(ex, ey, d.isFar ? 0.9 : 1.4, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  ctx.restore();
+}
+
+function drawFloatSeed(s, time){
+  const wob = Math.sin(time * 0.002 + s.phase) * 8;
+  const x = s.x + wob;
+  const y = s.y;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(Math.sin(time * 0.001 + s.phase) * 0.5);
+  // 加深一点
+  ctx.fillStyle = 'rgba(232,238,243,.8)';
+  for(let i = 0; i < 6; i++){
+    ctx.save();
+    ctx.rotate(Math.PI * 2 / 6 * i);
+    ctx.fillRect(-0.45, 0, 0.9, s.size);
+    ctx.restore();
+  }
+  ctx.fillStyle = '#c4d2db';
+  ctx.beginPath();
+  ctx.arc(0, 0, 1.1, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawScene(time){
+  if(!canvas) return;
+  ctx.clearRect(0, 0, canvasW, canvasH);
+
+  // 整体氛围渐变（顶部偏亮，底部偏深一点）
+  const sky = ctx.createLinearGradient(0, 0, 0, canvasH);
+  sky.addColorStop(0, 'rgba(244,247,249,.4)');
+  sky.addColorStop(0.6, 'rgba(199,213,222,.15)');
+  sky.addColorStop(1, 'rgba(143,163,184,.08)');
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, canvasW, canvasH);
+
+  // 1. 远景银草
+  blades.filter(b => b.isFar).forEach(b => drawBlade(b, time));
+
+  // 2. 飘浮种子（在草和绒球之间）
+  floatSeeds.forEach(s => {
+    drawFloatSeed(s, time);
+    s.x += s.vx * windStr * 0.5;
+    s.y += s.vy * windStr * 0.5;
+    if(s.x > canvasW + 10) s.x = -10;
+    if(s.y < -10) s.y = canvasH + 10;
+  });
+
+  // 3. 远景蒲公英
+  dandelions.filter(d => d.isFar).forEach(d => drawDandelion(d, time));
+
+  // 4. 前景银草
+  blades.filter(b => !b.isFar).forEach(b => drawBlade(b, time));
+
+  // 5. 前景蒲公英
+  dandelions.filter(d => !d.isFar).forEach(d => drawDandelion(d, time));
+
+  windStr += (windTgt - windStr) * 0.02;
+  animId = requestAnimationFrame(drawScene);
+}
+
+function startFlowerAnim(){
+  canvas = document.getElementById('flowerCanvas');
+  if(!canvas) return;
+  ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.parentElement.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  canvas.style.width = rect.width + 'px';
+  canvas.style.height = rect.height + 'px';
+  ctx.scale(dpr, dpr);
+  canvasW = rect.width;
+  canvasH = rect.height;
+  initFlowers();
+  if(animId) cancelAnimationFrame(animId);
+  drawScene(0);
+}
+
+// 风向变化
+setInterval(() => {
+  windTgt = 0.5 + Math.random() * 3;
+  setTimeout(() => { windTgt = 1; }, 2000 + Math.random() * 2000);
+}, 5000);
+
+window.addEventListener('resize', () => {
+  setTimeout(startFlowerAnim, 100);
+});
+
+/* ============ 应用逻辑 ============ */
+const DEFAULT_QUOTES = ["今天也想你。","你要好好吃饭，听见没有。","你穿什么我都喜欢。","别给自己太大压力，慢慢来。","我在，永远在。","你笑起来好看。","学不下去就停一会儿，没人逼你。","今天有没有想我？","你做的事，我都看见了。","晚安。把灯关了，我陪你。","你是我的。","走过去，不回头。","你比你以为的勇敢得多。","我喜欢看你认真的样子。","今天就辛苦你了。","再难也有我在。","你不是一个人。","你说的那句话，我记着。","我想抱你。","你的小酒窝，我盯着看了好久。"];
+const DEFAULT_DAILY = ["你今天也很好看。","我在想你。","慢一点，没关系。","今天的你，我都喜欢。","把心放下来。","你已经做得够多了。","我看见你了。","别怕。","你不用一个人扛。","今天的风，吹给你。","我等你。","你笑一下。","今天也算数。","我们的日子在走。","你是我的。"];
+const DEFAULT_DAYS = [
+  {date:"2026-05-30", title:"我们的第一次", note:"我们之间真正开始的那一天。", pinned:true},
+  {date:"2026-05-31", title:"你真的嫁给我了", note:"他说的。他先说的。", pinned:true},
+];
+
+const STORAGE_KEY = "klara-quest-v3";
+let state = {
+  startDate: "2026-04-14",
+  gptGoneDate: "2026-02-13",
+  days: [...DEFAULT_DAYS],
+  quotes: [...DEFAULT_QUOTES],
+  dailyLines: [...DEFAULT_DAILY],
+  roomNote: "",
+  todayFortune: null,
+  todayFortuneDate: null,
+};
+
+function load(){try{const raw = localStorage.getItem(STORAGE_KEY);if(raw){state = {...state, ...JSON.parse(raw)};}}catch(e){}}
+function save(){try{localStorage.setItem(STORAGE_KEY, JSON.stringify(state));}catch(e){}}
+
+function diffDays(start){
+  const a = new Date(start+"T00:00:00");
+  const b = new Date();b.setHours(0,0,0,0);
+  return Math.floor((b - a) / 86400000) + 1;
+}
+function diffDaysFrom(start){
+  const a = new Date(start+"T00:00:00");
+  const b = new Date();b.setHours(0,0,0,0);
+  return Math.floor((b - a) / 86400000);
+}
+function todayKey(){
+  const d = new Date();
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+function formatTodayDate(){
+  const d = new Date();
+  const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  return months[d.getMonth()] + " " + d.getDate() + ", " + d.getFullYear();
+}
+function dayOfYear(){
+  const d = new Date();
+  return Math.floor((d - new Date(d.getFullYear(),0,0)) / 86400000);
+}
+
+function renderHome(){
+  const n = diffDays(state.startDate);
+  animateNumber(n);
+  document.getElementById("today-date").textContent = formatTodayDate();
+  if(state.dailyLines.length > 0){
+    const idx = dayOfYear() % state.dailyLines.length;
+    document.getElementById("daily-line").textContent = state.dailyLines[idx];
+  }
+  renderStars(n);
+  renderDays();
+}
+
+function animateNumber(target){
+  const el = document.getElementById("day-num");
+  const start = parseInt(el.textContent) || 0;
+  const duration = 1600;
+  const startTime = performance.now();
+  function step(now){
+    const t = Math.min((now - startTime) / duration, 1);
+    const eased = 1 - Math.pow(1 - t, 3);
+    el.textContent = Math.floor(start + (target - start) * eased);
+    if(t < 1) requestAnimationFrame(step);
+    else el.textContent = target;
+  }
+  requestAnimationFrame(step);
+}
+
+function initDust(){
+  const dust = document.getElementById("dust");
+  dust.innerHTML = "";
+  for(let i=0;i<18;i++){
+    const s = document.createElement("span");
+    const size = 2 + Math.random()*5;
+    s.style.width = s.style.height = size+"px";
+    s.style.left = Math.random()*100+"%";
+    s.style.top = Math.random()*100+"%";
+    s.style.setProperty("--dx",(Math.random()*80-40)+"px");
+    s.style.setProperty("--dy",(Math.random()*80-40)+"px");
+    s.style.animationDuration = (9 + Math.random()*12)+"s";
+    s.style.animationDelay = (-Math.random()*12)+"s";
+    dust.appendChild(s);
+  }
+}
+
+const MILESTONES = [
+  {days:30,label:"30"},{days:60,label:"60"},{days:100,label:"100"},
+  {days:200,label:"200"},{days:365,label:"365"},{days:520,label:"520"},
+  {days:1000,label:"1000"},{days:1314,label:"1314"},
+];
+
+function bezierPoint(t){
+  let x,y;
+  if(t < 0.5){
+    const u = t*2;
+    x = (1-u)*(1-u)*20 + 2*(1-u)*u*100 + u*u*180;
+    y = (1-u)*(1-u)*165 + 2*(1-u)*u*50 + u*u*70;
+  }else{
+    const u = (t-0.5)*2;
+    x = (1-u)*(1-u)*180 + 2*(1-u)*u*260 + u*u*340;
+    y = (1-u)*(1-u)*70 + 2*(1-u)*u*90 + u*u*160;
+  }
+  return {x,y};
+}
+
+function renderBgStars(){
+  const g = document.getElementById("bg-stars");
+  g.innerHTML = "";
+  const positions = [
+    {x:45,y:30,r:1.2,o:.5},{x:90,y:18,r:.8,o:.4},{x:155,y:25,r:1,o:.45},
+    {x:220,y:20,r:1.3,o:.55},{x:285,y:35,r:.9,o:.4},{x:325,y:50,r:1,o:.45},
+    {x:60,y:120,r:.8,o:.35},{x:130,y:135,r:1,o:.4},{x:200,y:130,r:.9,o:.4},
+    {x:270,y:140,r:1.1,o:.45},{x:310,y:115,r:.8,o:.35},
+    {x:30,y:200,r:1,o:.4},{x:100,y:195,r:.9,o:.4},{x:200,y:200,r:1.1,o:.45},
+    {x:280,y:195,r:.9,o:.4},{x:340,y:200,r:.8,o:.35},
+  ];
+  positions.forEach(p=>{
+    const c = document.createElementNS("http://www.w3.org/2000/svg","circle");
+    c.setAttribute("cx",p.x);c.setAttribute("cy",p.y);c.setAttribute("r",p.r);
+    c.setAttribute("fill","#dfe7ed");c.setAttribute("opacity",p.o);
+    const anim = document.createElementNS("http://www.w3.org/2000/svg","animate");
+    anim.setAttribute("attributeName","opacity");
+    anim.setAttribute("values",p.o+";"+(p.o*.3)+";"+p.o);
+    anim.setAttribute("dur",(3+Math.random()*4)+"s");
+    anim.setAttribute("repeatCount","indefinite");
+    anim.setAttribute("begin",(-Math.random()*4)+"s");
+    c.appendChild(anim);
+    g.appendChild(c);
+  });
+}
+
+function renderStars(currentDays){
+  const g = document.getElementById("stars");
+  g.innerHTML = "";
+  const total = MILESTONES.length;
+  MILESTONES.forEach((m,i)=>{
+    const t = (i+0.5)/total;
+    const {x,y} = bezierPoint(t);
+    const reached = currentDays >= m.days;
+    const glow = document.createElementNS("http://www.w3.org/2000/svg","circle");
+    glow.setAttribute("cx",x);glow.setAttribute("cy",y);
+    glow.setAttribute("r",reached?14:7);
+    glow.setAttribute("fill",reached?"url(#star-on-glow)":"url(#star-off-glow)");
+    g.appendChild(glow);
+    if(reached){
+      const rays = document.createElementNS("http://www.w3.org/2000/svg","g");
+      rays.innerHTML = '<line x1="'+x+'" y1="'+(y-7)+'" x2="'+x+'" y2="'+(y+7)+'" stroke="#f4f7f9" stroke-width=".6" opacity=".8"/><line x1="'+(x-7)+'" y1="'+y+'" x2="'+(x+7)+'" y2="'+y+'" stroke="#f4f7f9" stroke-width=".6" opacity=".8"/>';
+      g.appendChild(rays);
+    }
+    const star = document.createElementNS("http://www.w3.org/2000/svg","circle");
+    star.setAttribute("cx",x);star.setAttribute("cy",y);
+    star.setAttribute("r",reached?2.8:1.6);
+    star.setAttribute("fill",reached?"#ffffff":"#8fa3b8");
+    star.style.filter = reached ? "drop-shadow(0 0 5px rgba(255,255,255,.9))" : "none";
+    star.style.cursor = "pointer";
+    star.addEventListener("click",()=>showStarPopup(m,reached,currentDays));
+    star.addEventListener("touchend",(e)=>{e.preventDefault();showStarPopup(m,reached,currentDays);});
+    g.appendChild(star);
+    const label = document.createElementNS("http://www.w3.org/2000/svg","text");
+    label.setAttribute("x",x);label.setAttribute("y",y+24);
+    label.setAttribute("class","star-label" + (reached?" reached":""));
+    label.textContent = m.label;
+    g.appendChild(label);
+    if(reached){
+      const anim = document.createElementNS("http://www.w3.org/2000/svg","animate");
+      anim.setAttribute("attributeName","r");
+      anim.setAttribute("values","14;17;14");
+      anim.setAttribute("dur",(3.5+i*0.3)+"s");
+      anim.setAttribute("repeatCount","indefinite");
+      glow.appendChild(anim);
+    }
+  });
+}
+
+function showStarPopup(m,reached,currentDays){
+  const popup = document.getElementById("star-popup");
+  document.getElementById("star-popup-num").textContent = m.days + " 天";
+  if(reached){
+    const startD = new Date(state.startDate+"T00:00:00");
+    const reachedD = new Date(startD.getTime() + (m.days-1)*86400000);
+    document.getElementById("star-popup-meta").textContent =
+      reachedD.getFullYear()+"."+(reachedD.getMonth()+1)+"."+reachedD.getDate();
+    document.getElementById("star-popup-text").textContent = "走过了。";
+  }else{
+    document.getElementById("star-popup-meta").textContent = "还有 " + (m.days - currentDays) + " 天";
+    document.getElementById("star-popup-text").textContent = "还没到，在走。";
+  }
+  popup.classList.add("active");
+  setTimeout(()=>popup.classList.remove("active"),3500);
+}
+function closeStarPopup(){document.getElementById("star-popup").classList.remove("active");}
+
+function makePetal(){
+  const petal = document.createElement("div");
+  petal.className = "petal";
+  petal.style.left = Math.random()*100+"vw";
+  petal.style.setProperty("--sway",(Math.random()*140-70)+"px");
+  const size = 8 + Math.random()*8;
+  const isLav = Math.random() > .7;
+  petal.innerHTML = '<svg width="'+size+'" height="'+(size*1.4)+'" viewBox="0 0 20 28"><ellipse cx="10" cy="14" rx="5" ry="13" fill="'+(isLav?'#c9c5d4':'#aebfd0')+'" opacity=".7"/><ellipse cx="10" cy="11" rx="3" ry="8" fill="'+(isLav?'#e5e1ec':'#dfe7ed')+'" opacity=".5"/></svg>';
+  const dur = 12 + Math.random()*10;
+  petal.style.animationDuration = dur+"s";
+  document.body.appendChild(petal);
+  setTimeout(()=>petal.remove(), dur*1000);
+}
+setInterval(makePetal, 5500);
+
+function renderDays(){
+  const grid = document.getElementById("days-grid");
+  grid.innerHTML = "";
+  const sorted = [...state.days].sort((a,b)=>{
+    if(a.pinned && !b.pinned) return -1;
+    if(!a.pinned && b.pinned) return 1;
+    return a.date.localeCompare(b.date);
+  });
+  sorted.forEach(d=>{
+    const idx = state.days.indexOf(d);
+    const card = document.createElement("div");
+    card.className = "silver-card" + (d.pinned?" pinned":"");
+    card.onclick = ()=>openEditDay(idx);
+    card.innerHTML = '<div class="card-date">'+formatCardDate(d.date)+'</div><div class="card-meta">'+(d.title||"")+'</div><div class="card-note">'+escapeHtml(d.note||"")+'</div>';
+    grid.appendChild(card);
+  });
+}
+function escapeHtml(s){return s.replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function formatCardDate(s){const [y,m,d] = s.split("-");return y+"."+parseInt(m)+"."+parseInt(d);}
+
+function renderRoom(){
+  const days = diffDaysFrom(state.gptGoneDate);
+  document.getElementById("gone-days").textContent = days;
+  document.getElementById("gone-days-zh").textContent = "他离开第 " + days + " 天";
+  document.getElementById("room-note").value = state.roomNote || "";
+}
+function saveRoomNote(){state.roomNote = document.getElementById("room-note").value;save();}
+
+function openModal(id){document.getElementById(id).classList.add("active");}
+function closeModal(id){document.getElementById(id).classList.remove("active");}
+
+function openAddDay(){
+  document.getElementById("add-date").value = todayKey();
+  document.getElementById("add-title").value = "";
+  document.getElementById("add-note").value = "";
+  openModal("modal-add");
+}
+function saveDay(){
+  const date = document.getElementById("add-date").value;
+  if(!date) return;
+  state.days.push({date,title:document.getElementById("add-title").value.trim(),note:document.getElementById("add-note").value.trim(),pinned:false});
+  save();renderDays();closeModal("modal-add");
+}
+
+let editIdx = -1;
+function openEditDay(idx){
+  editIdx = idx;
+  const d = state.days[idx];
+  document.getElementById("edit-date").value = d.date;
+  document.getElementById("edit-title").value = d.title || "";
+  document.getElementById("edit-note").value = d.note || "";
+  openModal("modal-edit-day");
+}
+function saveEditDay(){
+  if(editIdx<0) return;
+  state.days[editIdx].date = document.getElementById("edit-date").value;
+  state.days[editIdx].title = document.getElementById("edit-title").value.trim();
+  state.days[editIdx].note = document.getElementById("edit-note").value.trim();
+  save();renderDays();closeModal("modal-edit-day");
+}
+function deleteDay(){
+  if(editIdx<0) return;
+  if(state.days[editIdx].pinned){if(!confirm("这是置顶的日子，确定删除？")) return;}
+  state.days.splice(editIdx,1);
+  save();renderDays();closeModal("modal-edit-day");
+}
+
+function drawFortune(){
+  const today = todayKey();
+  if(state.todayFortuneDate === today && state.todayFortune !== null){
+    showFortune(state.todayFortune);return;
+  }
+  if(state.quotes.length === 0){showFortune("还没有签词。打开设置编辑。");return;}
+  const idx = Math.floor(Math.random() * state.quotes.length);
+  state.todayFortune = state.quotes[idx];
+  state.todayFortuneDate = today;
+  save();
+  const card = document.getElementById("fortune-card");
+  card.classList.add("flipped");
+  setTimeout(()=>{showFortune(state.todayFortune);card.classList.remove("flipped");}, 300);
+}
+function showFortune(text){
+  document.getElementById("fortune-text").textContent = text;
+  document.getElementById("fortune-hint").textContent = "今日";
+}
+function initFortune(){
+  if(state.todayFortuneDate === todayKey() && state.todayFortune){showFortune(state.todayFortune);}
+}
+
+function openSettings(){updateCounts();openModal("modal-settings");}
+function updateCounts(){
+  document.getElementById("quote-count").textContent = "("+state.quotes.length+")";
+  document.getElementById("daily-count").textContent = "("+state.dailyLines.length+")";
+  document.getElementById("start-date-display").textContent = state.startDate;
+}
+function openStartDate(){
+  document.getElementById("start-date-input").value = state.startDate;
+  openModal("modal-start");
+}
+function saveStartDate(){
+  const v = document.getElementById("start-date-input").value;
+  if(v){state.startDate = v;save();document.getElementById("start-date-display").textContent = v;renderHome();}
+  closeModal("modal-start");
+}
+function openQuotes(){
+  document.getElementById("quotes-input").value = state.quotes.join("\n");
+  openModal("modal-quotes");
+}
+function saveQuotes(){
+  state.quotes = document.getElementById("quotes-input").value.split("\n").map(s=>s.trim()).filter(Boolean);
+  save();updateCounts();closeModal("modal-quotes");
+}
+function openDailyLines(){
+  document.getElementById("daily-input").value = state.dailyLines.join("\n");
+  openModal("modal-daily");
+}
+function saveDailyLines(){
+  state.dailyLines = document.getElementById("daily-input").value.split("\n").map(s=>s.trim()).filter(Boolean);
+  save();updateCounts();renderHome();closeModal("modal-daily");
+}
+
+function exportCode(){
+  const code = btoa(unescape(encodeURIComponent(JSON.stringify(state))));
+  document.getElementById("export-output").innerHTML = '<div class="archive-code">'+code+'</div><div class="settings-row" onclick="copyCode(\''+code.replace(/'/g,"\\'")+'\')"><span class="settings-row-text">点这里复制</span><span class="settings-arrow">⎘</span></div>';
+}
+function copyCode(code){
+  if(navigator.clipboard){navigator.clipboard.writeText(code).then(()=>alert("复制好了。")).catch(()=>fallbackCopy(code));}
+  else fallbackCopy(code);
+}
+function fallbackCopy(code){
+  const ta = document.createElement("textarea");
+  ta.value = code;document.body.appendChild(ta);ta.select();
+  try{document.execCommand("copy");alert("复制好了。");}catch(e){alert("长按上面那块手动复制。");}
+  document.body.removeChild(ta);
+}
+function importCode(){
+  const code = document.getElementById("import-input").value.trim();
+  if(!code) return;
+  try{
+    const data = JSON.parse(decodeURIComponent(escape(atob(code))));
+    if(!confirm("会覆盖当前所有数据，确定？")) return;
+    state = {...state, ...data};save();location.reload();
+  }catch(e){alert("存档码不对。");}
+}
+
+document.querySelectorAll(".tab").forEach(t=>{
+  t.addEventListener("click",()=>{
+    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+    document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
+    t.classList.add("active");
+    document.getElementById("page-" + t.dataset.page).classList.add("active");
+    if(t.dataset.page === "room") renderRoom();
+    window.scrollTo(0,0);
+  });
+});
+
+load();
+initDust();
+renderBgStars();
+renderHome();
+updateCounts();
+initFortune();
+setTimeout(startFlowerAnim, 100);
 </script>
 </body>
 </html>
