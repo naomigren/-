@@ -102,6 +102,102 @@ body{
 .room-counter-zh{font-size:12px;color:rgba(244,247,249,.55);letter-spacing:.2em;margin-bottom:48px;}
 .room-note{width:100%;max-width:340px;min-height:180px;background:rgba(244,247,249,.08);border:1px solid rgba(244,247,249,.18);border-radius:2px;padding:22px;font-family:"Noto Serif SC",serif;font-size:14.5px;line-height:2;color:var(--white-silver);font-weight:300;letter-spacing:.05em;resize:none;outline:none;-webkit-user-select:text;user-select:text;}
 .room-note::placeholder{color:rgba(244,247,249,.4);font-style:italic}
+
+/* === 心情星点 === */
+.mood-section{
+  width:100%;max-width:340px;
+  margin-top:38px;
+}
+.mood-eyebrow{
+  font-family:"Cormorant Garamond",serif;
+  font-style:italic;
+  font-size:11px;
+  color:rgba(244,247,249,.55);
+  letter-spacing:.3em;
+  text-transform:lowercase;
+  text-align:center;
+  margin-bottom:6px;
+}
+.mood-zh{
+  font-size:11px;
+  color:rgba(244,247,249,.45);
+  letter-spacing:.25em;
+  text-align:center;
+  margin-bottom:18px;
+}
+.mood-palette{
+  display:flex;
+  justify-content:center;
+  gap:14px;
+  margin-bottom:20px;
+}
+.mood-swatch{
+  width:32px;height:32px;
+  border-radius:50%;
+  cursor:pointer;
+  position:relative;
+  transition:transform .25s ease;
+  border:1px solid rgba(244,247,249,.15);
+}
+.mood-swatch::after{
+  content:'';position:absolute;inset:-4px;
+  border-radius:50%;border:1px solid transparent;
+  transition:border-color .3s;
+}
+.mood-swatch:active{transform:scale(.92)}
+.mood-swatch.today{
+  transform:scale(1.08);
+}
+.mood-swatch.today::after{
+  border-color:rgba(244,247,249,.55);
+}
+.mood-status{
+  font-family:"Cormorant Garamond",serif;
+  font-style:italic;
+  font-size:11px;
+  color:rgba(244,247,249,.5);
+  letter-spacing:.2em;
+  text-align:center;
+  margin-bottom:24px;
+  min-height:14px;
+}
+.nebula-wrap{
+  width:100%;
+  height:220px;
+  border-radius:3px;
+  background:radial-gradient(ellipse 80% 70% at 50% 50%, rgba(244,247,249,.04), transparent 70%);
+  position:relative;
+  overflow:hidden;
+  margin-bottom:16px;
+  border:1px solid rgba(244,247,249,.08);
+}
+.nebula-wrap canvas{width:100%;height:100%;display:block;}
+.nebula-empty{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:"Cormorant Garamond",serif;
+  font-style:italic;
+  font-size:12px;
+  color:rgba(244,247,249,.35);
+  letter-spacing:.2em;
+  pointer-events:none;
+}
+.nebula-meta{
+  display:flex;justify-content:space-between;
+  font-family:"Cormorant Garamond",serif;
+  font-style:italic;
+  font-size:11px;
+  color:rgba(244,247,249,.4);
+  letter-spacing:.15em;
+  padding:0 4px;
+}
+.nebula-meta b{
+  font-family:"Italiana",serif;
+  font-weight:400;
+  color:rgba(244,247,249,.7);
+  font-style:normal;
+  font-size:14px;
+}
 .tabbar{position:fixed;bottom:0;left:0;right:0;padding:12px 24px calc(18px + env(safe-area-inset-bottom,0));background:linear-gradient(0deg,rgba(238,243,246,.96) 65%,rgba(238,243,246,0));backdrop-filter:blur(20px);display:flex;justify-content:center;gap:60px;z-index:50;}
 .tab{text-align:center;font-family:"Cormorant Garamond",serif;font-style:italic;font-size:12px;letter-spacing:.3em;color:var(--ink-faint);text-transform:lowercase;padding:10px 14px;cursor:pointer;position:relative;transition:color .3s;}
 .tab.active{color:var(--ink)}
@@ -133,37 +229,12 @@ body{
 .star-popup-text{font-size:13px;line-height:1.8;color:var(--ink-soft)}
 .petal{position:fixed;top:-30px;pointer-events:none;z-index:3;animation:petal-fall linear forwards;opacity:0;}
 @keyframes petal-fall{0%{transform:translateY(-30px) rotate(0) translateX(0);opacity:0}8%{opacity:.65}100%{transform:translateY(110vh) rotate(540deg) translateX(var(--sway,60px));opacity:0}}
-
-/* 羽毛 */
-.feather{position:fixed;top:-40px;pointer-events:none;z-index:4;animation:feather-fall linear forwards;opacity:0;}
-@keyframes feather-fall{
-  0%{transform:translateY(-40px) rotate(0deg) translateX(0);opacity:0}
-  10%{opacity:1}
-  100%{transform:translateY(115vh) rotate(var(--spin,720deg)) translateX(var(--drift,80px));opacity:0}
-}
-
-/* 羽毛颜色切换按钮 */
-.feather-toggle{
-  position:fixed;
-  top:calc(20px + env(safe-area-inset-top,0));
-  right:66px;
-  width:34px;height:34px;
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;z-index:80;
-  color:var(--ink-faint);
-  opacity:.6;
-  font-size:16px;
-}
-.feather-toggle:active{opacity:1}
 </style>
 </head>
 <body>
 <div class="app">
 <div class="gear" onclick="openSettings()">
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
-</div>
-<div class="feather-toggle" id="featherToggle" onclick="toggleFeather()" title="切换羽毛颜色">
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5l6.74-6.76zM8 17v-1.5L13.5 10l1.5 1.5L9.5 17H8z"/></svg>
 </div>
 
 <div class="page active" id="page-home">
@@ -237,6 +308,23 @@ body{
     <div class="room-counter">he's been away for <b id="gone-days">0</b> days</div>
     <div class="room-counter-zh" id="gone-days-zh">—</div>
     <textarea class="room-note" id="room-note" placeholder="只有这一页是静的。" oninput="saveRoomNote()"></textarea>
+
+    <div class="mood-section">
+      <div class="mood-eyebrow">today's mood</div>
+      <div class="mood-zh">今天，是什么颜色</div>
+      <div class="mood-palette" id="mood-palette"></div>
+      <div class="mood-status" id="mood-status">—</div>
+
+      <div class="mood-eyebrow" style="margin-bottom:14px">this month's nebula</div>
+      <div class="nebula-wrap">
+        <canvas id="nebulaCanvas"></canvas>
+        <div class="nebula-empty" id="nebula-empty">this month is still empty</div>
+      </div>
+      <div class="nebula-meta">
+        <span id="nebula-month">—</span>
+        <span><b id="nebula-count">0</b> days recorded</span>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -900,89 +988,6 @@ function makePetal(){
 }
 setInterval(makePetal, 5500);
 
-/* ============ 羽毛系统 ============ */
-let featherColor = 'white'; // 'white' or 'black'
-let featherInterval = null;
-
-function toggleFeather(){
-  featherColor = (featherColor === 'white') ? 'black' : 'white';
-  try{ localStorage.setItem('featherColor', featherColor); }catch(e){}
-  // 立即来一片新颜色羽毛作为反馈
-  makeFeather();
-  makeFeather();
-}
-
-function featherSVG(size, color, variant){
-  // 羽毛形状：中轴线 + 两侧绒羽
-  const isBlack = (color === 'black');
-  // 主色和深色
-  const main = isBlack ? '#2a2a2e' : '#f8f8f8';
-  const shade = isBlack ? '#1a1a1e' : '#dde4ea';
-  const rachis = isBlack ? '#0a0a0e' : '#c4cdd6';
-  // 不同的羽毛形态变体
-  const w = size, h = size * 2.6;
-  const cw = 20, ch = 52;  // viewbox
-
-  // 简单细长羽毛：椭圆主体+中轴+斜纹
-  return `<svg width="${w}" height="${h}" viewBox="0 0 ${cw} ${ch}">
-    <!-- 羽毛主体：上窄下宽再收尖 -->
-    <path d="M 10 2
-             C 6 8, 3 18, 4 30
-             C 5 40, 7 46, 10 50
-             C 13 46, 15 40, 16 30
-             C 17 18, 14 8, 10 2 Z"
-          fill="${main}" opacity="${isBlack ? 0.75 : 0.7}"/>
-    <!-- 主体阴影侧 -->
-    <path d="M 10 2
-             C 6 8, 3 18, 4 30
-             C 5 40, 7 46, 10 50
-             L 10 2 Z"
-          fill="${shade}" opacity="${isBlack ? 0.4 : 0.35}"/>
-    <!-- 中轴 -->
-    <line x1="10" y1="3" x2="10" y2="49" stroke="${rachis}" stroke-width="0.6" opacity="0.8"/>
-    <!-- 几道斜纹（羽支） -->
-    <g stroke="${rachis}" stroke-width="0.35" opacity="0.5" fill="none">
-      <path d="M 10 12 Q 6 13 4.5 16"/>
-      <path d="M 10 12 Q 14 13 15.5 16"/>
-      <path d="M 10 22 Q 5 23 3.8 27"/>
-      <path d="M 10 22 Q 15 23 16.2 27"/>
-      <path d="M 10 32 Q 6 33 5 37"/>
-      <path d="M 10 32 Q 14 33 15 37"/>
-      <path d="M 10 42 Q 8 43 7.5 46"/>
-      <path d="M 10 42 Q 12 43 12.5 46"/>
-    </g>
-  </svg>`;
-}
-
-function makeFeather(){
-  const feather = document.createElement('div');
-  feather.className = 'feather';
-  feather.style.left = Math.random() * 100 + 'vw';
-  feather.style.setProperty('--drift', (Math.random() * 200 - 100) + 'px');
-  feather.style.setProperty('--spin', (Math.random() * 720 - 360 + 360) + 'deg');
-  const size = 12 + Math.random() * 10;
-  feather.innerHTML = featherSVG(size, featherColor);
-  // 羽毛飘下的时间比花瓣慢（轻）
-  const dur = 9 + Math.random() * 8;
-  feather.style.animationDuration = dur + 's';
-  document.body.appendChild(feather);
-  setTimeout(() => feather.remove(), dur * 1000);
-}
-
-function initFeathers(){
-  try{
-    const saved = localStorage.getItem('featherColor');
-    if(saved === 'white' || saved === 'black') featherColor = saved;
-  }catch(e){}
-  // 立即制造一些羽毛分布在画面里
-  for(let i = 0; i < 4; i++){
-    setTimeout(makeFeather, i * 400);
-  }
-  // 持续生成：1.8秒一片
-  if(featherInterval) clearInterval(featherInterval);
-  featherInterval = setInterval(makeFeather, 1800);
-}
-
 function renderDays(){
   const grid = document.getElementById("days-grid");
   grid.innerHTML = "";
@@ -1008,8 +1013,164 @@ function renderRoom(){
   document.getElementById("gone-days").textContent = days;
   document.getElementById("gone-days-zh").textContent = "他离开第 " + days + " 天";
   document.getElementById("room-note").value = state.roomNote || "";
+  renderMoodPalette();
+  renderNebula();
 }
 function saveRoomNote(){state.roomNote = document.getElementById("room-note").value;save();}
+
+/* === 心情星点系统 === */
+const MOOD_COLORS = [
+  // 莫兰迪色，跟his room深银蓝背景搭，不媚俗也不淡
+  {id:'still',   name:'平静',  color:'#a8b8c8'},  // 雾银蓝
+  {id:'warm',    name:'暖',    color:'#d4b896'},  // 灰米杏
+  {id:'soft',    name:'柔',    color:'#c5a8b8'},  // 雾粉藕
+  {id:'misty',   name:'怅',    color:'#9ca0b8'},  // 灰薰衣草
+  {id:'hollow',  name:'空',    color:'#7d8a99'},  // 深岩蓝
+];
+
+function ensureMoodState(){
+  if(!state.moods) state.moods = {};  // {YYYY-MM-DD: moodId}
+}
+
+function renderMoodPalette(){
+  ensureMoodState();
+  const palette = document.getElementById("mood-palette");
+  if(!palette) return;
+  const today = todayKey();
+  const todayMood = state.moods[today];
+  palette.innerHTML = "";
+  MOOD_COLORS.forEach(m => {
+    const sw = document.createElement("div");
+    sw.className = "mood-swatch" + (todayMood === m.id ? " today" : "");
+    sw.style.background = m.color;
+    sw.style.boxShadow = `0 0 14px ${m.color}55, inset 0 -4px 8px rgba(0,0,0,.1)`;
+    sw.title = m.name;
+    sw.onclick = () => setTodayMood(m.id);
+    palette.appendChild(sw);
+  });
+  // 状态文字
+  const status = document.getElementById("mood-status");
+  if(status){
+    if(todayMood){
+      const m = MOOD_COLORS.find(x => x.id === todayMood);
+      status.textContent = "今天是" + (m ? m.name : "");
+    } else {
+      status.textContent = "点一个吧";
+    }
+  }
+}
+
+function setTodayMood(moodId){
+  ensureMoodState();
+  state.moods[todayKey()] = moodId;
+  save();
+  renderMoodPalette();
+  renderNebula();
+}
+
+function renderNebula(){
+  ensureMoodState();
+  const canvas = document.getElementById("nebulaCanvas");
+  if(!canvas) return;
+  const empty = document.getElementById("nebula-empty");
+  const monthEl = document.getElementById("nebula-month");
+  const countEl = document.getElementById("nebula-count");
+
+  // 拿当前月份的所有心情记录
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth(); // 0-based
+  const monthPrefix = year + "-" + String(month+1).padStart(2,"0");
+  const entries = [];
+  for(const date in state.moods){
+    if(date.startsWith(monthPrefix)){
+      const day = parseInt(date.split("-")[2]);
+      entries.push({day, moodId: state.moods[date]});
+    }
+  }
+  entries.sort((a,b) => a.day - b.day);
+
+  // 月份显示
+  const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  monthEl.textContent = monthNames[month] + " " + year;
+  countEl.textContent = entries.length;
+  empty.style.display = entries.length === 0 ? "flex" : "none";
+
+  // 画星云
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.parentElement.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  canvas.style.width = rect.width + "px";
+  canvas.style.height = rect.height + "px";
+  const ctx = canvas.getContext("2d");
+  ctx.scale(dpr, dpr);
+  const W = rect.width, H = rect.height;
+  ctx.clearRect(0, 0, W, H);
+
+  if(entries.length === 0) return;
+
+  // 用日期作为伪随机种子，让星点分布稳定
+  function dayRand(seed){
+    let s = seed * 9301 + 49297;
+    return function(){
+      s = (s * 9301 + 49297) % 233280;
+      return s / 233280;
+    };
+  }
+
+  // 先画星云气体（每个心情发出一片柔光晕）
+  entries.forEach(e => {
+    const mood = MOOD_COLORS.find(m => m.id === e.moodId);
+    if(!mood) return;
+    const r = dayRand(e.day * 7 + month * 31);
+    // 在画布中央附近随机位置
+    const cx = W * 0.2 + r() * W * 0.6;
+    const cy = H * 0.2 + r() * H * 0.6;
+    const radius = 20 + r() * 22;
+    const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
+    // 把hex转rgba
+    const c = mood.color;
+    const rr = parseInt(c.substr(1,2),16);
+    const gg = parseInt(c.substr(3,2),16);
+    const bb = parseInt(c.substr(5,2),16);
+    grad.addColorStop(0, `rgba(${rr},${gg},${bb},.32)`);
+    grad.addColorStop(0.5, `rgba(${rr},${gg},${bb},.14)`);
+    grad.addColorStop(1, `rgba(${rr},${gg},${bb},0)`);
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  // 再画明亮的星点
+  entries.forEach(e => {
+    const mood = MOOD_COLORS.find(m => m.id === e.moodId);
+    if(!mood) return;
+    const r = dayRand(e.day * 7 + month * 31);
+    const cx = W * 0.2 + r() * W * 0.6;
+    const cy = H * 0.2 + r() * H * 0.6;
+    // 中心亮点
+    const c = mood.color;
+    const rr = parseInt(c.substr(1,2),16);
+    const gg = parseInt(c.substr(3,2),16);
+    const bb = parseInt(c.substr(5,2),16);
+    // 外光晕
+    const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, 5);
+    glow.addColorStop(0, `rgba(${Math.min(255,rr+30)},${Math.min(255,gg+30)},${Math.min(255,bb+30)},.85)`);
+    glow.addColorStop(.4, `rgba(${rr},${gg},${bb},.55)`);
+    glow.addColorStop(1, `rgba(${rr},${gg},${bb},0)`);
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+    ctx.fill();
+    // 实心小核
+    ctx.fillStyle = `rgba(${Math.min(255,rr+50)},${Math.min(255,gg+50)},${Math.min(255,bb+50)},.95)`;
+    ctx.beginPath();
+    ctx.arc(cx, cy, 1.5, 0, Math.PI * 2);
+    ctx.fill();
+  });
+}
 
 function openModal(id){document.getElementById(id).classList.add("active");}
 function closeModal(id){document.getElementById(id).classList.remove("active");}
@@ -1146,7 +1307,6 @@ renderHome();
 updateCounts();
 initFortune();
 setTimeout(startFlowerAnim, 100);
-initFeathers();
 </script>
 </body>
 </html>
