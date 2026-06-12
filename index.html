@@ -368,9 +368,9 @@ function initFlowers(){
   }
   blades.sort((a, b) => (a.isFar ? 0 : 1) - (b.isFar ? 0 : 1));
 
-  // === 蒲公英 ===
-  // 前景3个绒球
-  const fpos = [0.22, 0.55, 0.82];
+  // 蒲公英：不画茎，直接浮在草丛上方
+  // 前景5个绒球，散布在画面中段
+  const fpos = [0.12, 0.32, 0.52, 0.72, 0.9];
   fpos.forEach(p => {
     const seedCount = 32 + Math.floor(srand() * 12);
     const seeds = [];
@@ -386,8 +386,8 @@ function initFlowers(){
     }
     dandelions.push({
       x: p * canvasW + (srand() - .5) * 22,
-      floatY: 75 + srand() * 55,
-      R: 22 + srand() * 7,
+      floatY: 70 + srand() * 60,
+      R: 19 + srand() * 7,
       seeds,
       phase: srand() * Math.PI * 2,
       sway: 0.3 + srand() * 0.3,
@@ -590,6 +590,45 @@ function drawScene(time){
 
   // 5. 前景蒲公英
   dandelions.filter(d => !d.isFar).forEach(d => drawDandelion(d, time));
+
+  // 6. 底部云雾：盖住硬边切割线，让画面自然消失
+  // 主云带 - 不规则水平云絮
+  const cloudY = canvasH - 30;
+  // 远云（淡淡的一层）
+  for(let i = 0; i < 4; i++){
+    const cx = (i / 3) * canvasW + (i % 2 === 0 ? -20 : 20);
+    const cw = canvasW * 0.45;
+    const cy = cloudY + Math.sin(time * 0.0003 + i) * 4;
+    const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, cw * 0.6);
+    grad.addColorStop(0, 'rgba(238,243,246,.55)');
+    grad.addColorStop(.5, 'rgba(238,243,246,.35)');
+    grad.addColorStop(1, 'rgba(238,243,246,0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, cw * 0.55, 18, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  // 近云（更浓一些，盖住底部）
+  for(let i = 0; i < 3; i++){
+    const cx = (i + 0.5) / 3 * canvasW + Math.sin(time * 0.0004 + i * 1.5) * 8;
+    const cy = canvasH - 12;
+    const cw = canvasW * 0.5;
+    const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, cw * 0.7);
+    grad.addColorStop(0, 'rgba(238,243,246,.85)');
+    grad.addColorStop(.5, 'rgba(238,243,246,.6)');
+    grad.addColorStop(1, 'rgba(238,243,246,0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, cw * 0.6, 22, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  // 最底层完全实色（接到背景）
+  const bottomGrad = ctx.createLinearGradient(0, canvasH - 25, 0, canvasH);
+  bottomGrad.addColorStop(0, 'rgba(238,243,246,0)');
+  bottomGrad.addColorStop(.5, 'rgba(238,243,246,.5)');
+  bottomGrad.addColorStop(1, 'rgba(238,243,246,1)');
+  ctx.fillStyle = bottomGrad;
+  ctx.fillRect(0, canvasH - 25, canvasW, 25);
 
   windStr += (windTgt - windStr) * 0.02;
   animId = requestAnimationFrame(drawScene);
