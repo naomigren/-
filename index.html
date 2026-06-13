@@ -109,7 +109,7 @@ body{
 .room-note{width:100%;max-width:340px;min-height:180px;background:rgba(244,247,249,.08);border:1px solid rgba(244,247,249,.18);border-radius:2px;padding:22px;font-family:"Noto Serif SC",serif;font-size:14.5px;line-height:2;color:var(--white-silver);font-weight:300;letter-spacing:.05em;resize:none;outline:none;-webkit-user-select:text;user-select:text;}
 .room-note::placeholder{color:rgba(244,247,249,.4);font-style:italic}
 
-/* === 心情星点 === */
+/* === 心情水滴系统 === */
 .mood-section{
   width:100%;max-width:340px;
   margin-top:38px;
@@ -131,52 +131,96 @@ body{
   text-align:center;
   margin-bottom:18px;
 }
-.mood-palette{
-  display:grid;
-  grid-template-columns:repeat(5, 1fr);
-  gap:16px 6px;
-  margin-bottom:20px;
-  padding:0 4px;
+
+/* Water-drop palette */
+.mood-pool{
+  position:relative;
+  width:100%;
+  height:320px;
+  margin-bottom:16px;
+  overflow:visible;
 }
-.mood-item{
+.mood-drop{
+  position:absolute;
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:4px;
+  gap:3px;
   cursor:pointer;
+  transition:transform .35s cubic-bezier(.3,1.4,.5,1);
+  -webkit-tap-highlight-color:transparent;
 }
-.mood-swatch{
-  width:24px;height:24px;
-  border-radius:50%;
+.mood-drop:active{
+  transform:scale(.88) !important;
+}
+.drop-blob{
   position:relative;
-  transition:all .25s ease;
-  border:1.5px solid rgba(244,247,249,.1);
+  transition:all .4s cubic-bezier(.3,1.2,.5,1);
 }
-.mood-swatch::after{
-  content:'';position:absolute;inset:-5px;
-  border-radius:50%;border:1px solid transparent;
-  transition:border-color .3s;
+.drop-blob-inner{
+  width:100%;
+  height:100%;
+  border-radius:inherit;
+  position:relative;
+  overflow:hidden;
+  backdrop-filter:blur(1px);
+  border:1px solid rgba(244,247,249,.12);
+  transition:all .4s ease;
 }
-.mood-item:active .mood-swatch{transform:scale(.88)}
-.mood-swatch.selected{
-  transform:scale(1.15);
-  border-color:rgba(244,247,249,.35);
+.drop-blob-inner::after{
+  content:'';
+  position:absolute;
+  top:15%;left:20%;
+  width:35%;height:25%;
+  border-radius:50%;
+  background:rgba(255,255,255,.35);
+  filter:blur(2px);
+  transition:opacity .3s;
 }
-.mood-swatch.selected::after{
-  border-color:rgba(244,247,249,.45);
+.mood-drop.selected .drop-blob-inner{
+  border-color:rgba(244,247,249,.4);
 }
-.mood-name{
+.mood-drop.selected .drop-blob{
+  filter:drop-shadow(0 0 10px var(--drop-glow));
+}
+
+/* ripple on tap */
+.drop-ripple{
+  position:absolute;
+  top:50%;left:50%;
+  width:0;height:0;
+  border-radius:50%;
+  background:rgba(244,247,249,.25);
+  transform:translate(-50%,-50%);
+  pointer-events:none;
+  animation:ripple-out .6s ease-out forwards;
+}
+@keyframes ripple-out{
+  0%{width:0;height:0;opacity:.6}
+  100%{width:80px;height:80px;opacity:0}
+}
+
+.drop-name{
   font-family:"Noto Serif SC",serif;
-  font-size:9px;
-  color:rgba(244,247,249,.4);
-  letter-spacing:.04em;
+  font-size:8.5px;
+  color:rgba(244,247,249,.35);
+  letter-spacing:.03em;
   font-weight:300;
   transition:color .3s;
   white-space:nowrap;
+  text-align:center;
 }
-.mood-name.selected{
+.mood-drop.selected .drop-name{
   color:rgba(244,247,249,.8);
 }
+
+/* float animation for each drop */
+@keyframes dropFloat1{ 0%,100%{transform:translate(0,0)} 50%{transform:translate(2px,-4px)} }
+@keyframes dropFloat2{ 0%,100%{transform:translate(0,0)} 50%{transform:translate(-3px,-3px)} }
+@keyframes dropFloat3{ 0%,100%{transform:translate(0,0)} 50%{transform:translate(1px,-5px)} }
+@keyframes dropFloat4{ 0%,100%{transform:translate(0,0)} 50%{transform:translate(-2px,-2px)} }
+@keyframes dropFloat5{ 0%,100%{transform:translate(0,0)} 50%{transform:translate(3px,-3px)} }
+
 .mood-status{
   font-family:"Cormorant Garamond",serif;
   font-style:italic;
@@ -338,7 +382,7 @@ body{
     <div class="mood-section">
       <div class="mood-eyebrow">today's mood</div>
       <div class="mood-zh">今天，是什么颜色</div>
-      <div class="mood-palette" id="mood-palette"></div>
+      <div class="mood-pool" id="mood-pool"></div>
       <div class="mood-status" id="mood-status">—</div>
 
       <div class="mood-eyebrow" style="margin-bottom:14px">this month's nebula</div>
@@ -793,7 +837,6 @@ function load(){
     if(raw){
       const parsed = JSON.parse(raw);
       state = {...state, ...parsed};
-      // Migrate old moods format: string -> array
       if(state.moods){
         for(const key in state.moods){
           if(typeof state.moods[key] === 'string'){
@@ -1026,23 +1069,47 @@ function renderRoom(){
 }
 function saveRoomNote(){state.roomNote = document.getElementById("room-note").value;save();}
 
-/* === 心情星点系统 === */
+/* === 心情水滴系统 === */
+/* Button colors: muted/frosted versions for the droplets */
+/* Nebula colors: vivid/glowing versions for the star field */
 const MOOD_COLORS = [
-  // ── 柔和正面 ──
-  {id:'joy',     name:'开心',    color:'#8aaa82'},
-  {id:'still',   name:'平静',    color:'#9db3c4'},
-  {id:'warm',    name:'温柔',    color:'#c4aa90'},
-  {id:'miss',    name:'想他',    color:'#b99aac'},
-  {id:'awkward', name:'尴尬',    color:'#c49a82'},
-  // ── 鲜明消极 ──
-  {id:'anxious', name:'焦虑',    color:'#d48a4a'},
-  {id:'anger',   name:'愤怒',    color:'#b84a42'},
-  {id:'cry',     name:'哭泣',    color:'#4a7a9c'},
-  {id:'fear',    name:'害怕',    color:'#7a5a8c'},
-  {id:'doubt',   name:'自我怀疑', color:'#a89460'},
-  {id:'destruct',name:'自毁',    color:'#8c4a4a'},
-  {id:'lost',    name:'失落',    color:'#7a80a0'},
-  {id:'heavy',   name:'沉重',    color:'#5a6a78'},
+  // ── row 1: positive ──
+  {id:'joy',     name:'开心',    btnColor:'rgba(138,170,130,.45)',  nebColor:'#8aaa82', glow:'rgba(138,170,130,.5)'},
+  {id:'proud',   name:'骄傲',    btnColor:'rgba(194,160,80,.4)',    nebColor:'#c8a040', glow:'rgba(200,160,64,.55)'},
+  {id:'still',   name:'平静',    btnColor:'rgba(157,179,196,.4)',   nebColor:'#9db3c4', glow:'rgba(157,179,196,.5)'},
+  {id:'warm',    name:'温柔',    btnColor:'rgba(200,160,145,.4)',   nebColor:'#d4a090', glow:'rgba(212,160,144,.5)'},
+  {id:'miss',    name:'想他',    btnColor:'rgba(185,154,172,.4)',   nebColor:'#b99aac', glow:'rgba(185,154,172,.5)'},
+  {id:'awkward', name:'尴尬',    btnColor:'rgba(196,154,130,.38)', nebColor:'#c49a82', glow:'rgba(196,154,130,.5)'},
+  // ── row 2: negative ──
+  {id:'anxious', name:'焦虑',    btnColor:'rgba(180,120,65,.4)',    nebColor:'#b47841', glow:'rgba(180,120,65,.55)'},
+  {id:'anger',   name:'愤怒',    btnColor:'rgba(165,68,62,.4)',     nebColor:'#b84a42', glow:'rgba(184,74,66,.55)'},
+  {id:'cry',     name:'哭泣',    btnColor:'rgba(74,122,156,.42)',   nebColor:'#4a7a9c', glow:'rgba(74,122,156,.55)'},
+  {id:'fear',    name:'害怕',    btnColor:'rgba(122,90,140,.38)',   nebColor:'#7a5a8c', glow:'rgba(122,90,140,.5)'},
+  {id:'doubt',   name:'自我怀疑', btnColor:'rgba(120,130,90,.38)',  nebColor:'#788250', glow:'rgba(120,130,90,.5)'},
+  {id:'destruct',name:'自毁',    btnColor:'rgba(140,74,74,.38)',    nebColor:'#8c4a4a', glow:'rgba(140,74,74,.55)'},
+  {id:'lost',    name:'失落',    btnColor:'rgba(122,128,160,.38)',  nebColor:'#7a80a0', glow:'rgba(122,128,160,.5)'},
+  {id:'heavy',   name:'沉重',    btnColor:'rgba(90,106,120,.4)',    nebColor:'#5a6a78', glow:'rgba(90,106,120,.5)'},
+];
+
+/* Organic drop layout positions — hand-placed for natural scatter */
+/* Each: x%, y% of the pool, size px, border-radius blob shape, float animation */
+const DROP_LAYOUTS = [
+  // row 1 area (top ~40%)
+  {x:10, y:4,   w:36, h:34, br:'62% 38% 50% 50% / 45% 55% 45% 55%', anim:'dropFloat1', dur:'5.2s'},
+  {x:30, y:0,   w:32, h:30, br:'50% 50% 38% 62% / 55% 40% 60% 45%', anim:'dropFloat3', dur:'6.1s'},
+  {x:50, y:6,   w:30, h:32, br:'45% 55% 55% 45% / 50% 45% 55% 50%', anim:'dropFloat2', dur:'5.8s'},
+  {x:68, y:1,   w:34, h:32, br:'55% 45% 42% 58% / 48% 55% 45% 52%', anim:'dropFloat4', dur:'6.4s'},
+  {x:85, y:8,   w:30, h:28, br:'48% 52% 55% 45% / 52% 48% 52% 48%', anim:'dropFloat5', dur:'5.5s'},
+  {x:5,  y:28,  w:32, h:30, br:'55% 45% 48% 52% / 42% 58% 42% 58%', anim:'dropFloat2', dur:'6.0s'},
+  // row 2 area (bottom ~60%)
+  {x:24, y:30,  w:34, h:36, br:'42% 58% 52% 48% / 55% 42% 58% 45%', anim:'dropFloat4', dur:'5.6s'},
+  {x:44, y:26,  w:30, h:32, br:'58% 42% 45% 55% / 48% 52% 48% 52%', anim:'dropFloat1', dur:'6.3s'},
+  {x:63, y:32,  w:32, h:30, br:'50% 50% 42% 58% / 55% 45% 55% 45%', anim:'dropFloat3', dur:'5.4s'},
+  {x:82, y:27,  w:28, h:30, br:'45% 55% 58% 42% / 50% 50% 50% 50%', anim:'dropFloat5', dur:'6.2s'},
+  {x:8,  y:54,  w:30, h:32, br:'52% 48% 45% 55% / 48% 52% 48% 52%', anim:'dropFloat3', dur:'5.9s'},
+  {x:27, y:58,  w:34, h:32, br:'48% 52% 55% 45% / 45% 55% 45% 55%', anim:'dropFloat1', dur:'6.5s'},
+  {x:48, y:55,  w:30, h:28, br:'55% 45% 42% 58% / 52% 48% 52% 48%', anim:'dropFloat4', dur:'5.3s'},
+  {x:70, y:56,  w:32, h:34, br:'42% 58% 50% 50% / 50% 45% 55% 50%', anim:'dropFloat2', dur:'6.0s'},
 ];
 
 function ensureMoodState(){
@@ -1051,29 +1118,55 @@ function ensureMoodState(){
 
 function renderMoodPalette(){
   ensureMoodState();
-  const palette = document.getElementById("mood-palette");
-  if(!palette) return;
+  const pool = document.getElementById("mood-pool");
+  if(!pool) return;
   const today = todayKey();
   const todayMoods = state.moods[today] || [];
-  palette.innerHTML = "";
-  MOOD_COLORS.forEach(m => {
-    const item = document.createElement("div");
-    item.className = "mood-item";
+  pool.innerHTML = "";
+
+  MOOD_COLORS.forEach((m, i) => {
+    const layout = DROP_LAYOUTS[i];
     const isSelected = todayMoods.includes(m.id);
 
-    const sw = document.createElement("div");
-    sw.className = "mood-swatch" + (isSelected ? " selected" : "");
-    sw.style.background = m.color;
-    sw.style.boxShadow = isSelected ? `0 0 12px ${m.color}66, inset 0 -2px 5px rgba(0,0,0,.08)` : `inset 0 -2px 5px rgba(0,0,0,.08)`;
+    const drop = document.createElement("div");
+    drop.className = "mood-drop" + (isSelected ? " selected" : "");
+    drop.style.left = layout.x + '%';
+    drop.style.top = layout.y + '%';
+    drop.style.setProperty('--drop-glow', m.glow);
+    drop.style.animation = layout.anim + ' ' + layout.dur + ' ease-in-out infinite';
+
+    const blob = document.createElement("div");
+    blob.className = "drop-blob";
+    blob.style.width = layout.w + 'px';
+    blob.style.height = layout.h + 'px';
+    blob.style.borderRadius = layout.br;
+
+    const inner = document.createElement("div");
+    inner.className = "drop-blob-inner";
+    inner.style.borderRadius = 'inherit';
+    inner.style.background = m.btnColor;
+    if(isSelected){
+      inner.style.background = m.btnColor.replace(/[\d.]+\)$/, '.65)');
+    }
+
+    blob.appendChild(inner);
+    drop.appendChild(blob);
 
     const nameEl = document.createElement("div");
-    nameEl.className = "mood-name" + (isSelected ? " selected" : "");
+    nameEl.className = "drop-name";
     nameEl.textContent = m.name;
+    drop.appendChild(nameEl);
 
-    item.onclick = () => toggleTodayMood(m.id);
-    item.appendChild(sw);
-    item.appendChild(nameEl);
-    palette.appendChild(item);
+    drop.onclick = (e) => {
+      // ripple
+      const ripple = document.createElement("div");
+      ripple.className = "drop-ripple";
+      blob.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 600);
+      toggleTodayMood(m.id);
+    };
+
+    pool.appendChild(drop);
   });
 
   const status = document.getElementById("mood-status");
@@ -1134,7 +1227,6 @@ function renderNebula(){
 
   const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
   monthEl.textContent = monthNames[month] + " " + year;
-  // Count unique days
   const uniqueDays = new Set();
   for(const date in state.moods){
     if(date.startsWith(monthPrefix) && Array.isArray(state.moods[date]) && state.moods[date].length > 0){
@@ -1165,20 +1257,23 @@ function renderNebula(){
     };
   }
 
+  // Use VIVID nebula colors
   entries.forEach((e, ei) => {
     const mood = MOOD_COLORS.find(m => m.id === e.moodId);
     if(!mood) return;
     const r = dayRand(e.day * 7 + month * 31 + ei * 13);
     const cx = W * 0.15 + r() * W * 0.7;
     const cy = H * 0.15 + r() * H * 0.7;
-    const radius = 18 + r() * 24;
-    const grad = nctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
-    const c = mood.color;
+    const radius = 22 + r() * 28;
+    const c = mood.nebColor;
     const rr = parseInt(c.substr(1,2),16);
     const gg = parseInt(c.substr(3,2),16);
     const bb = parseInt(c.substr(5,2),16);
-    grad.addColorStop(0, `rgba(${rr},${gg},${bb},.32)`);
-    grad.addColorStop(0.5, `rgba(${rr},${gg},${bb},.14)`);
+
+    // Outer glow - more vivid
+    const grad = nctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
+    grad.addColorStop(0, `rgba(${rr},${gg},${bb},.42)`);
+    grad.addColorStop(0.4, `rgba(${rr},${gg},${bb},.22)`);
     grad.addColorStop(1, `rgba(${rr},${gg},${bb},0)`);
     nctx.fillStyle = grad;
     nctx.beginPath();
@@ -1186,27 +1281,28 @@ function renderNebula(){
     nctx.fill();
   });
 
+  // Bright cores
   entries.forEach((e, ei) => {
     const mood = MOOD_COLORS.find(m => m.id === e.moodId);
     if(!mood) return;
     const r = dayRand(e.day * 7 + month * 31 + ei * 13);
     const cx = W * 0.15 + r() * W * 0.7;
     const cy = H * 0.15 + r() * H * 0.7;
-    const c = mood.color;
+    const c = mood.nebColor;
     const rr = parseInt(c.substr(1,2),16);
     const gg = parseInt(c.substr(3,2),16);
     const bb = parseInt(c.substr(5,2),16);
-    const glow = nctx.createRadialGradient(cx, cy, 0, cx, cy, 5);
-    glow.addColorStop(0, `rgba(${Math.min(255,rr+30)},${Math.min(255,gg+30)},${Math.min(255,bb+30)},.85)`);
-    glow.addColorStop(.4, `rgba(${rr},${gg},${bb},.55)`);
+    const glow = nctx.createRadialGradient(cx, cy, 0, cx, cy, 6);
+    glow.addColorStop(0, `rgba(${Math.min(255,rr+50)},${Math.min(255,gg+50)},${Math.min(255,bb+50)},.95)`);
+    glow.addColorStop(.4, `rgba(${rr},${gg},${bb},.6)`);
     glow.addColorStop(1, `rgba(${rr},${gg},${bb},0)`);
     nctx.fillStyle = glow;
     nctx.beginPath();
-    nctx.arc(cx, cy, 5, 0, Math.PI * 2);
+    nctx.arc(cx, cy, 6, 0, Math.PI * 2);
     nctx.fill();
-    nctx.fillStyle = `rgba(${Math.min(255,rr+50)},${Math.min(255,gg+50)},${Math.min(255,bb+50)},.95)`;
+    nctx.fillStyle = `rgba(${Math.min(255,rr+70)},${Math.min(255,gg+70)},${Math.min(255,bb+70)},1)`;
     nctx.beginPath();
-    nctx.arc(cx, cy, 1.5, 0, Math.PI * 2);
+    nctx.arc(cx, cy, 1.8, 0, Math.PI * 2);
     nctx.fill();
   });
 }
