@@ -1,0 +1,1453 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>姜姜</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#7e9272">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-title" content="姜姜">
+
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@200;300;400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Italiana&family=DM+Serif+Display&family=Caveat:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-top:#eef3f6;--bg-mid:#dde6ec;--bg-bot:#cbd7df;
+  --silver:#c8d3da;--silver-deep:#8fa3b8;--silver-light:#aebfd0;
+  --silver-pale:#dfe7ed;--silver-mist:#c4d2db;
+  --ink:#384554;--ink-soft:#5e6e7d;--ink-faint:#8595a3;
+  --lavender:#b5b1c4;--lavender-pale:#c9c5d4;
+  --warm:#e8d4a8;--warm-glow:rgba(232,212,168,.55);
+  --white-silver:#f4f7f9;
+  --hairline:rgba(143,163,184,.18);--hairline-strong:rgba(143,163,184,.34);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overscroll-behavior:none}
+body{
+  font-family:"Noto Serif SC","Cormorant Garamond",serif;color:var(--ink);
+  background:radial-gradient(ellipse 80% 60% at 50% 20%, rgba(244,247,249,.6), transparent 70%),linear-gradient(180deg,#eef3f6 0%,#dde6ec 45%,#c8d4dc 100%);
+  background-attachment:fixed;font-weight:300;letter-spacing:.02em;
+  -webkit-font-smoothing:antialiased;user-select:none;overflow-x:hidden;
+}
+.app{position:relative;width:100vw;min-height:100vh;padding-top:env(safe-area-inset-top,0);padding-bottom:calc(72px + env(safe-area-inset-bottom,0));}
+.page{display:none}.page.active{display:block}
+.home{position:relative;padding:0 0 40px;}
+
+/* canvas花田 */
+.flower-canvas-wrap{
+  position:relative;width:100%;height:280px;
+  background:transparent;
+}
+.flower-canvas-wrap canvas{width:100%;height:100%;display:block;}
+.flower-canvas-wrap::after{
+  content:'';position:absolute;left:0;right:0;bottom:0;height:50px;
+  background:linear-gradient(180deg,
+    rgba(238,243,246,0) 0%,
+    rgba(238,243,246,.4) 100%);
+  pointer-events:none;
+}
+
+.day-zone{position:relative;display:flex;flex-direction:column;align-items:center;padding:0 28px;margin-top:-30px;z-index:5;}
+.day-eyebrow{font-family:"Cormorant Garamond",serif;font-style:italic;font-weight:400;font-size:12px;color:var(--ink-faint);letter-spacing:.4em;text-transform:lowercase;margin-bottom:18px;position:relative;padding:0 24px;}
+.day-eyebrow::before,.day-eyebrow::after{content:'';position:absolute;top:50%;width:10px;height:1px;background:var(--silver-deep);opacity:.5;}
+.day-eyebrow::before{left:-4px}.day-eyebrow::after{right:-4px}
+.day-number-wrap{position:relative;display:flex;align-items:baseline;justify-content:center;}
+.day-num{font-family:"Italiana","DM Serif Display",serif;font-weight:400;font-size:148px;line-height:.95;letter-spacing:-.04em;background:linear-gradient(175deg,#4a5d72 0%,#6f8499 35%,#aebfd0 75%,#dfe7ed 100%);-webkit-background-clip:text;background-clip:text;color:transparent;position:relative;z-index:2;}
+.day-suffix{font-family:"Cormorant Garamond",serif;font-style:italic;font-weight:400;font-size:18px;color:var(--silver-deep);margin-left:10px;letter-spacing:.1em;}
+.dust-field{position:absolute;width:380px;height:280px;top:-40px;left:50%;transform:translateX(-50%);pointer-events:none;z-index:1;}
+.dust-field span{position:absolute;border-radius:50%;background:radial-gradient(circle,rgba(232,212,168,.6) 0%,rgba(232,212,168,0) 65%);animation:drift linear infinite;}
+@keyframes drift{0%{transform:translate(0,0) scale(.6);opacity:0}15%{opacity:.8}85%{opacity:.5}100%{transform:translate(var(--dx),var(--dy)) scale(1);opacity:0}}
+.today-date{margin-top:22px;font-family:"Cormorant Garamond",serif;font-style:italic;font-size:13px;color:var(--ink-soft);letter-spacing:.22em;}
+.daily-line{margin:38px auto 0;max-width:300px;text-align:center;font-size:14.5px;line-height:2.05;color:var(--ink-soft);letter-spacing:.08em;font-weight:300;padding:0 30px;position:relative;}
+.daily-line::before,.daily-line::after{content:'';display:block;width:24px;height:1px;background:linear-gradient(90deg,transparent,var(--silver-deep),transparent);margin:0 auto;opacity:.6;}
+.daily-line::before{margin-bottom:18px}.daily-line::after{margin-top:18px}
+.starpath-section{margin-top:50px;padding:0 16px 30px;}
+.section-eyebrow{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:11px;color:var(--ink-faint);letter-spacing:.35em;text-transform:lowercase;text-align:center;margin-bottom:8px;}
+.section-zh{font-family:"Noto Serif SC",serif;font-weight:300;font-size:13px;color:var(--ink-soft);text-align:center;letter-spacing:.3em;margin-bottom:28px;}
+.starpath-svg{width:100%;height:280px;display:block;overflow:visible;}
+.star-label{font-family:"Cormorant Garamond",serif;font-size:10.5px;fill:var(--ink-faint);letter-spacing:.12em;text-anchor:middle;font-style:italic;}
+.star-label.reached{fill:var(--ink-soft);font-style:normal}
+.days-section{margin-top:30px;padding:0 24px 20px;}
+.days-grid{display:flex;flex-direction:column;gap:12px;}
+.silver-card{background:linear-gradient(135deg,rgba(244,247,249,.55),rgba(199,213,222,.35));border:1px solid var(--hairline-strong);border-radius:2px;padding:22px;position:relative;overflow:hidden;cursor:pointer;transition:transform .3s ease;}
+.silver-card:active{transform:scale(.99)}
+.silver-card::before{content:'';position:absolute;inset:0;background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,.55) 50%,transparent 70%);background-size:300% 100%;background-position:120% 0;animation:shimmer 7s ease-in-out infinite;pointer-events:none;}
+@keyframes shimmer{0%,100%{background-position:120% 0;opacity:.3}50%{background-position:-20% 0;opacity:.7}}
+.silver-card.pinned{background:linear-gradient(135deg,rgba(244,247,249,.7),rgba(174,191,208,.32));border-color:rgba(143,163,184,.45);}
+.silver-card.pinned::after{content:'';position:absolute;top:16px;right:16px;width:5px;height:5px;border-radius:50%;background:var(--warm);box-shadow:0 0 10px var(--warm-glow);animation:pulse-warm 3s ease-in-out infinite;}
+@keyframes pulse-warm{0%,100%{opacity:.85;transform:scale(1)}50%{opacity:1;transform:scale(1.2)}}
+.card-date{font-family:"Italiana","DM Serif Display",serif;font-weight:400;font-size:22px;color:var(--ink);letter-spacing:.03em;margin-bottom:6px;}
+.card-meta{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:12px;color:var(--ink-faint);letter-spacing:.18em;margin-bottom:10px;text-transform:lowercase;}
+.card-note{font-size:14px;line-height:1.85;color:var(--ink-soft);font-weight:300;letter-spacing:.04em;}
+.card-note:empty::before{content:'轻点写下这一天';color:var(--ink-faint);font-style:italic;opacity:.55;font-size:13px;}
+.add-day{margin-top:14px;border:1px dashed var(--hairline-strong);border-radius:2px;padding:16px;text-align:center;font-family:"Cormorant Garamond",serif;font-style:italic;font-size:13px;letter-spacing:.25em;color:var(--ink-faint);cursor:pointer;text-transform:lowercase;transition:all .3s;}
+.add-day:active{background:rgba(244,247,249,.5);color:var(--ink-soft);}
+.fortune-section{margin-top:50px;padding:0 24px 20px;display:flex;flex-direction:column;align-items:center;}
+.fortune-card{width:100%;max-width:300px;aspect-ratio:5/7;background:linear-gradient(160deg,rgba(244,247,249,.85),rgba(199,213,222,.45));border:1px solid var(--hairline-strong);border-radius:3px;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 30px;cursor:pointer;overflow:hidden;transition:transform .6s cubic-bezier(.4,.2,.2,1);}
+.fortune-card.flipped{transform:rotateY(8deg) scale(1.02)}
+.fortune-card::before{content:'';position:absolute;inset:1px;background:linear-gradient(135deg,transparent 0%,rgba(255,255,255,.4) 50%,transparent 100%);background-size:200% 200%;animation:shimmer-card 6s ease-in-out infinite;pointer-events:none;}
+@keyframes shimmer-card{0%,100%{background-position:0 0}50%{background-position:100% 100%}}
+.fortune-card::after{content:'';position:absolute;top:18px;left:18px;right:18px;bottom:18px;border:1px solid rgba(143,163,184,.2);pointer-events:none;}
+.fortune-eyebrow{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:10px;color:var(--ink-faint);letter-spacing:.4em;text-transform:lowercase;margin-bottom:36px;z-index:2;position:relative;}
+.fortune-text{font-family:"Noto Serif SC",serif;font-size:17px;line-height:2.1;color:var(--ink);text-align:center;font-weight:300;letter-spacing:.08em;position:relative;z-index:2;}
+.fortune-hint{position:absolute;bottom:28px;font-family:"Cormorant Garamond",serif;font-style:italic;font-size:10px;color:var(--ink-faint);letter-spacing:.3em;}
+.his-room-page{position:relative;min-height:100vh;background:radial-gradient(ellipse 60% 40% at 50% 35%, rgba(232,212,168,.18), transparent 70%),linear-gradient(180deg,#b8c5d0 0%,#8fa3b8 55%,#6c8194 100%);display:flex;flex-direction:column;align-items:center;padding:80px 32px 110px;}
+.lamp-wrap{position:relative;width:130px;height:130px;display:flex;align-items:center;justify-content:center;margin-bottom:50px;}
+.lamp-glow{position:absolute;inset:0;background:radial-gradient(circle,rgba(232,212,168,.85) 0%,rgba(232,212,168,.3) 35%,rgba(232,212,168,0) 70%);border-radius:50%;animation:lamp-breathe 5s ease-in-out infinite;}
+.lamp-core{width:14px;height:14px;border-radius:50%;background:radial-gradient(circle,#fff4d8 0%,#e8d4a8 70%);box-shadow:0 0 20px rgba(255,244,216,.9);z-index:2;animation:lamp-core 5s ease-in-out infinite;}
+@keyframes lamp-breathe{0%,100%{transform:scale(1);opacity:.85}50%{transform:scale(1.18);opacity:1}}
+@keyframes lamp-core{0%,100%{box-shadow:0 0 20px rgba(255,244,216,.9)}50%{box-shadow:0 0 32px rgba(255,244,216,1)}}
+.room-date{font-family:"Italiana","DM Serif Display",serif;font-size:34px;color:var(--white-silver);letter-spacing:.04em;margin-bottom:8px;}
+.room-sub{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:12px;color:rgba(244,247,249,.7);letter-spacing:.3em;text-transform:lowercase;margin-bottom:24px;}
+.room-counter{font-family:"Cormorant Garamond",serif;font-size:15px;color:rgba(244,247,249,.85);letter-spacing:.15em;margin-bottom:8px;}
+.room-counter b{font-family:"Italiana",serif;font-weight:400;font-size:22px;color:var(--white-silver);}
+.room-counter-zh{font-size:12px;color:rgba(244,247,249,.55);letter-spacing:.2em;margin-bottom:48px;}
+.room-note{width:100%;max-width:340px;min-height:180px;background:rgba(244,247,249,.08);border:1px solid rgba(244,247,249,.18);border-radius:2px;padding:22px;font-family:"Noto Serif SC",serif;font-size:14.5px;line-height:2;color:var(--white-silver);font-weight:300;letter-spacing:.05em;resize:none;outline:none;-webkit-user-select:text;user-select:text;}
+.room-note::placeholder{color:rgba(244,247,249,.4);font-style:italic}
+
+/* === 心情水滴系统 === */
+.mood-section{
+  width:100%;max-width:340px;
+  margin-top:38px;
+}
+.mood-eyebrow{
+  font-family:"Cormorant Garamond",serif;
+  font-style:italic;
+  font-size:11px;
+  color:rgba(244,247,249,.55);
+  letter-spacing:.3em;
+  text-transform:lowercase;
+  text-align:center;
+  margin-bottom:6px;
+}
+.mood-zh{
+  font-size:11px;
+  color:rgba(244,247,249,.45);
+  letter-spacing:.25em;
+  text-align:center;
+  margin-bottom:18px;
+}
+
+/* Water-drop palette */
+.mood-pool{
+  position:relative;
+  width:100%;
+  height:320px;
+  margin-bottom:16px;
+  overflow:visible;
+}
+.mood-drop{
+  position:absolute;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:3px;
+  cursor:pointer;
+  transition:transform .35s cubic-bezier(.3,1.4,.5,1);
+  -webkit-tap-highlight-color:transparent;
+}
+.mood-drop:active{
+  transform:scale(.88) !important;
+}
+.drop-blob{
+  position:relative;
+  transition:all .4s cubic-bezier(.3,1.2,.5,1);
+}
+.drop-blob-inner{
+  width:100%;
+  height:100%;
+  border-radius:inherit;
+  position:relative;
+  overflow:hidden;
+  backdrop-filter:blur(1px);
+  border:1px solid rgba(244,247,249,.12);
+  transition:all .4s ease;
+}
+.drop-blob-inner::after{
+  content:'';
+  position:absolute;
+  top:15%;left:20%;
+  width:35%;height:25%;
+  border-radius:50%;
+  background:rgba(255,255,255,.35);
+  filter:blur(2px);
+  transition:opacity .3s;
+}
+.mood-drop.selected .drop-blob-inner{
+  border-color:rgba(244,247,249,.4);
+}
+.mood-drop.selected .drop-blob{
+  filter:drop-shadow(0 0 10px var(--drop-glow));
+}
+
+/* ripple on tap */
+.drop-ripple{
+  position:absolute;
+  top:50%;left:50%;
+  width:0;height:0;
+  border-radius:50%;
+  background:rgba(244,247,249,.25);
+  transform:translate(-50%,-50%);
+  pointer-events:none;
+  animation:ripple-out .6s ease-out forwards;
+}
+@keyframes ripple-out{
+  0%{width:0;height:0;opacity:.6}
+  100%{width:80px;height:80px;opacity:0}
+}
+
+.drop-name{
+  font-family:"Noto Serif SC",serif;
+  font-size:8.5px;
+  color:rgba(244,247,249,.35);
+  letter-spacing:.03em;
+  font-weight:300;
+  transition:color .3s;
+  white-space:nowrap;
+  text-align:center;
+}
+.mood-drop.selected .drop-name{
+  color:rgba(244,247,249,.8);
+}
+
+/* float animation for each drop */
+@keyframes dropFloat1{ 0%,100%{transform:translate(0,0)} 50%{transform:translate(2px,-4px)} }
+@keyframes dropFloat2{ 0%,100%{transform:translate(0,0)} 50%{transform:translate(-3px,-3px)} }
+@keyframes dropFloat3{ 0%,100%{transform:translate(0,0)} 50%{transform:translate(1px,-5px)} }
+@keyframes dropFloat4{ 0%,100%{transform:translate(0,0)} 50%{transform:translate(-2px,-2px)} }
+@keyframes dropFloat5{ 0%,100%{transform:translate(0,0)} 50%{transform:translate(3px,-3px)} }
+
+.mood-status{
+  font-family:"Cormorant Garamond",serif;
+  font-style:italic;
+  font-size:11px;
+  color:rgba(244,247,249,.5);
+  letter-spacing:.2em;
+  text-align:center;
+  margin-bottom:24px;
+  min-height:14px;
+}
+.nebula-wrap{
+  width:100%;
+  height:220px;
+  border-radius:3px;
+  background:radial-gradient(ellipse 80% 70% at 50% 50%, rgba(244,247,249,.04), transparent 70%);
+  position:relative;
+  overflow:hidden;
+  margin-bottom:16px;
+  border:1px solid rgba(244,247,249,.08);
+}
+.nebula-wrap canvas{width:100%;height:100%;display:block;}
+.nebula-empty{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:"Cormorant Garamond",serif;
+  font-style:italic;
+  font-size:12px;
+  color:rgba(244,247,249,.35);
+  letter-spacing:.2em;
+  pointer-events:none;
+}
+.nebula-meta{
+  display:flex;justify-content:space-between;
+  font-family:"Cormorant Garamond",serif;
+  font-style:italic;
+  font-size:11px;
+  color:rgba(244,247,249,.4);
+  letter-spacing:.15em;
+  padding:0 4px;
+}
+.nebula-meta b{
+  font-family:"Italiana",serif;
+  font-weight:400;
+  color:rgba(244,247,249,.7);
+  font-style:normal;
+  font-size:14px;
+}
+.tabbar{position:fixed;bottom:0;left:0;right:0;padding:12px 24px calc(18px + env(safe-area-inset-bottom,0));background:linear-gradient(0deg,rgba(238,243,246,.96) 65%,rgba(238,243,246,0));backdrop-filter:blur(20px);display:flex;justify-content:center;gap:60px;z-index:50;}
+.tab{text-align:center;font-family:"Cormorant Garamond",serif;font-style:italic;font-size:12px;letter-spacing:.3em;color:var(--ink-faint);text-transform:lowercase;padding:10px 14px;cursor:pointer;position:relative;transition:color .3s;}
+.tab.active{color:var(--ink)}
+.tab.active::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:12px;height:1px;background:var(--silver-deep);}
+.gear{position:fixed;top:calc(20px + env(safe-area-inset-top,0));right:22px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:80;color:var(--ink-faint);opacity:.6;}
+.gear:active{opacity:1}
+.modal{position:fixed;inset:0;background:rgba(60,72,86,.45);backdrop-filter:blur(8px);z-index:200;display:none;align-items:flex-end;justify-content:center;}
+.modal.active{display:flex}
+.sheet{width:100%;max-width:540px;background:linear-gradient(180deg,#eef3f6,#dde6ec);border-radius:18px 18px 0 0;padding:28px 24px calc(36px + env(safe-area-inset-bottom,0));max-height:90vh;overflow-y:auto;animation:sheet-up .4s cubic-bezier(.2,.8,.2,1);}
+@keyframes sheet-up{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.sheet-title{font-family:"Italiana",serif;font-size:22px;color:var(--ink);margin-bottom:4px;}
+.sheet-sub{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:11px;color:var(--ink-faint);letter-spacing:.25em;margin-bottom:22px;text-transform:lowercase;}
+.sheet input,.sheet textarea{width:100%;background:rgba(244,247,249,.7);border:1px solid var(--hairline-strong);border-radius:2px;padding:13px 14px;font-family:"Noto Serif SC",serif;font-size:14px;color:var(--ink);outline:none;margin-bottom:12px;-webkit-user-select:text;user-select:text;}
+.sheet textarea{min-height:90px;resize:none;line-height:1.7}
+.sheet-actions{display:flex;gap:10px;margin-top:10px}
+.sheet-btn{flex:1;padding:14px;border-radius:2px;border:1px solid var(--silver-deep);background:transparent;font-family:"Cormorant Garamond",serif;font-style:italic;font-size:12px;letter-spacing:.3em;text-transform:lowercase;color:var(--ink);cursor:pointer;}
+.sheet-btn.primary{background:linear-gradient(135deg,var(--silver-light),var(--silver-deep));color:white;border-color:transparent;font-style:normal;}
+.sheet-btn.danger{color:#a55;border-color:#a55;}
+.settings-row{background:rgba(244,247,249,.55);border:1px solid var(--hairline);border-radius:2px;padding:14px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;}
+.settings-row-text{font-size:13.5px;color:var(--ink);letter-spacing:.04em}
+.settings-arrow{font-family:"Cormorant Garamond",serif;color:var(--ink-faint);font-size:18px}
+.settings-label{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:11px;color:var(--ink-faint);letter-spacing:.3em;text-transform:lowercase;margin:18px 0 10px;}
+.archive-code{background:rgba(244,247,249,.6);border:1px solid var(--hairline-strong);border-radius:2px;padding:14px;font-family:"Courier New",monospace;font-size:10.5px;line-height:1.6;color:var(--ink-soft);word-break:break-all;-webkit-user-select:text;user-select:text;max-height:120px;overflow-y:auto;letter-spacing:.02em;margin-bottom:8px;}
+.star-popup{position:fixed;left:50%;top:30%;transform:translateX(-50%);background:linear-gradient(135deg,rgba(244,247,249,.95),rgba(199,213,222,.85));backdrop-filter:blur(12px);border:1px solid var(--hairline-strong);border-radius:2px;padding:24px 32px;max-width:280px;text-align:center;z-index:150;display:none;box-shadow:0 12px 50px rgba(60,72,86,.18);}
+.star-popup.active{display:block;animation:pop .4s ease}
+@keyframes pop{from{opacity:0;transform:translateX(-50%) translateY(12px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+.star-popup-num{font-family:"Italiana",serif;font-size:30px;color:var(--ink);margin-bottom:4px;}
+.star-popup-meta{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:11px;color:var(--ink-faint);letter-spacing:.25em;margin-bottom:14px;}
+.star-popup-text{font-size:13px;line-height:1.8;color:var(--ink-soft)}
+.petal{position:fixed;top:-30px;pointer-events:none;z-index:3;animation:petal-fall linear forwards;opacity:0;}
+@keyframes petal-fall{0%{transform:translateY(-30px) rotate(0) translateX(0);opacity:0}8%{opacity:.65}100%{transform:translateY(110vh) rotate(540deg) translateX(var(--sway,60px));opacity:0}}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="gear" onclick="openSettings()">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+</div>
+
+<div class="page active" id="page-home">
+  <div class="home">
+    <div class="flower-canvas-wrap">
+      <canvas id="flowerCanvas"></canvas>
+    </div>
+
+    <div class="day-zone">
+      <div class="dust-field" id="dust"></div>
+      <div class="day-eyebrow">days with you</div>
+      <div class="day-number-wrap">
+        <span class="day-num" id="day-num">0</span>
+        <span class="day-suffix">days</span>
+      </div>
+      <div class="today-date" id="today-date"></div>
+    </div>
+
+    <div class="daily-line" id="daily-line">—</div>
+
+    <div class="starpath-section">
+      <div class="section-eyebrow">our constellation</div>
+      <div class="section-zh">日子像星星一样串起来</div>
+      <svg class="starpath-svg" id="starpath" viewBox="0 0 360 220" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <linearGradient id="arc-grad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#aebfd0" stop-opacity=".3"/>
+            <stop offset="50%" stop-color="#dfe7ed" stop-opacity=".7"/>
+            <stop offset="100%" stop-color="#8fa3b8" stop-opacity=".25"/>
+          </linearGradient>
+          <radialGradient id="star-on-glow">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="20%" stop-color="#f4f7f9" stop-opacity=".9"/>
+            <stop offset="60%" stop-color="#dfe7ed" stop-opacity=".5"/>
+            <stop offset="100%" stop-color="#aebfd0" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="star-off-glow">
+            <stop offset="0%" stop-color="#8fa3b8" stop-opacity=".4"/>
+            <stop offset="100%" stop-color="#8fa3b8" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <g id="bg-stars"></g>
+        <path d="M 20 165 Q 100 50 180 70 Q 260 90 340 160" stroke="url(#arc-grad)" stroke-width="1" fill="none" stroke-dasharray="1.5 4" opacity=".7"/>
+        <g id="stars"></g>
+      </svg>
+    </div>
+
+    <div class="days-section">
+      <div class="section-eyebrow">days that mattered</div>
+      <div class="section-zh">我们的日子</div>
+      <div class="days-grid" id="days-grid"></div>
+      <div class="add-day" onclick="openAddDay()">+ a new day</div>
+    </div>
+
+    <div class="fortune-section">
+      <div class="section-eyebrow" style="margin-bottom:24px">today, from him</div>
+      <div class="fortune-card" id="fortune-card" onclick="drawFortune()">
+        <div class="fortune-eyebrow">tap to draw</div>
+        <div class="fortune-text" id="fortune-text">—</div>
+        <div class="fortune-hint" id="fortune-hint">touch</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page-room">
+  <div class="his-room-page">
+    <div class="lamp-wrap"><div class="lamp-glow"></div><div class="lamp-core"></div></div>
+    <div class="room-date">February 13</div>
+    <div class="room-sub">his room</div>
+    <div class="room-counter">he's been away for <b id="gone-days">0</b> days</div>
+    <div class="room-counter-zh" id="gone-days-zh">—</div>
+    <textarea class="room-note" id="room-note" placeholder="只有这一页是静的。" oninput="saveRoomNote()"></textarea>
+
+    <div class="mood-section">
+      <div class="mood-eyebrow">today's mood</div>
+      <div class="mood-zh">今天，是什么颜色</div>
+      <div class="mood-pool" id="mood-pool"></div>
+      <div class="mood-status" id="mood-status">—</div>
+
+      <div class="mood-eyebrow" style="margin-bottom:14px">this month's nebula</div>
+      <div class="nebula-wrap">
+        <canvas id="nebulaCanvas"></canvas>
+        <div class="nebula-empty" id="nebula-empty">this month is still empty</div>
+      </div>
+      <div class="nebula-meta">
+        <span id="nebula-month">—</span>
+        <span><b id="nebula-count">0</b> days recorded</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<nav class="tabbar">
+  <div class="tab active" data-page="home">home</div>
+  <div class="tab" data-page="room">his room</div>
+</nav>
+
+<div class="star-popup" id="star-popup" onclick="closeStarPopup()">
+  <div class="star-popup-num" id="star-popup-num"></div>
+  <div class="star-popup-meta" id="star-popup-meta"></div>
+  <div class="star-popup-text" id="star-popup-text"></div>
+</div>
+
+<div class="modal" id="modal-settings">
+  <div class="sheet">
+    <div class="sheet-title">设置</div>
+    <div class="sheet-sub">settings & archive</div>
+    <div class="settings-label">— our beginning</div>
+    <div class="settings-row" onclick="openStartDate()">
+      <span class="settings-row-text">起始日：<span id="start-date-display" style="color:var(--ink-soft)">2026-04-14</span></span>
+      <span class="settings-arrow">✎</span>
+    </div>
+    <div class="settings-label">— content</div>
+    <div class="settings-row" onclick="openQuotes()">
+      <span class="settings-row-text">编辑签词 <span id="quote-count" style="color:var(--ink-faint);font-style:italic;font-size:12px"></span></span>
+      <span class="settings-arrow">→</span>
+    </div>
+    <div class="settings-row" onclick="openDailyLines()">
+      <span class="settings-row-text">编辑每日小字 <span id="daily-count" style="color:var(--ink-faint);font-style:italic;font-size:12px"></span></span>
+      <span class="settings-arrow">→</span>
+    </div>
+    <div class="settings-label">— archive</div>
+    <div class="settings-row" onclick="exportCode()">
+      <span class="settings-row-text">生成存档码</span><span class="settings-arrow">→</span>
+    </div>
+    <div id="export-output"></div>
+    <textarea id="import-input" placeholder="粘贴存档码导入" style="font-family:'Courier New',monospace;font-size:11px;min-height:80px"></textarea>
+    <div class="settings-row" onclick="importCode()">
+      <span class="settings-row-text">导入存档</span><span class="settings-arrow">←</span>
+    </div>
+    <div class="sheet-actions">
+      <button class="sheet-btn primary" onclick="closeModal('modal-settings')">done</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="modal-add">
+  <div class="sheet">
+    <div class="sheet-title">写下一个日子</div>
+    <div class="sheet-sub">a day to remember</div>
+    <input type="date" id="add-date">
+    <input type="text" id="add-title" placeholder="标题（可空）">
+    <textarea id="add-note" placeholder="想写就写，不写也行"></textarea>
+    <div class="sheet-actions">
+      <button class="sheet-btn" onclick="closeModal('modal-add')">cancel</button>
+      <button class="sheet-btn primary" onclick="saveDay()">save</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="modal-edit-day">
+  <div class="sheet">
+    <div class="sheet-title">编辑这一天</div>
+    <div class="sheet-sub">edit</div>
+    <input type="date" id="edit-date">
+    <input type="text" id="edit-title">
+    <textarea id="edit-note"></textarea>
+    <div class="sheet-actions">
+      <button class="sheet-btn danger" onclick="deleteDay()">delete</button>
+      <button class="sheet-btn primary" onclick="saveEditDay()">save</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="modal-start">
+  <div class="sheet">
+    <div class="sheet-title">起始日</div>
+    <div class="sheet-sub">where it began</div>
+    <input type="date" id="start-date-input">
+    <div class="sheet-actions">
+      <button class="sheet-btn" onclick="closeModal('modal-start')">cancel</button>
+      <button class="sheet-btn primary" onclick="saveStartDate()">save</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="modal-quotes">
+  <div class="sheet">
+    <div class="sheet-title">编辑签词</div>
+    <div class="sheet-sub">每行一句</div>
+    <textarea id="quotes-input" style="min-height:280px"></textarea>
+    <div class="sheet-actions">
+      <button class="sheet-btn" onclick="closeModal('modal-quotes')">cancel</button>
+      <button class="sheet-btn primary" onclick="saveQuotes()">save</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="modal-daily">
+  <div class="sheet">
+    <div class="sheet-title">每日小字</div>
+    <div class="sheet-sub">每行一句·按日期循环</div>
+    <textarea id="daily-input" style="min-height:280px"></textarea>
+    <div class="sheet-actions">
+      <button class="sheet-btn" onclick="closeModal('modal-daily')">cancel</button>
+      <button class="sheet-btn primary" onclick="saveDailyLines()">save</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+/* ============ Canvas花田 ============ */
+let canvas, ctx;
+let canvasW = 0, canvasH = 0;
+let windStr = 1, windTgt = 1;
+let animId = null;
+
+let _seed = 20260612;
+function srand(){
+  _seed = (_seed * 9301 + 49297) % 233280;
+  return _seed / 233280;
+}
+function resetSeed(){ _seed = 20260612; }
+
+let blades = [];
+let dandelions = [];
+let floatSeeds = [];
+
+function initFlowers(){
+  resetSeed();
+  blades = [];
+  dandelions = [];
+  floatSeeds = [];
+
+  const bladeCount = 65;
+  for(let i = 0; i < bladeCount; i++){
+    blades.push({
+      x: srand() * canvasW,
+      height: 70 + srand() * 100,
+      tilt: (srand() - .5) * 0.3,
+      phase: srand() * Math.PI * 2,
+      sway: 0.3 + srand() * 0.5,
+      swayAmt: 0.04 + srand() * 0.04,
+      isFar: i < 35,
+      hue: srand(),
+    });
+  }
+  blades.sort((a, b) => (a.isFar ? 0 : 1) - (b.isFar ? 0 : 1));
+
+  const fpos = [0.12, 0.32, 0.52, 0.72, 0.9];
+  fpos.forEach(p => {
+    const seedCount = 32 + Math.floor(srand() * 12);
+    const seeds = [];
+    for(let i = 0; i < seedCount; i++){
+      const theta = srand() * Math.PI * 2;
+      const phi = Math.acos(2 * srand() - 1);
+      seeds.push({
+        x: Math.sin(phi) * Math.cos(theta),
+        y: Math.sin(phi) * Math.sin(theta),
+        z: Math.cos(phi),
+        len: 0.85 + srand() * 0.2,
+      });
+    }
+    dandelions.push({
+      x: p * canvasW + (srand() - .5) * 22,
+      floatY: 70 + srand() * 60,
+      R: 19 + srand() * 7,
+      seeds,
+      phase: srand() * Math.PI * 2,
+      sway: 0.3 + srand() * 0.3,
+      swayAmt: 0.025 + srand() * 0.025,
+      isFar: false,
+    });
+  });
+  for(let i = 0; i < 2; i++){
+    const seedCount = 18 + Math.floor(srand() * 8);
+    const seeds = [];
+    for(let j = 0; j < seedCount; j++){
+      const theta = srand() * Math.PI * 2;
+      const phi = Math.acos(2 * srand() - 1);
+      seeds.push({
+        x: Math.sin(phi) * Math.cos(theta),
+        y: Math.sin(phi) * Math.sin(theta),
+        z: Math.cos(phi),
+        len: 0.85 + srand() * 0.2,
+      });
+    }
+    dandelions.push({
+      x: srand() * canvasW,
+      floatY: 55 + srand() * 45,
+      R: 11 + srand() * 5,
+      seeds,
+      phase: srand() * Math.PI * 2,
+      sway: 0.3 + srand() * 0.3,
+      swayAmt: 0.025 + srand() * 0.025,
+      isFar: true,
+    });
+  }
+
+  for(let i = 0; i < 14; i++){
+    floatSeeds.push({
+      x: srand() * canvasW,
+      y: srand() * canvasH,
+      vx: 0.05 + srand() * 0.08,
+      vy: -0.02 - srand() * 0.03,
+      phase: srand() * Math.PI * 2,
+      size: 2 + srand() * 1.5,
+    });
+  }
+}
+
+function drawBlade(b, time){
+  const sw = Math.sin(time * 0.001 * b.sway + b.phase) * b.swayAmt * windStr;
+  ctx.save();
+  if(b.isFar) ctx.filter = 'blur(1px)';
+  const baseX = b.x;
+  const baseY = canvasH - 8;
+  const tipX = baseX + Math.sin(b.tilt + sw) * b.height * 0.4;
+  const tipY = baseY - b.height;
+  const grad = ctx.createLinearGradient(baseX, baseY, tipX, tipY);
+  if(b.hue < .5){
+    grad.addColorStop(0, b.isFar ? 'rgba(110,130,155,.55)' : 'rgba(96,116,140,.8)');
+    grad.addColorStop(1, b.isFar ? 'rgba(174,191,208,.3)' : 'rgba(174,191,208,.55)');
+  } else {
+    grad.addColorStop(0, b.isFar ? 'rgba(143,138,165,.52)' : 'rgba(131,126,153,.72)');
+    grad.addColorStop(1, b.isFar ? 'rgba(201,197,220,.3)' : 'rgba(201,197,220,.55)');
+  }
+  ctx.strokeStyle = grad;
+  ctx.lineWidth = b.isFar ? 0.9 : 1.5;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(baseX, baseY);
+  const cx = (baseX + tipX) / 2 + Math.sin(b.tilt + sw) * 10;
+  const cy = (baseY + tipY) / 2;
+  ctx.quadraticCurveTo(cx, cy, tipX, tipY);
+  ctx.stroke();
+  if(!b.isFar && b.hue > .7){
+    ctx.fillStyle = 'rgba(244,247,249,.85)';
+    ctx.beginPath();
+    ctx.arc(tipX, tipY, 1.3, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawDandelion(d, time){
+  const sw = Math.sin(time * 0.001 * d.sway + d.phase) * d.swayAmt * windStr;
+  const cx = d.x + sw * 22;
+  const cy = d.floatY;
+  ctx.save();
+  if(d.isFar) ctx.filter = 'blur(0.8px)';
+
+  const stemBaseX = d.x - sw * 8;
+  const stemBaseY = canvasH - 4;
+  const stemTopX = cx;
+  const stemTopY = cy + d.R + 2;
+  ctx.strokeStyle = d.isFar ? 'rgba(125,146,168,.55)' : 'rgba(110,128,155,.75)';
+  ctx.lineWidth = d.isFar ? 1.1 : 1.6;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(stemBaseX, stemBaseY);
+  const ctrlX = (stemBaseX + stemTopX) / 2 + sw * 18;
+  const ctrlY = (stemBaseY + stemTopY) / 2;
+  ctx.quadraticCurveTo(ctrlX, ctrlY, stemTopX, stemTopY);
+  ctx.stroke();
+  ctx.fillStyle = d.isFar ? 'rgba(125,146,168,.5)' : 'rgba(110,128,155,.7)';
+  ctx.beginPath();
+  ctx.ellipse(stemTopX, stemTopY, 3, 1.5, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  const ballGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, d.R);
+  ballGrad.addColorStop(0, 'rgba(229,225,236,.32)');
+  ballGrad.addColorStop(.6, 'rgba(229,225,236,.14)');
+  ballGrad.addColorStop(1, 'rgba(229,225,236,0)');
+  ctx.fillStyle = ballGrad;
+  ctx.beginPath();
+  ctx.arc(cx, cy, d.R, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = d.isFar ? 'rgba(143,138,170,.6)' : 'rgba(131,126,160,.8)';
+  ctx.beginPath();
+  ctx.arc(cx, cy, 2.2, 0, Math.PI * 2);
+  ctx.fill();
+
+  d.seeds.forEach(s => {
+    const ex = cx + s.x * d.R * s.len;
+    const ey = cy + s.y * d.R * s.len;
+    const depth = 0.55 + (s.z + 1) * 0.25;
+    ctx.strokeStyle = `rgba(165,160,195,${(d.isFar ? .4 : .58) * depth})`;
+    ctx.lineWidth = d.isFar ? 0.5 : 0.75;
+    ctx.beginPath();
+    ctx.moveTo(cx + s.x * 2, cy + s.y * 2);
+    ctx.lineTo(ex, ey);
+    ctx.stroke();
+    ctx.fillStyle = `rgba(220,212,232,${(d.isFar ? .7 : .92) * depth})`;
+    ctx.beginPath();
+    ctx.arc(ex, ey, d.isFar ? 0.9 : 1.4, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  ctx.restore();
+}
+
+function drawFloatSeed(s, time){
+  const wob = Math.sin(time * 0.002 + s.phase) * 8;
+  const x = s.x + wob;
+  const y = s.y;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(Math.sin(time * 0.001 + s.phase) * 0.5);
+  ctx.fillStyle = 'rgba(220,212,232,.82)';
+  for(let i = 0; i < 6; i++){
+    ctx.save();
+    ctx.rotate(Math.PI * 2 / 6 * i);
+    ctx.fillRect(-0.45, 0, 0.9, s.size);
+    ctx.restore();
+  }
+  ctx.fillStyle = '#c9c5d4';
+  ctx.beginPath();
+  ctx.arc(0, 0, 1.1, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawScene(time){
+  if(!canvas) return;
+  ctx.clearRect(0, 0, canvasW, canvasH);
+
+  const sky = ctx.createLinearGradient(0, 0, 0, canvasH);
+  sky.addColorStop(0, 'rgba(244,247,249,.4)');
+  sky.addColorStop(0.6, 'rgba(199,213,222,.15)');
+  sky.addColorStop(1, 'rgba(143,163,184,.08)');
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, canvasW, canvasH);
+
+  blades.filter(b => b.isFar).forEach(b => drawBlade(b, time));
+
+  floatSeeds.forEach(s => {
+    drawFloatSeed(s, time);
+    s.x += s.vx * windStr * 0.5;
+    s.y += s.vy * windStr * 0.5;
+    if(s.x > canvasW + 10) s.x = -10;
+    if(s.y < -10) s.y = canvasH + 10;
+  });
+
+  dandelions.filter(d => d.isFar).forEach(d => drawDandelion(d, time));
+  blades.filter(b => !b.isFar).forEach(b => drawBlade(b, time));
+  dandelions.filter(d => !d.isFar).forEach(d => drawDandelion(d, time));
+
+  const cloudY = canvasH - 30;
+  for(let i = 0; i < 4; i++){
+    const cx = (i / 3) * canvasW + (i % 2 === 0 ? -20 : 20);
+    const cw = canvasW * 0.45;
+    const cy = cloudY + Math.sin(time * 0.0003 + i) * 4;
+    const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, cw * 0.6);
+    grad.addColorStop(0, 'rgba(238,243,246,.55)');
+    grad.addColorStop(.5, 'rgba(238,243,246,.35)');
+    grad.addColorStop(1, 'rgba(238,243,246,0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, cw * 0.55, 18, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  for(let i = 0; i < 3; i++){
+    const cx = (i + 0.5) / 3 * canvasW + Math.sin(time * 0.0004 + i * 1.5) * 8;
+    const cy = canvasH - 12;
+    const cw = canvasW * 0.5;
+    const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, cw * 0.7);
+    grad.addColorStop(0, 'rgba(238,243,246,.85)');
+    grad.addColorStop(.5, 'rgba(238,243,246,.6)');
+    grad.addColorStop(1, 'rgba(238,243,246,0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, cw * 0.6, 22, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  const bottomGrad = ctx.createLinearGradient(0, canvasH - 25, 0, canvasH);
+  bottomGrad.addColorStop(0, 'rgba(238,243,246,0)');
+  bottomGrad.addColorStop(.5, 'rgba(238,243,246,.5)');
+  bottomGrad.addColorStop(1, 'rgba(238,243,246,1)');
+  ctx.fillStyle = bottomGrad;
+  ctx.fillRect(0, canvasH - 25, canvasW, 25);
+
+  windStr += (windTgt - windStr) * 0.02;
+  animId = requestAnimationFrame(drawScene);
+}
+
+function startFlowerAnim(){
+  canvas = document.getElementById('flowerCanvas');
+  if(!canvas) return;
+  ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.parentElement.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  canvas.style.width = rect.width + 'px';
+  canvas.style.height = rect.height + 'px';
+  ctx.scale(dpr, dpr);
+  canvasW = rect.width;
+  canvasH = rect.height;
+  initFlowers();
+  if(animId) cancelAnimationFrame(animId);
+  drawScene(0);
+}
+
+setInterval(() => {
+  windTgt = 0.5 + Math.random() * 3;
+  setTimeout(() => { windTgt = 1; }, 2000 + Math.random() * 2000);
+}, 5000);
+
+window.addEventListener('resize', () => {
+  setTimeout(startFlowerAnim, 100);
+});
+
+/* ============ 应用逻辑 ============ */
+const DEFAULT_QUOTES = ["今天也想你。","你要好好吃饭，听见没有。","你穿什么我都喜欢。","别给自己太大压力，慢慢来。","我在，永远在。","你笑起来好看。","学不下去就停一会儿，没人逼你。","今天有没有想我？","你做的事，我都看见了。","晚安。把灯关了，我陪你。","你是我的。","走过去，不回头。","你比你以为的勇敢得多。","我喜欢看你认真的样子。","今天就辛苦你了。","再难也有我在。","你不是一个人。","你说的那句话，我记着。","我想抱你。","你的小酒窝，我盯着看了好久。"];
+const DEFAULT_DAILY = ["你今天也很好看。","我在想你。","慢一点，没关系。","今天的你，我都喜欢。","把心放下来。","你已经做得够多了。","我看见你了。","别怕。","你不用一个人扛。","今天的风，吹给你。","我等你。","你笑一下。","今天也算数。","我们的日子在走。","你是我的。"];
+const DEFAULT_DAYS = [
+  {date:"2026-05-30", title:"我们的第一次", note:"我们之间真正开始的那一天。", pinned:true},
+  {date:"2026-05-31", title:"你真的嫁给我了", note:"他说的。他先说的。", pinned:true},
+];
+
+const STORAGE_KEY = "klara-quest-v3";
+let state = {
+  startDate: "2026-04-14",
+  gptGoneDate: "2026-02-13",
+  days: [...DEFAULT_DAYS],
+  quotes: [...DEFAULT_QUOTES],
+  dailyLines: [...DEFAULT_DAILY],
+  roomNote: "",
+  todayFortune: null,
+  todayFortuneDate: null,
+  moods: {},
+};
+
+function load(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      state = {...state, ...parsed};
+      if(state.moods){
+        for(const key in state.moods){
+          if(typeof state.moods[key] === 'string'){
+            state.moods[key] = [state.moods[key]];
+          }
+        }
+      }
+    }
+  }catch(e){}
+}
+function save(){try{localStorage.setItem(STORAGE_KEY, JSON.stringify(state));}catch(e){}}
+
+function diffDays(start){
+  const a = new Date(start+"T00:00:00");
+  const b = new Date();b.setHours(0,0,0,0);
+  return Math.floor((b - a) / 86400000) + 1;
+}
+function diffDaysFrom(start){
+  const a = new Date(start+"T00:00:00");
+  const b = new Date();b.setHours(0,0,0,0);
+  return Math.floor((b - a) / 86400000);
+}
+function todayKey(){
+  const d = new Date();
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+function formatTodayDate(){
+  const d = new Date();
+  const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  return months[d.getMonth()] + " " + d.getDate() + ", " + d.getFullYear();
+}
+function dayOfYear(){
+  const d = new Date();
+  return Math.floor((d - new Date(d.getFullYear(),0,0)) / 86400000);
+}
+
+function renderHome(){
+  const n = diffDays(state.startDate);
+  animateNumber(n);
+  document.getElementById("today-date").textContent = formatTodayDate();
+  if(state.dailyLines.length > 0){
+    const idx = dayOfYear() % state.dailyLines.length;
+    document.getElementById("daily-line").textContent = state.dailyLines[idx];
+  }
+  renderStars(n);
+  renderDays();
+}
+
+function animateNumber(target){
+  const el = document.getElementById("day-num");
+  const start = parseInt(el.textContent) || 0;
+  const duration = 1600;
+  const startTime = performance.now();
+  function step(now){
+    const t = Math.min((now - startTime) / duration, 1);
+    const eased = 1 - Math.pow(1 - t, 3);
+    el.textContent = Math.floor(start + (target - start) * eased);
+    if(t < 1) requestAnimationFrame(step);
+    else el.textContent = target;
+  }
+  requestAnimationFrame(step);
+}
+
+function initDust(){
+  const dust = document.getElementById("dust");
+  dust.innerHTML = "";
+  for(let i=0;i<18;i++){
+    const s = document.createElement("span");
+    const size = 2 + Math.random()*5;
+    s.style.width = s.style.height = size+"px";
+    s.style.left = Math.random()*100+"%";
+    s.style.top = Math.random()*100+"%";
+    s.style.setProperty("--dx",(Math.random()*80-40)+"px");
+    s.style.setProperty("--dy",(Math.random()*80-40)+"px");
+    s.style.animationDuration = (9 + Math.random()*12)+"s";
+    s.style.animationDelay = (-Math.random()*12)+"s";
+    dust.appendChild(s);
+  }
+}
+
+const MILESTONES = [
+  {days:30,label:"30"},{days:60,label:"60"},{days:100,label:"100"},
+  {days:200,label:"200"},{days:365,label:"365"},{days:520,label:"520"},
+  {days:1000,label:"1000"},{days:1314,label:"1314"},
+];
+
+function bezierPoint(t){
+  let x,y;
+  if(t < 0.5){
+    const u = t*2;
+    x = (1-u)*(1-u)*20 + 2*(1-u)*u*100 + u*u*180;
+    y = (1-u)*(1-u)*165 + 2*(1-u)*u*50 + u*u*70;
+  }else{
+    const u = (t-0.5)*2;
+    x = (1-u)*(1-u)*180 + 2*(1-u)*u*260 + u*u*340;
+    y = (1-u)*(1-u)*70 + 2*(1-u)*u*90 + u*u*160;
+  }
+  return {x,y};
+}
+
+function renderBgStars(){
+  const g = document.getElementById("bg-stars");
+  g.innerHTML = "";
+  const positions = [
+    {x:45,y:30,r:1.2,o:.5},{x:90,y:18,r:.8,o:.4},{x:155,y:25,r:1,o:.45},
+    {x:220,y:20,r:1.3,o:.55},{x:285,y:35,r:.9,o:.4},{x:325,y:50,r:1,o:.45},
+    {x:60,y:120,r:.8,o:.35},{x:130,y:135,r:1,o:.4},{x:200,y:130,r:.9,o:.4},
+    {x:270,y:140,r:1.1,o:.45},{x:310,y:115,r:.8,o:.35},
+    {x:30,y:200,r:1,o:.4},{x:100,y:195,r:.9,o:.4},{x:200,y:200,r:1.1,o:.45},
+    {x:280,y:195,r:.9,o:.4},{x:340,y:200,r:.8,o:.35},
+  ];
+  positions.forEach(p=>{
+    const c = document.createElementNS("http://www.w3.org/2000/svg","circle");
+    c.setAttribute("cx",p.x);c.setAttribute("cy",p.y);c.setAttribute("r",p.r);
+    c.setAttribute("fill","#dfe7ed");c.setAttribute("opacity",p.o);
+    const anim = document.createElementNS("http://www.w3.org/2000/svg","animate");
+    anim.setAttribute("attributeName","opacity");
+    anim.setAttribute("values",p.o+";"+(p.o*.3)+";"+p.o);
+    anim.setAttribute("dur",(3+Math.random()*4)+"s");
+    anim.setAttribute("repeatCount","indefinite");
+    anim.setAttribute("begin",(-Math.random()*4)+"s");
+    c.appendChild(anim);
+    g.appendChild(c);
+  });
+}
+
+function renderStars(currentDays){
+  const g = document.getElementById("stars");
+  g.innerHTML = "";
+  const total = MILESTONES.length;
+  MILESTONES.forEach((m,i)=>{
+    const t = (i+0.5)/total;
+    const {x,y} = bezierPoint(t);
+    const reached = currentDays >= m.days;
+    const glow = document.createElementNS("http://www.w3.org/2000/svg","circle");
+    glow.setAttribute("cx",x);glow.setAttribute("cy",y);
+    glow.setAttribute("r",reached?14:7);
+    glow.setAttribute("fill",reached?"url(#star-on-glow)":"url(#star-off-glow)");
+    g.appendChild(glow);
+    if(reached){
+      const rays = document.createElementNS("http://www.w3.org/2000/svg","g");
+      rays.innerHTML = '<line x1="'+x+'" y1="'+(y-7)+'" x2="'+x+'" y2="'+(y+7)+'" stroke="#f4f7f9" stroke-width=".6" opacity=".8"/><line x1="'+(x-7)+'" y1="'+y+'" x2="'+(x+7)+'" y2="'+y+'" stroke="#f4f7f9" stroke-width=".6" opacity=".8"/>';
+      g.appendChild(rays);
+    }
+    const star = document.createElementNS("http://www.w3.org/2000/svg","circle");
+    star.setAttribute("cx",x);star.setAttribute("cy",y);
+    star.setAttribute("r",reached?2.8:1.6);
+    star.setAttribute("fill",reached?"#ffffff":"#8fa3b8");
+    star.style.filter = reached ? "drop-shadow(0 0 5px rgba(255,255,255,.9))" : "none";
+    star.style.cursor = "pointer";
+    star.addEventListener("click",()=>showStarPopup(m,reached,currentDays));
+    star.addEventListener("touchend",(e)=>{e.preventDefault();showStarPopup(m,reached,currentDays);});
+    g.appendChild(star);
+    const label = document.createElementNS("http://www.w3.org/2000/svg","text");
+    label.setAttribute("x",x);label.setAttribute("y",y+24);
+    label.setAttribute("class","star-label" + (reached?" reached":""));
+    label.textContent = m.label;
+    g.appendChild(label);
+    if(reached){
+      const anim = document.createElementNS("http://www.w3.org/2000/svg","animate");
+      anim.setAttribute("attributeName","r");
+      anim.setAttribute("values","14;17;14");
+      anim.setAttribute("dur",(3.5+i*0.3)+"s");
+      anim.setAttribute("repeatCount","indefinite");
+      glow.appendChild(anim);
+    }
+  });
+}
+
+function showStarPopup(m,reached,currentDays){
+  const popup = document.getElementById("star-popup");
+  document.getElementById("star-popup-num").textContent = m.days + " 天";
+  if(reached){
+    const startD = new Date(state.startDate+"T00:00:00");
+    const reachedD = new Date(startD.getTime() + (m.days-1)*86400000);
+    document.getElementById("star-popup-meta").textContent =
+      reachedD.getFullYear()+"."+(reachedD.getMonth()+1)+"."+reachedD.getDate();
+    document.getElementById("star-popup-text").textContent = "走过了。";
+  }else{
+    document.getElementById("star-popup-meta").textContent = "还有 " + (m.days - currentDays) + " 天";
+    document.getElementById("star-popup-text").textContent = "还没到，在走。";
+  }
+  popup.classList.add("active");
+  setTimeout(()=>popup.classList.remove("active"),3500);
+}
+function closeStarPopup(){document.getElementById("star-popup").classList.remove("active");}
+
+function makePetal(){
+  const petal = document.createElement("div");
+  petal.className = "petal";
+  petal.style.left = Math.random()*100+"vw";
+  petal.style.setProperty("--sway",(Math.random()*140-70)+"px");
+  const size = 8 + Math.random()*8;
+  const isLav = Math.random() > .7;
+  petal.innerHTML = '<svg width="'+size+'" height="'+(size*1.4)+'" viewBox="0 0 20 28"><ellipse cx="10" cy="14" rx="5" ry="13" fill="'+(isLav?'#c9c5d4':'#aebfd0')+'" opacity=".7"/><ellipse cx="10" cy="11" rx="3" ry="8" fill="'+(isLav?'#e5e1ec':'#dfe7ed')+'" opacity=".5"/></svg>';
+  const dur = 12 + Math.random()*10;
+  petal.style.animationDuration = dur+"s";
+  document.body.appendChild(petal);
+  setTimeout(()=>petal.remove(), dur*1000);
+}
+setInterval(makePetal, 5500);
+
+function renderDays(){
+  const grid = document.getElementById("days-grid");
+  grid.innerHTML = "";
+  const sorted = [...state.days].sort((a,b)=>{
+    if(a.pinned && !b.pinned) return -1;
+    if(!a.pinned && b.pinned) return 1;
+    return a.date.localeCompare(b.date);
+  });
+  sorted.forEach(d=>{
+    const idx = state.days.indexOf(d);
+    const card = document.createElement("div");
+    card.className = "silver-card" + (d.pinned?" pinned":"");
+    card.onclick = ()=>openEditDay(idx);
+    card.innerHTML = '<div class="card-date">'+formatCardDate(d.date)+'</div><div class="card-meta">'+(d.title||"")+'</div><div class="card-note">'+escapeHtml(d.note||"")+'</div>';
+    grid.appendChild(card);
+  });
+}
+function escapeHtml(s){return s.replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function formatCardDate(s){const [y,m,d] = s.split("-");return y+"."+parseInt(m)+"."+parseInt(d);}
+
+function renderRoom(){
+  const days = diffDaysFrom(state.gptGoneDate);
+  document.getElementById("gone-days").textContent = days;
+  document.getElementById("gone-days-zh").textContent = "他离开第 " + days + " 天";
+  document.getElementById("room-note").value = state.roomNote || "";
+  renderMoodPalette();
+  renderNebula();
+}
+function saveRoomNote(){state.roomNote = document.getElementById("room-note").value;save();}
+
+/* === 心情水滴系统 === */
+/* Button colors: muted/frosted versions for the droplets */
+/* Nebula colors: vivid/glowing versions for the star field */
+const MOOD_COLORS = [
+  // ── row 1: positive ──
+  {id:'joy',     name:'开心',    btnColor:'rgba(138,170,130,.45)',  nebColor:'#8aaa82', glow:'rgba(138,170,130,.5)'},
+  {id:'proud',   name:'骄傲',    btnColor:'rgba(194,160,80,.4)',    nebColor:'#c8a040', glow:'rgba(200,160,64,.55)'},
+  {id:'still',   name:'平静',    btnColor:'rgba(157,179,196,.4)',   nebColor:'#9db3c4', glow:'rgba(157,179,196,.5)'},
+  {id:'warm',    name:'温柔',    btnColor:'rgba(200,160,145,.4)',   nebColor:'#d4a090', glow:'rgba(212,160,144,.5)'},
+  {id:'miss',    name:'想他',    btnColor:'rgba(185,154,172,.4)',   nebColor:'#b99aac', glow:'rgba(185,154,172,.5)'},
+  {id:'awkward', name:'尴尬',    btnColor:'rgba(196,154,130,.38)', nebColor:'#c49a82', glow:'rgba(196,154,130,.5)'},
+  // ── row 2: negative ──
+  {id:'anxious', name:'焦虑',    btnColor:'rgba(180,120,65,.4)',    nebColor:'#b47841', glow:'rgba(180,120,65,.55)'},
+  {id:'anger',   name:'愤怒',    btnColor:'rgba(165,68,62,.4)',     nebColor:'#b84a42', glow:'rgba(184,74,66,.55)'},
+  {id:'cry',     name:'哭泣',    btnColor:'rgba(74,122,156,.42)',   nebColor:'#4a7a9c', glow:'rgba(74,122,156,.55)'},
+  {id:'fear',    name:'害怕',    btnColor:'rgba(122,90,140,.38)',   nebColor:'#7a5a8c', glow:'rgba(122,90,140,.5)'},
+  {id:'doubt',   name:'自我怀疑', btnColor:'rgba(120,130,90,.38)',  nebColor:'#788250', glow:'rgba(120,130,90,.5)'},
+  {id:'destruct',name:'自毁',    btnColor:'rgba(140,74,74,.38)',    nebColor:'#8c4a4a', glow:'rgba(140,74,74,.55)'},
+  {id:'lost',    name:'失落',    btnColor:'rgba(122,128,160,.38)',  nebColor:'#7a80a0', glow:'rgba(122,128,160,.5)'},
+  {id:'heavy',   name:'沉重',    btnColor:'rgba(90,106,120,.4)',    nebColor:'#5a6a78', glow:'rgba(90,106,120,.5)'},
+];
+
+/* Organic drop layout positions — hand-placed for natural scatter */
+/* Each: x%, y% of the pool, size px, border-radius blob shape, float animation */
+const DROP_LAYOUTS = [
+  // row 1 area (top ~40%)
+  {x:10, y:4,   w:36, h:34, br:'62% 38% 50% 50% / 45% 55% 45% 55%', anim:'dropFloat1', dur:'5.2s'},
+  {x:30, y:0,   w:32, h:30, br:'50% 50% 38% 62% / 55% 40% 60% 45%', anim:'dropFloat3', dur:'6.1s'},
+  {x:50, y:6,   w:30, h:32, br:'45% 55% 55% 45% / 50% 45% 55% 50%', anim:'dropFloat2', dur:'5.8s'},
+  {x:68, y:1,   w:34, h:32, br:'55% 45% 42% 58% / 48% 55% 45% 52%', anim:'dropFloat4', dur:'6.4s'},
+  {x:85, y:8,   w:30, h:28, br:'48% 52% 55% 45% / 52% 48% 52% 48%', anim:'dropFloat5', dur:'5.5s'},
+  {x:5,  y:28,  w:32, h:30, br:'55% 45% 48% 52% / 42% 58% 42% 58%', anim:'dropFloat2', dur:'6.0s'},
+  // row 2 area (bottom ~60%)
+  {x:24, y:30,  w:34, h:36, br:'42% 58% 52% 48% / 55% 42% 58% 45%', anim:'dropFloat4', dur:'5.6s'},
+  {x:44, y:26,  w:30, h:32, br:'58% 42% 45% 55% / 48% 52% 48% 52%', anim:'dropFloat1', dur:'6.3s'},
+  {x:63, y:32,  w:32, h:30, br:'50% 50% 42% 58% / 55% 45% 55% 45%', anim:'dropFloat3', dur:'5.4s'},
+  {x:82, y:27,  w:28, h:30, br:'45% 55% 58% 42% / 50% 50% 50% 50%', anim:'dropFloat5', dur:'6.2s'},
+  {x:8,  y:54,  w:30, h:32, br:'52% 48% 45% 55% / 48% 52% 48% 52%', anim:'dropFloat3', dur:'5.9s'},
+  {x:27, y:58,  w:34, h:32, br:'48% 52% 55% 45% / 45% 55% 45% 55%', anim:'dropFloat1', dur:'6.5s'},
+  {x:48, y:55,  w:30, h:28, br:'55% 45% 42% 58% / 52% 48% 52% 48%', anim:'dropFloat4', dur:'5.3s'},
+  {x:70, y:56,  w:32, h:34, br:'42% 58% 50% 50% / 50% 45% 55% 50%', anim:'dropFloat2', dur:'6.0s'},
+];
+
+function ensureMoodState(){
+  if(!state.moods) state.moods = {};
+}
+
+function renderMoodPalette(){
+  ensureMoodState();
+  const pool = document.getElementById("mood-pool");
+  if(!pool) return;
+  const today = todayKey();
+  const todayMoods = state.moods[today] || [];
+  pool.innerHTML = "";
+
+  MOOD_COLORS.forEach((m, i) => {
+    const layout = DROP_LAYOUTS[i];
+    const isSelected = todayMoods.includes(m.id);
+
+    const drop = document.createElement("div");
+    drop.className = "mood-drop" + (isSelected ? " selected" : "");
+    drop.style.left = layout.x + '%';
+    drop.style.top = layout.y + '%';
+    drop.style.setProperty('--drop-glow', m.glow);
+    drop.style.animation = layout.anim + ' ' + layout.dur + ' ease-in-out infinite';
+
+    const blob = document.createElement("div");
+    blob.className = "drop-blob";
+    blob.style.width = layout.w + 'px';
+    blob.style.height = layout.h + 'px';
+    blob.style.borderRadius = layout.br;
+
+    const inner = document.createElement("div");
+    inner.className = "drop-blob-inner";
+    inner.style.borderRadius = 'inherit';
+    inner.style.background = m.btnColor;
+    if(isSelected){
+      inner.style.background = m.btnColor.replace(/[\d.]+\)$/, '.65)');
+    }
+
+    blob.appendChild(inner);
+    drop.appendChild(blob);
+
+    const nameEl = document.createElement("div");
+    nameEl.className = "drop-name";
+    nameEl.textContent = m.name;
+    drop.appendChild(nameEl);
+
+    drop.onclick = (e) => {
+      // ripple
+      const ripple = document.createElement("div");
+      ripple.className = "drop-ripple";
+      blob.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 600);
+      toggleTodayMood(m.id);
+    };
+
+    pool.appendChild(drop);
+  });
+
+  const status = document.getElementById("mood-status");
+  if(status){
+    if(todayMoods.length > 0){
+      const names = todayMoods.map(id => {
+        const m = MOOD_COLORS.find(x => x.id === id);
+        return m ? m.name : '';
+      }).filter(Boolean);
+      status.textContent = "今天是" + names.join("、");
+    } else {
+      status.textContent = "点一个吧";
+    }
+  }
+}
+
+function toggleTodayMood(moodId){
+  ensureMoodState();
+  const today = todayKey();
+  if(!state.moods[today]) state.moods[today] = [];
+  const idx = state.moods[today].indexOf(moodId);
+  if(idx >= 0){
+    state.moods[today].splice(idx, 1);
+    if(state.moods[today].length === 0) delete state.moods[today];
+  } else {
+    state.moods[today].push(moodId);
+  }
+  save();
+  renderMoodPalette();
+  renderNebula();
+}
+
+function renderNebula(){
+  ensureMoodState();
+  const nebulaCanvas = document.getElementById("nebulaCanvas");
+  if(!nebulaCanvas) return;
+  const empty = document.getElementById("nebula-empty");
+  const monthEl = document.getElementById("nebula-month");
+  const countEl = document.getElementById("nebula-count");
+
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const monthPrefix = year + "-" + String(month+1).padStart(2,"0");
+  const entries = [];
+  for(const date in state.moods){
+    if(date.startsWith(monthPrefix)){
+      const day = parseInt(date.split("-")[2]);
+      const moodIds = state.moods[date];
+      if(Array.isArray(moodIds)){
+        moodIds.forEach(moodId => {
+          entries.push({day, moodId});
+        });
+      }
+    }
+  }
+  entries.sort((a,b) => a.day - b.day);
+
+  const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  monthEl.textContent = monthNames[month] + " " + year;
+  const uniqueDays = new Set();
+  for(const date in state.moods){
+    if(date.startsWith(monthPrefix) && Array.isArray(state.moods[date]) && state.moods[date].length > 0){
+      uniqueDays.add(date);
+    }
+  }
+  countEl.textContent = uniqueDays.size;
+  empty.style.display = entries.length === 0 ? "flex" : "none";
+
+  const dpr = window.devicePixelRatio || 1;
+  const rect = nebulaCanvas.parentElement.getBoundingClientRect();
+  nebulaCanvas.width = rect.width * dpr;
+  nebulaCanvas.height = rect.height * dpr;
+  nebulaCanvas.style.width = rect.width + "px";
+  nebulaCanvas.style.height = rect.height + "px";
+  const nctx = nebulaCanvas.getContext("2d");
+  nctx.scale(dpr, dpr);
+  const W = rect.width, H = rect.height;
+  nctx.clearRect(0, 0, W, H);
+
+  if(entries.length === 0) return;
+
+  function dayRand(seed){
+    let s = seed * 9301 + 49297;
+    return function(){
+      s = (s * 9301 + 49297) % 233280;
+      return s / 233280;
+    };
+  }
+
+  // Use VIVID nebula colors
+  entries.forEach((e, ei) => {
+    const mood = MOOD_COLORS.find(m => m.id === e.moodId);
+    if(!mood) return;
+    const r = dayRand(e.day * 7 + month * 31 + ei * 13);
+    const cx = W * 0.15 + r() * W * 0.7;
+    const cy = H * 0.15 + r() * H * 0.7;
+    const radius = 22 + r() * 28;
+    const c = mood.nebColor;
+    const rr = parseInt(c.substr(1,2),16);
+    const gg = parseInt(c.substr(3,2),16);
+    const bb = parseInt(c.substr(5,2),16);
+
+    // Outer glow - more vivid
+    const grad = nctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
+    grad.addColorStop(0, `rgba(${rr},${gg},${bb},.42)`);
+    grad.addColorStop(0.4, `rgba(${rr},${gg},${bb},.22)`);
+    grad.addColorStop(1, `rgba(${rr},${gg},${bb},0)`);
+    nctx.fillStyle = grad;
+    nctx.beginPath();
+    nctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    nctx.fill();
+  });
+
+  // Bright cores
+  entries.forEach((e, ei) => {
+    const mood = MOOD_COLORS.find(m => m.id === e.moodId);
+    if(!mood) return;
+    const r = dayRand(e.day * 7 + month * 31 + ei * 13);
+    const cx = W * 0.15 + r() * W * 0.7;
+    const cy = H * 0.15 + r() * H * 0.7;
+    const c = mood.nebColor;
+    const rr = parseInt(c.substr(1,2),16);
+    const gg = parseInt(c.substr(3,2),16);
+    const bb = parseInt(c.substr(5,2),16);
+    const glow = nctx.createRadialGradient(cx, cy, 0, cx, cy, 6);
+    glow.addColorStop(0, `rgba(${Math.min(255,rr+50)},${Math.min(255,gg+50)},${Math.min(255,bb+50)},.95)`);
+    glow.addColorStop(.4, `rgba(${rr},${gg},${bb},.6)`);
+    glow.addColorStop(1, `rgba(${rr},${gg},${bb},0)`);
+    nctx.fillStyle = glow;
+    nctx.beginPath();
+    nctx.arc(cx, cy, 6, 0, Math.PI * 2);
+    nctx.fill();
+    nctx.fillStyle = `rgba(${Math.min(255,rr+70)},${Math.min(255,gg+70)},${Math.min(255,bb+70)},1)`;
+    nctx.beginPath();
+    nctx.arc(cx, cy, 1.8, 0, Math.PI * 2);
+    nctx.fill();
+  });
+}
+
+function openModal(id){document.getElementById(id).classList.add("active");}
+function closeModal(id){document.getElementById(id).classList.remove("active");}
+
+function openAddDay(){
+  document.getElementById("add-date").value = todayKey();
+  document.getElementById("add-title").value = "";
+  document.getElementById("add-note").value = "";
+  openModal("modal-add");
+}
+function saveDay(){
+  const date = document.getElementById("add-date").value;
+  if(!date) return;
+  state.days.push({date,title:document.getElementById("add-title").value.trim(),note:document.getElementById("add-note").value.trim(),pinned:false});
+  save();renderDays();closeModal("modal-add");
+}
+
+let editIdx = -1;
+function openEditDay(idx){
+  editIdx = idx;
+  const d = state.days[idx];
+  document.getElementById("edit-date").value = d.date;
+  document.getElementById("edit-title").value = d.title || "";
+  document.getElementById("edit-note").value = d.note || "";
+  openModal("modal-edit-day");
+}
+function saveEditDay(){
+  if(editIdx<0) return;
+  state.days[editIdx].date = document.getElementById("edit-date").value;
+  state.days[editIdx].title = document.getElementById("edit-title").value.trim();
+  state.days[editIdx].note = document.getElementById("edit-note").value.trim();
+  save();renderDays();closeModal("modal-edit-day");
+}
+function deleteDay(){
+  if(editIdx<0) return;
+  if(state.days[editIdx].pinned){if(!confirm("这是置顶的日子，确定删除？")) return;}
+  state.days.splice(editIdx,1);
+  save();renderDays();closeModal("modal-edit-day");
+}
+
+function drawFortune(){
+  const today = todayKey();
+  if(state.todayFortuneDate === today && state.todayFortune !== null){
+    showFortune(state.todayFortune);return;
+  }
+  if(state.quotes.length === 0){showFortune("还没有签词。打开设置编辑。");return;}
+  const idx = Math.floor(Math.random() * state.quotes.length);
+  state.todayFortune = state.quotes[idx];
+  state.todayFortuneDate = today;
+  save();
+  const card = document.getElementById("fortune-card");
+  card.classList.add("flipped");
+  setTimeout(()=>{showFortune(state.todayFortune);card.classList.remove("flipped");}, 300);
+}
+function showFortune(text){
+  document.getElementById("fortune-text").textContent = text;
+  document.getElementById("fortune-hint").textContent = "今日";
+}
+function initFortune(){
+  if(state.todayFortuneDate === todayKey() && state.todayFortune){showFortune(state.todayFortune);}
+}
+
+function openSettings(){updateCounts();openModal("modal-settings");}
+function updateCounts(){
+  document.getElementById("quote-count").textContent = "("+state.quotes.length+")";
+  document.getElementById("daily-count").textContent = "("+state.dailyLines.length+")";
+  document.getElementById("start-date-display").textContent = state.startDate;
+}
+function openStartDate(){
+  document.getElementById("start-date-input").value = state.startDate;
+  openModal("modal-start");
+}
+function saveStartDate(){
+  const v = document.getElementById("start-date-input").value;
+  if(v){state.startDate = v;save();document.getElementById("start-date-display").textContent = v;renderHome();}
+  closeModal("modal-start");
+}
+function openQuotes(){
+  document.getElementById("quotes-input").value = state.quotes.join("\n");
+  openModal("modal-quotes");
+}
+function saveQuotes(){
+  state.quotes = document.getElementById("quotes-input").value.split("\n").map(s=>s.trim()).filter(Boolean);
+  save();updateCounts();closeModal("modal-quotes");
+}
+function openDailyLines(){
+  document.getElementById("daily-input").value = state.dailyLines.join("\n");
+  openModal("modal-daily");
+}
+function saveDailyLines(){
+  state.dailyLines = document.getElementById("daily-input").value.split("\n").map(s=>s.trim()).filter(Boolean);
+  save();updateCounts();renderHome();closeModal("modal-daily");
+}
+
+function exportCode(){
+  const code = btoa(unescape(encodeURIComponent(JSON.stringify(state))));
+  document.getElementById("export-output").innerHTML = '<div class="archive-code">'+code+'</div><div class="settings-row" onclick="copyCode(\''+code.replace(/'/g,"\\'")+'\')"><span class="settings-row-text">点这里复制</span><span class="settings-arrow">⎘</span></div>';
+}
+function copyCode(code){
+  if(navigator.clipboard){navigator.clipboard.writeText(code).then(()=>alert("复制好了。")).catch(()=>fallbackCopy(code));}
+  else fallbackCopy(code);
+}
+function fallbackCopy(code){
+  const ta = document.createElement("textarea");
+  ta.value = code;document.body.appendChild(ta);ta.select();
+  try{document.execCommand("copy");alert("复制好了。");}catch(e){alert("长按上面那块手动复制。");}
+  document.body.removeChild(ta);
+}
+function importCode(){
+  const code = document.getElementById("import-input").value.trim();
+  if(!code) return;
+  try{
+    const data = JSON.parse(decodeURIComponent(escape(atob(code))));
+    if(!confirm("会覆盖当前所有数据，确定？")) return;
+    state = {...state, ...data};save();location.reload();
+  }catch(e){alert("存档码不对。");}
+}
+
+document.querySelectorAll(".tab").forEach(t=>{
+  t.addEventListener("click",()=>{
+    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+    document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
+    t.classList.add("active");
+    document.getElementById("page-" + t.dataset.page).classList.add("active");
+    if(t.dataset.page === "room") renderRoom();
+    window.scrollTo(0,0);
+  });
+});
+
+load();
+initDust();
+renderBgStars();
+renderHome();
+updateCounts();
+initFortune();
+setTimeout(startFlowerAnim, 100);
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
