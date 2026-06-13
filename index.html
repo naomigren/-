@@ -43,7 +43,6 @@ body{
   background:transparent;
 }
 .flower-canvas-wrap canvas{width:100%;height:100%;display:block;}
-/* 底部柔化：让草根隐入背景，不切硬边 */
 .flower-canvas-wrap::after{
   content:'';position:absolute;left:0;right:0;bottom:0;height:50px;
   background:linear-gradient(180deg,
@@ -134,29 +133,47 @@ body{
 }
 .mood-palette{
   display:flex;
+  flex-wrap:wrap;
   justify-content:center;
-  gap:14px;
+  gap:10px 14px;
   margin-bottom:20px;
+}
+.mood-item{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:5px;
+  cursor:pointer;
 }
 .mood-swatch{
   width:32px;height:32px;
   border-radius:50%;
-  cursor:pointer;
   position:relative;
   transition:transform .25s ease;
   border:1px solid rgba(244,247,249,.15);
 }
 .mood-swatch::after{
   content:'';position:absolute;inset:-4px;
-  border-radius:50%;border:1px solid transparent;
+  border-radius:50%;border:1.5px solid transparent;
   transition:border-color .3s;
 }
-.mood-swatch:active{transform:scale(.92)}
-.mood-swatch.today{
+.mood-item:active .mood-swatch{transform:scale(.92)}
+.mood-swatch.selected{
   transform:scale(1.08);
 }
-.mood-swatch.today::after{
+.mood-swatch.selected::after{
   border-color:rgba(244,247,249,.55);
+}
+.mood-name{
+  font-family:"Noto Serif SC",serif;
+  font-size:10px;
+  color:rgba(244,247,249,.45);
+  letter-spacing:.08em;
+  font-weight:300;
+  transition:color .3s;
+}
+.mood-name.selected{
+  color:rgba(244,247,249,.75);
 }
 .mood-status{
   font-family:"Cormorant Garamond",serif;
@@ -446,15 +463,11 @@ body{
 
 <script>
 /* ============ Canvas花田 ============ */
-// ===== 银草 + 蒲公英 系统 =====
-// 莫兰迪银蓝调，渲染稍强但保持淡雅
-
 let canvas, ctx;
 let canvasW = 0, canvasH = 0;
 let windStr = 1, windTgt = 1;
 let animId = null;
 
-// 固定种子的伪随机，保证每次刷新画面都一样
 let _seed = 20260612;
 function srand(){
   _seed = (_seed * 9301 + 49297) % 233280;
@@ -472,7 +485,6 @@ function initFlowers(){
   dandelions = [];
   floatSeeds = [];
 
-  // === 银草 ===
   const bladeCount = 65;
   for(let i = 0; i < bladeCount; i++){
     blades.push({
@@ -488,8 +500,6 @@ function initFlowers(){
   }
   blades.sort((a, b) => (a.isFar ? 0 : 1) - (b.isFar ? 0 : 1));
 
-  // 蒲公英：不画茎，直接浮在草丛上方
-  // 前景5个绒球，散布在画面中段
   const fpos = [0.12, 0.32, 0.52, 0.72, 0.9];
   fpos.forEach(p => {
     const seedCount = 32 + Math.floor(srand() * 12);
@@ -515,7 +525,6 @@ function initFlowers(){
       isFar: false,
     });
   });
-  // 远景小绒球2个
   for(let i = 0; i < 2; i++){
     const seedCount = 18 + Math.floor(srand() * 8);
     const seeds = [];
@@ -541,7 +550,6 @@ function initFlowers(){
     });
   }
 
-  // === 漂浮种子 ===
   for(let i = 0; i < 14; i++){
     floatSeeds.push({
       x: srand() * canvasW,
@@ -559,16 +567,14 @@ function drawBlade(b, time){
   ctx.save();
   if(b.isFar) ctx.filter = 'blur(1px)';
   const baseX = b.x;
-  const baseY = canvasH - 8;  // 根部略缩在画布内，让蒙版柔化
+  const baseY = canvasH - 8;
   const tipX = baseX + Math.sin(b.tilt + sw) * b.height * 0.4;
   const tipY = baseY - b.height;
   const grad = ctx.createLinearGradient(baseX, baseY, tipX, tipY);
   if(b.hue < .5){
-    // 银蓝草
     grad.addColorStop(0, b.isFar ? 'rgba(110,130,155,.55)' : 'rgba(96,116,140,.8)');
     grad.addColorStop(1, b.isFar ? 'rgba(174,191,208,.3)' : 'rgba(174,191,208,.55)');
   } else {
-    // 薰衣草草
     grad.addColorStop(0, b.isFar ? 'rgba(143,138,165,.52)' : 'rgba(131,126,153,.72)');
     grad.addColorStop(1, b.isFar ? 'rgba(201,197,220,.3)' : 'rgba(201,197,220,.55)');
   }
@@ -581,7 +587,6 @@ function drawBlade(b, time){
   const cy = (baseY + tipY) / 2;
   ctx.quadraticCurveTo(cx, cy, tipX, tipY);
   ctx.stroke();
-  // 顶端小白点（部分前景草籽）
   if(!b.isFar && b.hue > .7){
     ctx.fillStyle = 'rgba(244,247,249,.85)';
     ctx.beginPath();
@@ -598,12 +603,10 @@ function drawDandelion(d, time){
   ctx.save();
   if(d.isFar) ctx.filter = 'blur(0.8px)';
 
-  // === 茎：从画布底部长上来，到绒球底部 ===
-  const stemBaseX = d.x - sw * 8;  // 茎根固定在草丛里
-  const stemBaseY = canvasH - 4;   // 草丛底部
+  const stemBaseX = d.x - sw * 8;
+  const stemBaseY = canvasH - 4;
   const stemTopX = cx;
-  const stemTopY = cy + d.R + 2;   // 接到绒球底
-  // 茎曲线：自然弯曲
+  const stemTopY = cy + d.R + 2;
   ctx.strokeStyle = d.isFar ? 'rgba(125,146,168,.55)' : 'rgba(110,128,155,.75)';
   ctx.lineWidth = d.isFar ? 1.1 : 1.6;
   ctx.lineCap = 'round';
@@ -613,13 +616,11 @@ function drawDandelion(d, time){
   const ctrlY = (stemBaseY + stemTopY) / 2;
   ctx.quadraticCurveTo(ctrlX, ctrlY, stemTopX, stemTopY);
   ctx.stroke();
-  // 花托（茎顶部小膨大）
   ctx.fillStyle = d.isFar ? 'rgba(125,146,168,.5)' : 'rgba(110,128,155,.7)';
   ctx.beginPath();
   ctx.ellipse(stemTopX, stemTopY, 3, 1.5, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // === 中心透明球（光晕，淡紫调）===
   const ballGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, d.R);
   ballGrad.addColorStop(0, 'rgba(229,225,236,.32)');
   ballGrad.addColorStop(.6, 'rgba(229,225,236,.14)');
@@ -629,25 +630,21 @@ function drawDandelion(d, time){
   ctx.arc(cx, cy, d.R, 0, Math.PI * 2);
   ctx.fill();
 
-  // 中心小核（薰衣草深紫）
   ctx.fillStyle = d.isFar ? 'rgba(143,138,170,.6)' : 'rgba(131,126,160,.8)';
   ctx.beginPath();
   ctx.arc(cx, cy, 2.2, 0, Math.PI * 2);
   ctx.fill();
 
-  // === 纤毛（淡紫色）===
   d.seeds.forEach(s => {
     const ex = cx + s.x * d.R * s.len;
     const ey = cy + s.y * d.R * s.len;
     const depth = 0.55 + (s.z + 1) * 0.25;
-    // 纤毛茎
     ctx.strokeStyle = `rgba(165,160,195,${(d.isFar ? .4 : .58) * depth})`;
     ctx.lineWidth = d.isFar ? 0.5 : 0.75;
     ctx.beginPath();
     ctx.moveTo(cx + s.x * 2, cy + s.y * 2);
     ctx.lineTo(ex, ey);
     ctx.stroke();
-    // 顶端绒毛点
     ctx.fillStyle = `rgba(220,212,232,${(d.isFar ? .7 : .92) * depth})`;
     ctx.beginPath();
     ctx.arc(ex, ey, d.isFar ? 0.9 : 1.4, 0, Math.PI * 2);
@@ -663,7 +660,6 @@ function drawFloatSeed(s, time){
   ctx.save();
   ctx.translate(x, y);
   ctx.rotate(Math.sin(time * 0.001 + s.phase) * 0.5);
-  // 淡紫调
   ctx.fillStyle = 'rgba(220,212,232,.82)';
   for(let i = 0; i < 6; i++){
     ctx.save();
@@ -682,7 +678,6 @@ function drawScene(time){
   if(!canvas) return;
   ctx.clearRect(0, 0, canvasW, canvasH);
 
-  // 整体氛围渐变（顶部偏亮，底部偏深一点）
   const sky = ctx.createLinearGradient(0, 0, 0, canvasH);
   sky.addColorStop(0, 'rgba(244,247,249,.4)');
   sky.addColorStop(0.6, 'rgba(199,213,222,.15)');
@@ -690,10 +685,8 @@ function drawScene(time){
   ctx.fillStyle = sky;
   ctx.fillRect(0, 0, canvasW, canvasH);
 
-  // 1. 远景银草
   blades.filter(b => b.isFar).forEach(b => drawBlade(b, time));
 
-  // 2. 飘浮种子（在草和绒球之间）
   floatSeeds.forEach(s => {
     drawFloatSeed(s, time);
     s.x += s.vx * windStr * 0.5;
@@ -702,19 +695,11 @@ function drawScene(time){
     if(s.y < -10) s.y = canvasH + 10;
   });
 
-  // 3. 远景蒲公英
   dandelions.filter(d => d.isFar).forEach(d => drawDandelion(d, time));
-
-  // 4. 前景银草
   blades.filter(b => !b.isFar).forEach(b => drawBlade(b, time));
-
-  // 5. 前景蒲公英
   dandelions.filter(d => !d.isFar).forEach(d => drawDandelion(d, time));
 
-  // 6. 底部云雾：盖住硬边切割线，让画面自然消失
-  // 主云带 - 不规则水平云絮
   const cloudY = canvasH - 30;
-  // 远云（淡淡的一层）
   for(let i = 0; i < 4; i++){
     const cx = (i / 3) * canvasW + (i % 2 === 0 ? -20 : 20);
     const cw = canvasW * 0.45;
@@ -728,7 +713,6 @@ function drawScene(time){
     ctx.ellipse(cx, cy, cw * 0.55, 18, 0, 0, Math.PI * 2);
     ctx.fill();
   }
-  // 近云（更浓一些，盖住底部）
   for(let i = 0; i < 3; i++){
     const cx = (i + 0.5) / 3 * canvasW + Math.sin(time * 0.0004 + i * 1.5) * 8;
     const cy = canvasH - 12;
@@ -742,7 +726,6 @@ function drawScene(time){
     ctx.ellipse(cx, cy, cw * 0.6, 22, 0, 0, Math.PI * 2);
     ctx.fill();
   }
-  // 最底层完全实色（接到背景）
   const bottomGrad = ctx.createLinearGradient(0, canvasH - 25, 0, canvasH);
   bottomGrad.addColorStop(0, 'rgba(238,243,246,0)');
   bottomGrad.addColorStop(.5, 'rgba(238,243,246,.5)');
@@ -772,7 +755,6 @@ function startFlowerAnim(){
   drawScene(0);
 }
 
-// 风向变化
 setInterval(() => {
   windTgt = 0.5 + Math.random() * 3;
   setTimeout(() => { windTgt = 1; }, 2000 + Math.random() * 2000);
@@ -800,9 +782,26 @@ let state = {
   roomNote: "",
   todayFortune: null,
   todayFortuneDate: null,
+  moods: {},
 };
 
-function load(){try{const raw = localStorage.getItem(STORAGE_KEY);if(raw){state = {...state, ...JSON.parse(raw)};}}catch(e){}}
+function load(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      state = {...state, ...parsed};
+      // Migrate old moods format: string -> array
+      if(state.moods){
+        for(const key in state.moods){
+          if(typeof state.moods[key] === 'string'){
+            state.moods[key] = [state.moods[key]];
+          }
+        }
+      }
+    }
+  }catch(e){}
+}
 function save(){try{localStorage.setItem(STORAGE_KEY, JSON.stringify(state));}catch(e){}}
 
 function diffDays(start){
@@ -1027,19 +1026,25 @@ function saveRoomNote(){state.roomNote = document.getElementById("room-note").va
 
 /* === 心情星点系统 === */
 const MOOD_COLORS = [
-  // 莫兰迪色，跟his room深银蓝背景搭，不媚俗也不淡
-  {id:'joy',     name:'开心',  color:'#9eb09a'},  // 鼠尾草绿
-  {id:'still',   name:'平静',  color:'#a8b8c8'},  // 雾银蓝
-  {id:'warm',    name:'温柔',  color:'#d4b896'},  // 灰米杏
-  {id:'miss',    name:'想他',  color:'#c5a8b8'},  // 雾粉藕
-  {id:'anxious', name:'焦虑',  color:'#c4b078'},  // 芥末黄
-  {id:'anger',   name:'愤怒',  color:'#b88478'},  // 砖红
-  {id:'misty',   name:'失落',  color:'#9ca0b8'},  // 灰薰衣草
-  {id:'hollow',  name:'沉重',  color:'#7d8a99'},  // 深岩蓝
+  // ── 柔和正面 ──
+  {id:'joy',     name:'开心',    color:'#8aaa82'},
+  {id:'still',   name:'平静',    color:'#9db3c4'},
+  {id:'warm',    name:'温柔',    color:'#c4aa90'},
+  {id:'miss',    name:'想他',    color:'#b99aac'},
+  {id:'awkward', name:'尴尬',    color:'#c49a82'},
+  // ── 鲜明消极 ──
+  {id:'anxious', name:'焦虑',    color:'#d48a4a'},
+  {id:'anger',   name:'愤怒',    color:'#b84a42'},
+  {id:'cry',     name:'哭泣',    color:'#4a7a9c'},
+  {id:'fear',    name:'害怕',    color:'#7a5a8c'},
+  {id:'doubt',   name:'自我怀疑', color:'#a89460'},
+  {id:'destruct',name:'自毁',    color:'#8c4a4a'},
+  {id:'lost',    name:'失落',    color:'#7a80a0'},
+  {id:'heavy',   name:'沉重',    color:'#5a6a78'},
 ];
 
 function ensureMoodState(){
-  if(!state.moods) state.moods = {};  // {YYYY-MM-DD: moodId}
+  if(!state.moods) state.moods = {};
 }
 
 function renderMoodPalette(){
@@ -1047,32 +1052,53 @@ function renderMoodPalette(){
   const palette = document.getElementById("mood-palette");
   if(!palette) return;
   const today = todayKey();
-  const todayMood = state.moods[today];
+  const todayMoods = state.moods[today] || [];
   palette.innerHTML = "";
   MOOD_COLORS.forEach(m => {
+    const item = document.createElement("div");
+    item.className = "mood-item";
+    const isSelected = todayMoods.includes(m.id);
+
     const sw = document.createElement("div");
-    sw.className = "mood-swatch" + (todayMood === m.id ? " today" : "");
+    sw.className = "mood-swatch" + (isSelected ? " selected" : "");
     sw.style.background = m.color;
     sw.style.boxShadow = `0 0 14px ${m.color}55, inset 0 -4px 8px rgba(0,0,0,.1)`;
-    sw.title = m.name;
-    sw.onclick = () => setTodayMood(m.id);
-    palette.appendChild(sw);
+
+    const nameEl = document.createElement("div");
+    nameEl.className = "mood-name" + (isSelected ? " selected" : "");
+    nameEl.textContent = m.name;
+
+    item.onclick = () => toggleTodayMood(m.id);
+    item.appendChild(sw);
+    item.appendChild(nameEl);
+    palette.appendChild(item);
   });
-  // 状态文字
+
   const status = document.getElementById("mood-status");
   if(status){
-    if(todayMood){
-      const m = MOOD_COLORS.find(x => x.id === todayMood);
-      status.textContent = "今天是" + (m ? m.name : "");
+    if(todayMoods.length > 0){
+      const names = todayMoods.map(id => {
+        const m = MOOD_COLORS.find(x => x.id === id);
+        return m ? m.name : '';
+      }).filter(Boolean);
+      status.textContent = "今天是" + names.join("、");
     } else {
       status.textContent = "点一个吧";
     }
   }
 }
 
-function setTodayMood(moodId){
+function toggleTodayMood(moodId){
   ensureMoodState();
-  state.moods[todayKey()] = moodId;
+  const today = todayKey();
+  if(!state.moods[today]) state.moods[today] = [];
+  const idx = state.moods[today].indexOf(moodId);
+  if(idx >= 0){
+    state.moods[today].splice(idx, 1);
+    if(state.moods[today].length === 0) delete state.moods[today];
+  } else {
+    state.moods[today].push(moodId);
+  }
   save();
   renderMoodPalette();
   renderNebula();
@@ -1080,47 +1106,55 @@ function setTodayMood(moodId){
 
 function renderNebula(){
   ensureMoodState();
-  const canvas = document.getElementById("nebulaCanvas");
-  if(!canvas) return;
+  const nebulaCanvas = document.getElementById("nebulaCanvas");
+  if(!nebulaCanvas) return;
   const empty = document.getElementById("nebula-empty");
   const monthEl = document.getElementById("nebula-month");
   const countEl = document.getElementById("nebula-count");
 
-  // 拿当前月份的所有心情记录
   const now = new Date();
   const year = now.getFullYear();
-  const month = now.getMonth(); // 0-based
+  const month = now.getMonth();
   const monthPrefix = year + "-" + String(month+1).padStart(2,"0");
   const entries = [];
   for(const date in state.moods){
     if(date.startsWith(monthPrefix)){
       const day = parseInt(date.split("-")[2]);
-      entries.push({day, moodId: state.moods[date]});
+      const moodIds = state.moods[date];
+      if(Array.isArray(moodIds)){
+        moodIds.forEach(moodId => {
+          entries.push({day, moodId});
+        });
+      }
     }
   }
   entries.sort((a,b) => a.day - b.day);
 
-  // 月份显示
   const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
   monthEl.textContent = monthNames[month] + " " + year;
-  countEl.textContent = entries.length;
+  // Count unique days
+  const uniqueDays = new Set();
+  for(const date in state.moods){
+    if(date.startsWith(monthPrefix) && Array.isArray(state.moods[date]) && state.moods[date].length > 0){
+      uniqueDays.add(date);
+    }
+  }
+  countEl.textContent = uniqueDays.size;
   empty.style.display = entries.length === 0 ? "flex" : "none";
 
-  // 画星云
   const dpr = window.devicePixelRatio || 1;
-  const rect = canvas.parentElement.getBoundingClientRect();
-  canvas.width = rect.width * dpr;
-  canvas.height = rect.height * dpr;
-  canvas.style.width = rect.width + "px";
-  canvas.style.height = rect.height + "px";
-  const ctx = canvas.getContext("2d");
-  ctx.scale(dpr, dpr);
+  const rect = nebulaCanvas.parentElement.getBoundingClientRect();
+  nebulaCanvas.width = rect.width * dpr;
+  nebulaCanvas.height = rect.height * dpr;
+  nebulaCanvas.style.width = rect.width + "px";
+  nebulaCanvas.style.height = rect.height + "px";
+  const nctx = nebulaCanvas.getContext("2d");
+  nctx.scale(dpr, dpr);
   const W = rect.width, H = rect.height;
-  ctx.clearRect(0, 0, W, H);
+  nctx.clearRect(0, 0, W, H);
 
   if(entries.length === 0) return;
 
-  // 用日期作为伪随机种子，让星点分布稳定
   function dayRand(seed){
     let s = seed * 9301 + 49297;
     return function(){
@@ -1129,17 +1163,14 @@ function renderNebula(){
     };
   }
 
-  // 先画星云气体（每个心情发出一片柔光晕）
-  entries.forEach(e => {
+  entries.forEach((e, ei) => {
     const mood = MOOD_COLORS.find(m => m.id === e.moodId);
     if(!mood) return;
-    const r = dayRand(e.day * 7 + month * 31);
-    // 在画布中央附近随机位置
-    const cx = W * 0.2 + r() * W * 0.6;
-    const cy = H * 0.2 + r() * H * 0.6;
-    const radius = 20 + r() * 22;
-    const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
-    // 把hex转rgba
+    const r = dayRand(e.day * 7 + month * 31 + ei * 13);
+    const cx = W * 0.15 + r() * W * 0.7;
+    const cy = H * 0.15 + r() * H * 0.7;
+    const radius = 18 + r() * 24;
+    const grad = nctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
     const c = mood.color;
     const rr = parseInt(c.substr(1,2),16);
     const gg = parseInt(c.substr(3,2),16);
@@ -1147,38 +1178,34 @@ function renderNebula(){
     grad.addColorStop(0, `rgba(${rr},${gg},${bb},.32)`);
     grad.addColorStop(0.5, `rgba(${rr},${gg},${bb},.14)`);
     grad.addColorStop(1, `rgba(${rr},${gg},${bb},0)`);
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-    ctx.fill();
+    nctx.fillStyle = grad;
+    nctx.beginPath();
+    nctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    nctx.fill();
   });
 
-  // 再画明亮的星点
-  entries.forEach(e => {
+  entries.forEach((e, ei) => {
     const mood = MOOD_COLORS.find(m => m.id === e.moodId);
     if(!mood) return;
-    const r = dayRand(e.day * 7 + month * 31);
-    const cx = W * 0.2 + r() * W * 0.6;
-    const cy = H * 0.2 + r() * H * 0.6;
-    // 中心亮点
+    const r = dayRand(e.day * 7 + month * 31 + ei * 13);
+    const cx = W * 0.15 + r() * W * 0.7;
+    const cy = H * 0.15 + r() * H * 0.7;
     const c = mood.color;
     const rr = parseInt(c.substr(1,2),16);
     const gg = parseInt(c.substr(3,2),16);
     const bb = parseInt(c.substr(5,2),16);
-    // 外光晕
-    const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, 5);
+    const glow = nctx.createRadialGradient(cx, cy, 0, cx, cy, 5);
     glow.addColorStop(0, `rgba(${Math.min(255,rr+30)},${Math.min(255,gg+30)},${Math.min(255,bb+30)},.85)`);
     glow.addColorStop(.4, `rgba(${rr},${gg},${bb},.55)`);
     glow.addColorStop(1, `rgba(${rr},${gg},${bb},0)`);
-    ctx.fillStyle = glow;
-    ctx.beginPath();
-    ctx.arc(cx, cy, 5, 0, Math.PI * 2);
-    ctx.fill();
-    // 实心小核
-    ctx.fillStyle = `rgba(${Math.min(255,rr+50)},${Math.min(255,gg+50)},${Math.min(255,bb+50)},.95)`;
-    ctx.beginPath();
-    ctx.arc(cx, cy, 1.5, 0, Math.PI * 2);
-    ctx.fill();
+    nctx.fillStyle = glow;
+    nctx.beginPath();
+    nctx.arc(cx, cy, 5, 0, Math.PI * 2);
+    nctx.fill();
+    nctx.fillStyle = `rgba(${Math.min(255,rr+50)},${Math.min(255,gg+50)},${Math.min(255,bb+50)},.95)`;
+    nctx.beginPath();
+    nctx.arc(cx, cy, 1.5, 0, Math.PI * 2);
+    nctx.fill();
   });
 }
 
@@ -1318,7 +1345,6 @@ updateCounts();
 initFortune();
 setTimeout(startFlowerAnim, 100);
 
-// === 注册 service worker（PWA离线支持）===
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js').catch(() => {});
