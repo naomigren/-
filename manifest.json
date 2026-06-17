@@ -1,25 +1,21 @@
 {
-  "name": "姜姜",
-  "short_name": "姜姜",
-  "description": "我们的日子",
-  "start_url": "./",
-  "scope": "./",
+  "name": "Piano Journey",
+  "short_name": "Piano",
+  "description": "钢琴自学打卡",
+  "start_url": "./piano-tracker.html",
   "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#eef3f6",
-  "theme_color": "#7e9272",
+  "background_color": "#edeef4",
+  "theme_color": "#96a6c8",
   "icons": [
     {
-      "src": "icon-192.png",
+      "src": "./icon-192.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
+      "type": "image/png"
     },
     {
-      "src": "icon-512.png",
+      "src": "./icon-512.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
+      "type": "image/png"
     }
   ]
 }
