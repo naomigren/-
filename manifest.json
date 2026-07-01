@@ -1,21 +1,18 @@
 {
-  "name": "Piano Journey",
-  "short_name": "Piano",
-  "description": "钢琴自学打卡",
-  "start_url": "./piano-tracker.html",
-  "display": "standalone",
-  "background_color": "#edeef4",
-  "theme_color": "#96a6c8",
+  "name": "克拉拉养成计划",
+  "short_name": "克拉拉",
+  "description": "Klara's Life Quest - 养成系统",
   "icons": [
     {
-      "src": "./icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "./icon-512.png",
+      "src": "icon.png.PNG",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
-  ]
+  ],
+  "start_url": "./klara-quest.html",
+  "display": "standalone",
+  "background_color": "#fdf2f0",
+  "theme_color": "#c4868e",
+  "orientation": "portrait"
 }
