@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#fdf2f0">
 <meta name="apple-mobile-web-app-title" content="克拉拉养成">
 <title>克拉拉养成计划</title>
 <link rel="manifest" href="manifest.json">
@@ -225,7 +226,62 @@ body.winter .inp{border-color:rgba(138,154,180,0.2);}
 .pl-whisper-ov{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(90,58,64,0.2);backdrop-filter:blur(4px);z-index:300;}
 .pl-whisper-pop{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fdfaf9;padding:28px 24px;border-radius:16px;width:82%;max-width:320px;z-index:310;box-shadow:0 8px 40px rgba(90,58,64,0.18);text-align:center;}
 @media(max-width:400px){.pl-grid{grid-template-columns:repeat(9,1fr);gap:3px;}.pl-day{font-size:0.65rem;}}
-</style>
+
+/* ═══════ COMPREHENSIVE WINTER OVERRIDES ═══════ */
+body.winter{color:#4a4a5a;}
+body.winter ::-webkit-scrollbar-thumb{background:rgba(130,130,170,0.3);}
+
+/* Season toggle: purple in winter */
+body.winter .season-toggle{background:linear-gradient(135deg,rgba(130,140,170,0.2),rgba(150,155,180,0.15));color:#6a6a8a;border-color:rgba(130,140,170,0.3);}
+
+/* Score boxes */
+body.winter #cpBox{background:linear-gradient(135deg,rgba(140,140,175,0.15),rgba(155,155,185,0.1))!important;border-color:rgba(140,140,175,0.2)!important;}
+body.winter #cpVal{background:linear-gradient(135deg,#9a9ab8,#b0b0c8)!important;-webkit-background-clip:text!important;-webkit-text-fill-color:transparent!important;}
+
+/* Progress bars */
+body.winter #japanBar{background:linear-gradient(90deg,#8a8aaa,#a0a0c0,#b0b0c8)!important;}
+body.winter #deBar{background:linear-gradient(90deg,#7a8ea0,#8a8aaa,#9a9ab8)!important;}
+
+/* Progress bar containers */
+body.winter .progress-wrap{border-color:rgba(140,140,175,0.2)!important;}
+
+/* Tab system */
+body.winter .tab-active{color:#fff!important;}
+body.winter .tab-inactive{color:#8a8a9a!important;}
+
+/* Task button points color */
+body.winter .pts{color:#8a8aaa!important;}
+body.winter .task-btn-big .pts{color:#7a7aa0!important;}
+
+/* Daily plan */
+body.winter .dp-msg{background:linear-gradient(135deg,rgba(140,140,175,0.1),rgba(155,155,185,0.06))!important;border-color:rgba(140,140,175,0.2)!important;}
+body.winter .dp-item{border-color:rgba(140,140,175,0.15)!important;}
+body.winter .dp-item.done{background:rgba(140,140,175,0.08)!important;border-color:rgba(140,140,175,0.25)!important;}
+body.winter .dp-check{border-color:rgba(140,140,175,0.35)!important;}
+body.winter .dp-check.checked{background:linear-gradient(135deg,#8a8aaa,#9a9ab8)!important;border-color:#8a8aaa!important;}
+body.winter .dp-add-btn{color:#8a8aaa!important;background:rgba(140,140,175,0.1)!important;border-color:rgba(140,140,175,0.2)!important;}
+body.winter .dp-done-card{background:linear-gradient(145deg,rgba(140,140,175,0.12),rgba(155,155,185,0.06))!important;border-color:rgba(140,140,175,0.25)!important;}
+
+/* Toast */
+body.winter .toast-big{background:linear-gradient(135deg,#7a7a9a,#8a8aaa)!important;}
+body.winter .toast-earn{background:linear-gradient(135deg,#6a8a7a,#5a7a6a)!important;}
+body.winter .toast-card{background:linear-gradient(135deg,#7a7a9a,#8a8aaa)!important;}
+
+/* Winter badge */
+body.winter .winter-badge{background:rgba(130,130,170,0.15)!important;color:#7a7aa0!important;}
+
+/* Achievement glow in winter */
+body.winter .ach-unlocked-legend{animation-name:glowWinter!important;}
+
+/* Generic pink overrides for borders/backgrounds */
+body.winter [style*="rgba(219,147,158"]{border-color:rgba(140,140,175,0.2)!important;}
+body.winter [style*="color:#c4868e"]{color:#8a8aaa!important;}
+
+/* Fix top status bar area - make body background extend fully */
+body.winter{background-attachment:fixed;}
+body.spring{background-attachment:fixed;}
+
+@keyframes glowWinter{0%,100%{box-shadow:0 0 20px rgba(130,130,170,0.3);}50%{box-shadow:0 0 40px rgba(130,130,170,0.5);}}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.1.0/dist/chartjs-plugin-annotation.min.js"></script>
 </head>
@@ -595,8 +651,8 @@ function renderAttrs(){
   h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
   for(const a of ATTRS){
     const xp=S.attrs[a.id]||0;const lv=getLv(xp);const pct=getLvPct(xp);
-    const accentColor=currentSeason==='winter'?'#7a8ea0':'#c4868e';
-    const barBg=currentSeason==='winter'?'linear-gradient(90deg,#7a8ea0,#8aa0b8)':'linear-gradient(90deg,#c4868e,#d4a0a0)';
+    const accentColor=currentSeason==='winter'?'#8a8aaa':'#c4868e';
+    const barBg=currentSeason==='winter'?'linear-gradient(90deg,#8a8aaa,#9a9ab8)':'linear-gradient(90deg,#c4868e,#d4a0a0)';
     h+=`<div style="background:rgba(255,255,255,0.5);border-radius:12px;padding:10px 12px;border:1px solid ${currentSeason==='winter'?'rgba(138,154,170,0.15)':'rgba(219,147,158,0.15)'};">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
         <span style="font-size:13px;">${a.em} ${a.name}</span>
@@ -926,13 +982,14 @@ function loadSave(){
     saveState();
     // Apply season visually
     document.body.className=currentSeason;
+    applySeasonInlineStyles(currentSeason);
     if(currentSeason==='winter'){
       document.getElementById('seasonBtn').innerHTML='❄️ 冬';
-      document.getElementById('headerSub').style.color='#7a8ea0';
-      document.getElementById('headerTitle').style.background='linear-gradient(135deg,#8a9ab0 0%,#a0b0c0 50%,#b0bac8 100%)';
+      document.getElementById('headerSub').style.color='#8a8aaa';
+      document.getElementById('headerTitle').style.background='linear-gradient(135deg,#8a8aaa 0%,#9a9ab8 50%,#a0b0c8 100%)';
       document.getElementById('headerTitle').style.webkitBackgroundClip='text';
       document.getElementById('headerTitle').style.webkitTextFillColor='transparent';
-      document.getElementById('headerDesc').style.color='#8a9aaa';
+      document.getElementById('headerDesc').style.color='#8a8a9a';
       startSnow(false);
     } else {
       document.getElementById('seasonBtn').innerHTML='🌸 春';
@@ -952,6 +1009,36 @@ function loadSave(){
 }
 
 /* ═══════ SEASON TOGGLE ═══════ */
+function applySeasonInlineStyles(season){
+  var isW = season === 'winter';
+  // Score box
+  var cpBox = document.getElementById('cpBox');
+  if(cpBox){
+    cpBox.style.background = isW ? 'linear-gradient(135deg,rgba(140,140,175,0.15),rgba(155,155,185,0.1))' : 'linear-gradient(135deg,rgba(219,147,158,0.15),rgba(199,163,163,0.1))';
+    cpBox.style.borderColor = isW ? 'rgba(140,140,175,0.2)' : 'rgba(219,147,158,0.2)';
+  }
+  var cpVal = document.getElementById('cpVal');
+  if(cpVal){
+    cpVal.style.background = isW ? 'linear-gradient(135deg,#9a9ab8,#b0b0c8)' : 'linear-gradient(135deg,#d4a0a0,#e8b4b8)';
+    cpVal.style.webkitBackgroundClip = 'text';
+    cpVal.style.webkitTextFillColor = 'transparent';
+  }
+  // Progress bars
+  var jBar = document.getElementById('japanBar');
+  if(jBar) jBar.style.background = isW ? 'linear-gradient(90deg,#8a8aaa,#a0a0c0,#b0b0c8)' : 'linear-gradient(90deg,#c4868e,#d4a0a0,#c9b8a8)';
+  var dBar = document.getElementById('deBar');
+  if(dBar) dBar.style.background = isW ? 'linear-gradient(90deg,#7a8ea0,#8a8aaa,#9a9ab8)' : 'linear-gradient(90deg,#c9b8a8,#b07078,#c4868e)';
+  // Progress text
+  var jText = document.getElementById('japanText');
+  if(jText) jText.style.color = isW ? '#8a8aaa' : '#c4868e';
+  var dText = document.getElementById('deText');
+  if(dText) dText.style.color = isW ? '#8a8aaa' : '#c4868e';
+  // Theme color meta tag for status bar
+  var meta = document.querySelector('meta[name="theme-color"]');
+  if(!meta){meta = document.createElement('meta');meta.name='theme-color';document.head.appendChild(meta);}
+  meta.content = isW ? '#eef2f7' : '#fdf2f0';
+}
+
 function toggleSeason(){
   if(currentSeason==="spring"){
     currentSeason="winter";S.season="winter";
@@ -964,12 +1051,14 @@ function toggleSeason(){
     // Blizzard then gentle
     startSnow(true);
     setTimeout(function(){if(currentSeason==="winter")snowIntensity=1;},6000);
-    // Header colors
-    document.getElementById('headerSub').style.color='#7a8ea0';
-    document.getElementById('headerTitle').style.background='linear-gradient(135deg,#8a9ab0 0%,#a0b0c0 50%,#b0bac8 100%)';
+    // Header colors - blue/silver/purple
+    document.getElementById('headerSub').style.color='#8a8aaa';
+    document.getElementById('headerTitle').style.background='linear-gradient(135deg,#8a8aaa 0%,#9a9ab8 50%,#a0b0c0 100%)';
     document.getElementById('headerTitle').style.webkitBackgroundClip='text';
     document.getElementById('headerTitle').style.webkitTextFillColor='transparent';
-    document.getElementById('headerDesc').style.color='#8a9aaa';
+    document.getElementById('headerDesc').style.color='#8a8a9a';
+    // Fix inline pink elements
+    applySeasonInlineStyles('winter');
     showToast('❄️ 冬季模式：寒冬里每一步都更难，分值已提升！','card');
   } else {
     currentSeason="spring";S.season="spring";
@@ -984,6 +1073,7 @@ function toggleSeason(){
     document.getElementById('headerTitle').style.webkitBackgroundClip='text';
     document.getElementById('headerTitle').style.webkitTextFillColor='transparent';
     document.getElementById('headerDesc').style.color='#a08888';
+    applySeasonInlineStyles('spring');
     showToast('🌸 春季模式：温暖的日子回来了！','earn');
   }
   saveState();render();
@@ -1069,13 +1159,14 @@ function spawnPetals(count){
 loadState();
 // Apply saved season
 document.body.className=currentSeason;
+applySeasonInlineStyles(currentSeason);
 if(currentSeason==='winter'){
   document.getElementById('seasonBtn').innerHTML='❄️ 冬';
-  document.getElementById('headerSub').style.color='#7a8ea0';
-  document.getElementById('headerTitle').style.background='linear-gradient(135deg,#8a9ab0 0%,#a0b0c0 50%,#b0bac8 100%)';
+  document.getElementById('headerSub').style.color='#8a8aaa';
+  document.getElementById('headerTitle').style.background='linear-gradient(135deg,#8a8aaa 0%,#9a9ab8 50%,#a0b0c8 100%)';
   document.getElementById('headerTitle').style.webkitBackgroundClip='text';
   document.getElementById('headerTitle').style.webkitTextFillColor='transparent';
-  document.getElementById('headerDesc').style.color='#8a9aaa';
+  document.getElementById('headerDesc').style.color='#8a8a9a';
   setTimeout(function(){startSnow(false);},500);
 }
 render();
