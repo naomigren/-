@@ -292,6 +292,7 @@ body.spring{background-attachment:fixed;}
 <div id="toast" class="toast hidden"></div>
 <div id="achieveOverlay"></div>
 <div id="confettiContainer"></div>
+<div id="seasonFlashContainer"></div>
 <div id="cardRevealOv" class="card-reveal-ov" onclick="closeCardReveal()">
   <div class="card-reveal-box" onclick="event.stopPropagation()">
     <img id="crImg" class="card-reveal-img" src="" alt="">
@@ -615,6 +616,7 @@ function confetti(n){
 
 /* ═══════ RENDER ═══════ */
 function render(){
+  try{
   document.getElementById('cpVal').textContent=S.cp;
   document.getElementById('tpVal').textContent=S.totalEarned;
   const jp=Math.min(S.totalEarned/2000*100,100);
@@ -626,6 +628,7 @@ function render(){
   document.getElementById('deText').textContent=Math.min(deTotal,2000)+'/2000';
   renderTasks();renderAttrs();renderAchieve();renderShop();renderHistory();renderWishes();renderDailyPlan();
   if(document.getElementById('content-palace')&&!document.getElementById('content-palace').classList.contains('hidden'))renderPalace();
+  }catch(e){document.getElementById('content-tasks').innerHTML='<div style="color:red;padding:20px;font-size:14px;">渲染错误: '+e.message+'<br>'+e.stack+'</div>';}
 }
 
 function renderTasks(){
@@ -1157,6 +1160,7 @@ function spawnPetals(count){
 }
 
 /* ═══════ INIT ═══════ */
+try{
 loadState();
 // Apply saved season
 document.body.className=currentSeason;
@@ -1172,6 +1176,7 @@ if(currentSeason==='winter'){
 }
 render();
 switchTab('tasks');
+}catch(e){document.body.innerHTML='<div style="color:red;padding:40px;font-size:16px;">初始化错误: '+e.message+'<br><pre>'+e.stack+'</pre></div>';}
 </script>
 </body>
 </html>
