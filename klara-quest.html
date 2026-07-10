@@ -504,7 +504,7 @@ const WISH_LIST=[
 const LS_KEY="klara_quest_v3";
 let S={cp:0,totalEarned:0,totalSpent:0,taskCounts:{},penCounts:{},attrs:{},log:[],achievements:[],cardPieces:{},dailyPlan:{items:[],msg:"",date:""},palace:{days:{},startDate:null,startWeight:null,goalWeight:null,rewards:{d30:"",d60:"",d90:""},visionBoard:[]},phoneFund:0,apiFund:0,season:"spring"};
 function initAttrs(){ATTRS.forEach(a=>{if(!S.attrs[a.id])S.attrs[a.id]=0;});}
-function loadState(){try{const d=localStorage.getItem(LS_KEY);if(d){const p=JSON.parse(d);Object.assign(S,p);if(!S.taskCounts)S.taskCounts={};if(!S.penCounts)S.penCounts={};if(!S.attrs)S.attrs={};if(!S.log)S.log=[];if(!S.achievements)S.achievements=[];if(!S.cardPieces)S.cardPieces={};if(!S.dailyPlan)S.dailyPlan={items:[],msg:"",date:""};if(!S.palace)S.palace={days:{},startDate:null,startWeight:null,goalWeight:null,rewards:{d30:"",d60:"",d90:""},visionBoard:[]};if(S.phoneFund===undefined)S.phoneFund=0;if(S.apiFund===undefined)S.apiFund=0;if(!S.season)S.season="spring";currentSeason=S.season;}}catch(e){console.error(e);}initAttrs();}
+function loadState(){try{const d=localStorage.getItem(LS_KEY);if(d){const p=JSON.parse(d);Object.assign(S,p);}else{S.cp=500;S.totalEarned=500;S.taskCounts={gc_pass:1};S.attrs={intel:10,will:8,mood:5};S.achievements=["a_first","a_10","a_50","a_100","a_200","a_500","a_gcpass"];S.log=[{type:"earn",id:"gc_pass",name:"高财通过！",pts:500,em:"✅",date:"2026-06-28",ts:1719561600000}];}if(!S.taskCounts)S.taskCounts={};if(!S.penCounts)S.penCounts={};if(!S.attrs)S.attrs={};if(!S.log)S.log=[];if(!S.achievements)S.achievements=[];if(!S.cardPieces)S.cardPieces={};if(!S.dailyPlan)S.dailyPlan={items:[],msg:"",date:""};if(!S.palace)S.palace={days:{},startDate:null,startWeight:null,goalWeight:null,rewards:{d30:"",d60:"",d90:""},visionBoard:[]};if(S.phoneFund===undefined)S.phoneFund=0;if(S.apiFund===undefined)S.apiFund=0;if(!S.season)S.season="spring";currentSeason=S.season;}catch(e){console.error(e);}initAttrs();}
 function saveState(){S.season=currentSeason;try{localStorage.setItem(LS_KEY,JSON.stringify(S));}catch(e){console.error(e);}}
 function getToday(){var now=new Date();if(now.getHours()<23||(now.getHours()===23&&now.getMinutes()===0&&now.getSeconds()===0)){return now.toISOString().slice(0,10);}else{var tom=new Date(now);tom.setDate(tom.getDate()+1);return tom.toISOString().slice(0,10);}}
 
@@ -616,7 +616,6 @@ function confetti(n){
 
 /* ═══════ RENDER ═══════ */
 function render(){
-  try{
   document.getElementById('cpVal').textContent=S.cp;
   document.getElementById('tpVal').textContent=S.totalEarned;
   const jp=Math.min(S.totalEarned/2000*100,100);
@@ -628,7 +627,6 @@ function render(){
   document.getElementById('deText').textContent=Math.min(deTotal,2000)+'/2000';
   renderTasks();renderAttrs();renderAchieve();renderShop();renderHistory();renderWishes();renderDailyPlan();
   if(document.getElementById('content-palace')&&!document.getElementById('content-palace').classList.contains('hidden'))renderPalace();
-  }catch(e){document.getElementById('content-tasks').innerHTML='<div style="color:red;padding:20px;font-size:14px;">渲染错误: '+e.message+'<br>'+e.stack+'</div>';}
 }
 
 function renderTasks(){
@@ -1160,9 +1158,7 @@ function spawnPetals(count){
 }
 
 /* ═══════ INIT ═══════ */
-try{
 loadState();
-// Apply saved season
 document.body.className=currentSeason;
 applySeasonInlineStyles(currentSeason);
 if(currentSeason==='winter'){
@@ -1176,7 +1172,6 @@ if(currentSeason==='winter'){
 }
 render();
 switchTab('tasks');
-}catch(e){document.body.innerHTML='<div style="color:red;padding:40px;font-size:16px;">初始化错误: '+e.message+'<br><pre>'+e.stack+'</pre></div>';}
 </script>
 </body>
 </html>
