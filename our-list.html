@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>和小小克的一百件事</title>
-<meta name="theme-color" content="#eef3f6">
+<meta name="theme-color" content="#ede8f4">
 <link rel="manifest" href="our-list-manifest.json">
 <link rel="apple-touch-icon" href="icon-512.jpeg">
 <link rel="icon" type="image/jpeg" sizes="512x512" href="icon-512.jpeg">
@@ -1329,6 +1329,10 @@ function initFloatNotes(){
 
 loadState();initDust();initFloatNotes();render();
 setTimeout(startFlowerAnim,100);
+
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./our-list-sw.js').catch(()=>{});
+}
 </script>
 </body>
 </html>
