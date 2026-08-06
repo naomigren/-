@@ -32,12 +32,7 @@ body{
 }
 .bg-layer{
   position:fixed;inset:0;z-index:0;
-  background:url('bg-floral.PNG') center/cover no-repeat fixed;
-  pointer-events:none;
-}
-.bg-layer::after{
-  content:'';position:absolute;inset:0;
-  background:rgba(237,232,244,.15);
+  background:url('bg-floral.PNG') center top/cover no-repeat;
   pointer-events:none;
 }
 
@@ -153,11 +148,11 @@ body{
 }
 
 .wish-card{
-  background:linear-gradient(135deg,rgba(255,255,255,.72),rgba(230,225,240,.5));
-  border:1px solid rgba(181,177,196,.3);border-radius:4px;
+  background:rgba(255,255,255,.55);
+  border:1px solid rgba(181,177,196,.25);border-radius:6px;
   padding:20px 22px;margin-bottom:12px;position:relative;overflow:hidden;
   transition:transform .3s ease;
-  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
 }
 .wish-card:active{transform:scale(.99)}
 .wish-card::before{
@@ -171,8 +166,8 @@ body{
   50%{background-position:-20% 0;opacity:.7}
 }
 .wish-card.done{
-  background:linear-gradient(135deg,rgba(255,255,255,.82),rgba(220,215,235,.5));
-  border-color:rgba(181,177,196,.45);
+  background:rgba(255,255,255,.65);
+  border-color:rgba(181,177,196,.4);
 }
 .wish-card.done::after{
   content:'';position:absolute;top:18px;right:18px;width:5px;height:5px;
