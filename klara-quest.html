@@ -1908,7 +1908,7 @@ function pyqCelebrate(post){
   // ripple waves
   for(var r=0;r<3;r++){
     var rip=document.createElement('div');
-    rip.style.cssText='position:fixed;left:'+cx+'px;top:'+cy+'px;width:80px;height:80px;border-radius:50%;background:'+cat.color+'30;pointer-events:none;z-index:3002;animation:pyqRipple 1.2s ease-out '+(r*0.25)+'s forwards;opacity:0;';
+    rip.style.cssText='position:fixed;left:'+cx+'px;top:'+cy+'px;width:80px;height:80px;border-radius:50%;background:'+cat.color+'30;pointer-events:none;z-index:3005;animation:pyqRipple 1.2s ease-out '+(r*0.25)+'s forwards;opacity:0;';
     ov.appendChild(rip);
   }
 
@@ -1920,7 +1920,7 @@ function pyqCelebrate(post){
     var size=12+Math.random()*18;
     var symbols=['✦','✧','★','❋','✿','♡','🌸'];
     star.textContent=symbols[Math.floor(Math.random()*symbols.length)];
-    star.style.cssText='position:fixed;left:'+sx+'vw;bottom:0;font-size:'+size+'px;color:'+cols[Math.floor(Math.random()*cols.length)]+';pointer-events:none;z-index:3002;animation:pyqStarFloat '+(1.5+Math.random())+'s ease-out '+delay+'s forwards;opacity:0;';
+    star.style.cssText='position:fixed;left:'+sx+'vw;bottom:0;font-size:'+size+'px;color:'+cols[Math.floor(Math.random()*cols.length)]+';pointer-events:none;z-index:3005;animation:pyqStarFloat '+(1.5+Math.random())+'s ease-out '+delay+'s forwards;opacity:0;';
     ov.appendChild(star);
   }
 
@@ -1931,7 +1931,7 @@ function pyqCelebrate(post){
     var ang=Math.random()*Math.PI*2;
     var dist=80+Math.random()*160;
     fl.textContent=flowers[Math.floor(Math.random()*flowers.length)];
-    fl.style.cssText='position:fixed;left:'+cx+'px;top:'+cy+'px;font-size:'+(14+Math.random()*14)+'px;pointer-events:none;z-index:3002;--bx:'+(Math.cos(ang)*dist)+'px;--by:'+(Math.sin(ang)*dist)+'px;--br:'+(Math.random()*360)+'deg;animation:pyqFlowerBurst 1.4s ease-out '+(0.1+Math.random()*0.6)+'s forwards;opacity:0;';
+    fl.style.cssText='position:fixed;left:'+cx+'px;top:'+cy+'px;font-size:'+(14+Math.random()*14)+'px;pointer-events:none;z-index:3005;--bx:'+(Math.cos(ang)*dist)+'px;--by:'+(Math.sin(ang)*dist)+'px;--br:'+(Math.random()*360)+'deg;animation:pyqFlowerBurst 1.4s ease-out '+(0.1+Math.random()*0.6)+'s forwards;opacity:0;';
     ov.appendChild(fl);
   }
 
@@ -1950,12 +1950,10 @@ function pyqCelebrate(post){
   banner.onclick=function(){pyqEndCelebrate();};
   ov.appendChild(banner);
 
-  // confetti
-  if(typeof spawnConfetti==='function'){
-    spawnConfetti(80,cols);
-    setTimeout(function(){spawnConfetti(60,cols);},500);
-    setTimeout(function(){spawnConfetti(50,cols);},1000);
-  }
+  // confetti — use high z-index version
+  pyqSpawnConfetti(80,cols);
+  setTimeout(function(){pyqSpawnConfetti(60,cols);},500);
+  setTimeout(function(){pyqSpawnConfetti(50,cols);},1000);
 
   // sparkle ring
   for(var sp=0;sp<12;sp++){
@@ -1963,15 +1961,26 @@ function pyqCelebrate(post){
     var spAng=(sp/12)*Math.PI*2;
     var spR=100;
     sparkle.textContent='✦';
-    sparkle.style.cssText='position:fixed;left:'+(cx+Math.cos(spAng)*spR)+'px;top:'+(cy+Math.sin(spAng)*spR)+'px;font-size:16px;color:'+cols[sp%cols.length]+';pointer-events:none;z-index:3002;animation:pyqSparkleRotate 1.5s ease-out '+(0.5+sp*0.1)+'s forwards;opacity:0;';
+    sparkle.style.cssText='position:fixed;left:'+(cx+Math.cos(spAng)*spR)+'px;top:'+(cy+Math.sin(spAng)*spR)+'px;font-size:16px;color:'+cols[sp%cols.length]+';pointer-events:none;z-index:3005;animation:pyqSparkleRotate 1.5s ease-out '+(0.5+sp*0.1)+'s forwards;opacity:0;';
     ov.appendChild(sparkle);
   }
 
   // heartbeat emoji
   var heart=document.createElement('div');
   heart.textContent='💗';
-  heart.style.cssText='position:fixed;left:'+(cx-15)+'px;top:'+(cy-160)+'px;font-size:30px;pointer-events:none;z-index:3002;animation:pyqHeartBeat 1.2s ease-in-out 1.2s both;';
+  heart.style.cssText='position:fixed;left:'+(cx-15)+'px;top:'+(cy-160)+'px;font-size:30px;pointer-events:none;z-index:3005;animation:pyqHeartBeat 1.2s ease-in-out 1.2s both;';
   ov.appendChild(heart);
+}
+
+function pyqSpawnConfetti(n,cols){
+  var ov=document.getElementById('pyqCelebOv');
+  for(var i=0;i<n;i++){
+    var p=document.createElement('div');
+    var sz=Math.random()*8+4;
+    p.style.cssText='position:fixed;top:-10px;z-index:3005;pointer-events:none;width:'+sz+'px;height:'+sz+'px;left:'+(Math.random()*100)+'vw;background:'+cols[Math.floor(Math.random()*cols.length)]+';border-radius:'+(Math.random()>0.5?'50%':'2px')+';animation:confettiFall '+(Math.random()*2+2)+'s linear '+(Math.random()*0.5)+'s forwards;';
+    ov.appendChild(p);
+    (function(p){setTimeout(function(){p.remove();},4500);})(p);
+  }
 }
 
 window.pyqReplay=function(i){
