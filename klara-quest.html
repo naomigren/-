@@ -452,7 +452,7 @@ function copyCode(){const c=document.getElementById("saveCode").value;navigator.
 function loadSave(){const d=decode(document.getElementById("loadCode").value);if(d&&typeof d.cp==="number"){S={...d,ct:d.ct||[],cs:d.cs||[],cpn:d.cpn||[],attrs:d.attrs?{...initAttrs(),...d.attrs}:initAttrs(),de:d.de||0,ach:d.ach||{},taskCounts:d.taskCounts||{},dailyTasks:d.dailyTasks||{},dailyPens:d.dailyPens||{},dailyPts:d.dailyPts||{},cards:d.cards||initCards(),dailyPlan:d.dailyPlan||{date:"",items:[]},wishes:d.wishes||{}};saveState();render();document.getElementById("loadPanel").classList.add("hidden");flash("存档读取成功！","big");}else{document.getElementById("loadMsg").innerHTML='<span style="color:#c07070">❌ 存档码无效</span>';}}
 /* ═══════ TABS & RENDER ═══════ */
 let currentTab="tasks";
-function switchTab(t){currentTab=t;["tasks","attrs","achieve","palace","shop","history","wishes","savings"].forEach(k=>{var c=document.getElementById("content-"+k);var b=document.getElementById("tab-"+k);if(c)c.classList.toggle("hidden",k!==t);if(b)b.className="tab-btn "+(k===t?"tab-active":"tab-inactive");});if(t==="savings"){if(typeof svRender==="function")svRender();renderDaily();return;}render();}
+function switchTab(t){currentTab=t;["tasks","attrs","achieve","palace","shop","history","wishes","savings","pyq"].forEach(k=>{var c=document.getElementById("content-"+k);var b=document.getElementById("tab-"+k);if(c)c.classList.toggle("hidden",k!==t);if(b)b.className="tab-btn "+(k===t?"tab-active":"tab-inactive");});if(t==="savings"){if(typeof svRender==="function")svRender();renderDaily();return;}if(t==="pyq"){if(typeof pyqRender==="function")pyqRender();return;}render();}
 function render(){
   document.getElementById("cpVal").textContent=S.cp;document.getElementById("tpVal").textContent=S.tp;
   document.getElementById("japanText").textContent=S.cp+"/2000";document.getElementById("japanBar").style.width=Math.min(100,S.cp/2000*100)+"%";
@@ -1378,7 +1378,7 @@ function svInjectTab(){
     host.appendChild(div);
   }
 }
-var SV_TABS=["tasks","attrs","achieve","palace","shop","history","wishes","savings"];
+var SV_TABS=["tasks","attrs","achieve","palace","shop","history","wishes","savings","pyq"];
 function svSwitchTo(){
   SV_TABS.forEach(function(k){
     var c=document.getElementById("content-"+k);
@@ -1389,7 +1389,7 @@ function svSwitchTo(){
   svRender();
 }
 function svHookOriginalTabs(){
-  ["tasks","attrs","achieve","palace","shop","history","wishes"].forEach(function(k){
+  ["tasks","attrs","achieve","palace","shop","history","wishes","pyq"].forEach(function(k){
     var t=document.getElementById("tab-"+k);
     if(!t)return;
     t.addEventListener("click",function(){
@@ -1599,4 +1599,399 @@ else{document.addEventListener("DOMContentLoaded",function(){setTimeout(svBoot,4
 })();
 </script>
 <!-- ════════════ 攒钱罐模块结束 ════════════ -->
+
+<!-- ════════════ 朋友圈模块 ════════════ -->
+<div id="pyqCelebOv" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:3000;pointer-events:none;overflow:hidden;"></div>
+<div id="pyqComposeOv" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:2500;display:none;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);">
+  <div id="pyqComposePanel" style="position:absolute;bottom:0;left:0;right:0;max-height:90vh;overflow-y:auto;background:linear-gradient(180deg,#fdf2f0,#f5e6e0);border-radius:20px 20px 0 0;padding:24px 20px 40px;"></div>
+</div>
+<style>
+.pyq-post{background:rgba(255,255,255,0.55);border-radius:16px;padding:18px;margin-bottom:14px;border:1px solid rgba(219,147,158,0.15);position:relative;overflow:hidden;transition:all 0.3s;}
+.pyq-post.achieved{border-color:rgba(196,134,142,0.35);background:linear-gradient(135deg,rgba(255,255,255,0.6),rgba(219,147,158,0.08));}
+.pyq-post .pyq-tag{display:inline-block;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600;margin-bottom:10px;}
+.pyq-post .pyq-tag.de{background:rgba(180,60,60,0.08);color:#b04040;border:1px solid rgba(180,60,60,0.15);}
+.pyq-post .pyq-tag.fit{background:rgba(60,140,100,0.08);color:#3a8a5a;border:1px solid rgba(60,140,100,0.15);}
+.pyq-post .pyq-tag.life{background:rgba(160,120,80,0.08);color:#a08050;border:1px solid rgba(160,120,80,0.15);}
+.pyq-post .pyq-text{font-size:14px;line-height:1.7;color:#5a4a4a;margin-bottom:12px;white-space:pre-wrap;word-break:break-word;}
+.pyq-grid{display:grid;gap:4px;border-radius:10px;overflow:hidden;margin-bottom:12px;}
+.pyq-grid.g1{grid-template-columns:1fr;max-width:260px;}
+.pyq-grid.g2{grid-template-columns:1fr 1fr;}
+.pyq-grid.g3{grid-template-columns:1fr 1fr 1fr;}
+.pyq-grid.g4{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;}
+.pyq-grid.g5,.pyq-grid.g6{grid-template-columns:1fr 1fr 1fr;}
+.pyq-grid.g7,.pyq-grid.g8,.pyq-grid.g9{grid-template-columns:1fr 1fr 1fr;}
+.pyq-grid img{width:100%;aspect-ratio:1;object-fit:cover;display:block;background:#f0e0da;}
+.pyq-meta{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:#b09898;}
+.pyq-achieve-btn{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s;}
+.pyq-achieve-btn.todo{background:linear-gradient(135deg,rgba(219,147,158,0.15),rgba(199,163,163,0.1));color:#c4868e;border:1px solid rgba(219,147,158,0.25);}
+.pyq-achieve-btn.todo:active{transform:scale(0.95);}
+.pyq-achieve-btn.done{background:rgba(100,160,120,0.1);color:#5a9a6a;border:1px solid rgba(100,160,120,0.2);pointer-events:none;}
+.pyq-achieved-badge{position:absolute;top:12px;right:12px;font-size:20px;opacity:0.6;}
+.pyq-del-btn{position:absolute;top:12px;right:12px;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,0.04);color:#c0a0a0;font-size:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0.5;transition:opacity 0.2s;}
+.pyq-del-btn:hover,.pyq-del-btn:active{opacity:1;background:rgba(200,100,100,0.1);color:#c07070;}
+.pyq-empty{text-align:center;padding:60px 20px;color:#c0a8a8;}
+
+/* compose panel */
+.pyq-compose-handle{width:40px;height:4px;border-radius:2px;background:rgba(219,147,158,0.3);margin:0 auto 16px;}
+.pyq-compose-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;color:#6a5555;text-align:center;margin-bottom:16px;}
+.pyq-compose-label{font-size:12px;font-weight:600;color:#8a7070;margin-bottom:6px;margin-top:14px;}
+.pyq-compose-textarea{width:100%;min-height:100px;padding:12px;border-radius:12px;font-size:14px;line-height:1.6;background:rgba(255,255,255,0.7);color:#5a4a4a;border:1px solid rgba(219,147,158,0.2);outline:none;resize:vertical;font-family:inherit;}
+.pyq-compose-textarea:focus{border-color:rgba(219,147,158,0.4);}
+.pyq-photo-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+.pyq-photo-thumb{width:72px;height:72px;border-radius:10px;object-fit:cover;position:relative;overflow:hidden;border:1px solid rgba(219,147,158,0.2);}
+.pyq-photo-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+.pyq-photo-rm{position:absolute;top:2px;right:2px;width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,0.5);color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.pyq-photo-add{width:72px;height:72px;border-radius:10px;border:1.5px dashed rgba(219,147,158,0.3);display:flex;align-items:center;justify-content:center;font-size:24px;color:#c4a0a0;cursor:pointer;background:rgba(255,255,255,0.4);transition:all 0.2s;}
+.pyq-photo-add:active{background:rgba(219,147,158,0.1);}
+.pyq-cat-select{display:flex;gap:8px;margin-top:6px;}
+.pyq-cat-opt{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid rgba(219,147,158,0.2);background:rgba(255,255,255,0.5);color:#8a7070;transition:all 0.2s;}
+.pyq-cat-opt.active{background:linear-gradient(135deg,rgba(219,147,158,0.2),rgba(199,163,163,0.15));color:#c4868e;border-color:rgba(219,147,158,0.35);font-weight:600;}
+.pyq-submit-btn{width:100%;padding:14px;border-radius:14px;font-size:15px;font-weight:600;color:#fff;background:linear-gradient(135deg,#c4868e,#d4a0a0);border:none;cursor:pointer;margin-top:20px;transition:all 0.2s;}
+.pyq-submit-btn:active{transform:scale(0.97);opacity:0.9;}
+
+/* celebration */
+@keyframes pyqRipple{0%{transform:translate(-50%,-50%) scale(0);opacity:0.6;}100%{transform:translate(-50%,-50%) scale(8);opacity:0;}}
+@keyframes pyqStarFloat{0%{transform:translateY(0) scale(0) rotate(0deg);opacity:0;}20%{opacity:1;transform:translateY(-30px) scale(1) rotate(72deg);}100%{transform:translateY(-180px) scale(0.3) rotate(360deg);opacity:0;}}
+@keyframes pyqBannerDrop{0%{transform:translateY(-60px) scale(0.7);opacity:0;}60%{transform:translateY(8px) scale(1.02);}100%{transform:translateY(0) scale(1);opacity:1;}}
+@keyframes pyqShimmer{0%{background-position:-200% center;}100%{background-position:200% center;}}
+@keyframes pyqHeartBeat{0%,100%{transform:scale(1);}15%{transform:scale(1.3);}30%{transform:scale(1);}45%{transform:scale(1.2);}60%{transform:scale(1);}}
+@keyframes pyqSparkleRotate{0%{transform:rotate(0deg) scale(0);opacity:0;}30%{transform:rotate(180deg) scale(1.2);opacity:1;}70%{transform:rotate(300deg) scale(0.8);opacity:0.6;}100%{transform:rotate(360deg) scale(0);opacity:0;}}
+@keyframes pyqGlowPulse{0%,100%{box-shadow:0 0 30px var(--glow-color,rgba(219,147,158,0.3));}50%{box-shadow:0 0 80px var(--glow-color,rgba(219,147,158,0.6));}}
+@keyframes pyqTextReveal{0%{opacity:0;letter-spacing:12px;filter:blur(4px);}100%{opacity:1;letter-spacing:2px;filter:blur(0);}}
+@keyframes pyqCheckDraw{0%{stroke-dashoffset:60;}100%{stroke-dashoffset:0;}}
+@keyframes pyqFlowerBurst{0%{transform:translate(-50%,-50%) scale(0) rotate(0deg);opacity:0;}40%{opacity:1;}100%{transform:translate(var(--bx),var(--by)) scale(1) rotate(var(--br));opacity:0;}}
+</style>
+<script>
+(function(){
+'use strict';
+var PYQ_CATS=[
+  {id:'de',name:'德语进度',emoji:'🇩🇪',color:'#b04040'},
+  {id:'fit',name:'减肥打卡',emoji:'💪',color:'#3a8a5a'},
+  {id:'life',name:'生活记录',emoji:'🌿',color:'#a08050'}
+];
+var _pyqPhotos=[];
+var _pyqCat='de';
+
+function pyqInit(){
+  if(!S.pyqPosts) S.pyqPosts=[];
+}
+
+function pyqInjectTab(){
+  var bar=document.querySelector('[id="tab-tasks"]').parentElement;
+  var btn=document.createElement("button");
+  btn.id="tab-pyq";
+  btn.className="tab-btn tab-inactive";
+  btn.style.cssText="flex:0 0 auto;min-width:52px;";
+  btn.textContent="📸 圈子";
+  btn.onclick=pyqSwitchTo;
+  bar.appendChild(btn);
+  var host=document.querySelector('[id^="content-tasks"]').parentElement;
+  if(!document.getElementById("content-pyq")){
+    var div=document.createElement("div");
+    div.id="content-pyq";
+    div.className="hidden";
+    host.appendChild(div);
+  }
+}
+
+var PYQ_ALL_TABS=["tasks","attrs","achieve","palace","shop","history","wishes","savings","pyq"];
+function pyqSwitchTo(){
+  PYQ_ALL_TABS.forEach(function(k){
+    var c=document.getElementById("content-"+k);
+    var t=document.getElementById("tab-"+k);
+    if(c)c.classList.toggle("hidden",k!=="pyq");
+    if(t)t.className="tab-btn "+(k==="pyq"?"tab-active":"tab-inactive");
+  });
+  pyqRender();
+}
+function pyqHookTabs(){
+  ["tasks","attrs","achieve","palace","shop","history","wishes","savings"].forEach(function(k){
+    var t=document.getElementById("tab-"+k);
+    if(!t)return;
+    t.addEventListener("click",function(){
+      var sc=document.getElementById("content-pyq");
+      var st=document.getElementById("tab-pyq");
+      if(sc)sc.classList.add("hidden");
+      if(st)st.className="tab-btn tab-inactive";
+    });
+  });
+}
+
+function pyqRender(){
+  pyqInit();
+  var host=document.getElementById("content-pyq");
+  if(!host)return;
+  var posts=S.pyqPosts||[];
+  var doneCount=posts.filter(function(p){return p.achieved;}).length;
+  var h='<div style="text-align:center;margin-bottom:20px;">'+
+    '<div style="font-family:Caveat,cursive;font-size:14px;color:#b09898;letter-spacing:2px;margin-bottom:4px;">✧ Moments ✧</div>'+
+    '<div style="font-family:Playfair Display,serif;font-size:22px;font-weight:600;color:#6a5555;margin-bottom:8px;">克拉拉的朋友圈</div>'+
+    '<div style="font-family:Outfit;font-size:13px;color:#b09898;">写下目标，实现后打勾庆祝 🎉</div>'+
+    (posts.length>0?'<div style="font-size:12px;color:#c4a0a0;margin-top:6px;">'+doneCount+' / '+posts.length+' 已实现</div>':'')+
+    '</div>';
+  h+='<button onclick="pyqOpenCompose()" style="width:100%;padding:14px;border-radius:14px;font-size:14px;font-weight:600;color:#c4868e;background:linear-gradient(135deg,rgba(219,147,158,0.1),rgba(199,163,163,0.06));border:1.5px dashed rgba(219,147,158,0.25);cursor:pointer;margin-bottom:18px;transition:all 0.2s;">＋ 发一条朋友圈</button>';
+  if(posts.length===0){
+    h+='<div class="pyq-empty"><div style="font-size:36px;margin-bottom:12px;">📸</div><div style="font-size:14px;">还没有动态</div><div style="font-size:12px;margin-top:4px;">写下你的德语/减肥目标吧</div></div>';
+  }else{
+    posts.forEach(function(p,i){
+      var cat=PYQ_CATS.find(function(c){return c.id===p.cat;})||PYQ_CATS[0];
+      h+='<div class="pyq-post'+(p.achieved?' achieved':'')+'">';
+      if(p.achieved){
+        h+='<div class="pyq-achieved-badge">✦</div>';
+      }else{
+        h+='<div class="pyq-del-btn" onclick="event.stopPropagation();pyqDelete('+i+')">✕</div>';
+      }
+      h+='<div class="pyq-tag '+cat.id+'">'+cat.emoji+' '+cat.name+'</div>';
+      h+='<div class="pyq-text">'+pyqEsc(p.text)+'</div>';
+      if(p.photos&&p.photos.length>0){
+        var gc=Math.min(p.photos.length,9);
+        var gClass=gc<=1?'g1':gc<=2?'g2':gc<=4&&gc!==3?'g4':'g3';
+        if(gc>=5)gClass='g3';
+        h+='<div class="pyq-grid '+gClass+'">';
+        p.photos.forEach(function(src){
+          h+='<img src="'+src+'" loading="lazy" onclick="pyqPreviewImg(this.src)">';
+        });
+        h+='</div>';
+      }
+      h+='<div class="pyq-meta"><span>'+pyqDateFmt(p.date)+(p.achievedDate?' · ✦ '+pyqDateFmt(p.achievedDate):'')+'</span>';
+      if(!p.achieved){
+        h+='<button class="pyq-achieve-btn todo" onclick="event.stopPropagation();pyqAchieve('+i+')">☐ 标记实现</button>';
+      }else{
+        h+='<button class="pyq-achieve-btn done">✓ 已实现</button>';
+      }
+      h+='</div></div>';
+    });
+  }
+  host.innerHTML=h;
+}
+
+function pyqEsc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function pyqDateFmt(iso){if(!iso)return'';var d=new Date(iso);return(d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
+
+/* compose */
+window.pyqOpenCompose=function(){
+  _pyqPhotos=[];
+  _pyqCat='de';
+  var ov=document.getElementById('pyqComposeOv');
+  var panel=document.getElementById('pyqComposePanel');
+  var h='<div class="pyq-compose-handle"></div>';
+  h+='<div class="pyq-compose-title">发朋友圈</div>';
+  h+='<div class="pyq-compose-label">分类</div>';
+  h+='<div class="pyq-cat-select" id="pyqCatSelect">';
+  PYQ_CATS.forEach(function(c){
+    h+='<div class="pyq-cat-opt'+(c.id===_pyqCat?' active':'')+'" data-cat="'+c.id+'" onclick="pyqSelectCat(\''+c.id+'\')">'+c.emoji+' '+c.name+'</div>';
+  });
+  h+='</div>';
+  h+='<div class="pyq-compose-label">文案</div>';
+  h+='<textarea class="pyq-compose-textarea" id="pyqComposeText" placeholder="写下你的目标或打卡内容..."></textarea>';
+  h+='<div class="pyq-compose-label">照片（最多9张）</div>';
+  h+='<div class="pyq-photo-grid" id="pyqPhotoGrid"><div class="pyq-photo-add" onclick="document.getElementById(\'pyqPhotoInput\').click()">＋</div></div>';
+  h+='<input type="file" id="pyqPhotoInput" accept="image/*" multiple style="display:none" onchange="pyqAddPhotos(this)">';
+  h+='<button class="pyq-submit-btn" onclick="pyqSubmit()">发布</button>';
+  h+='<button style="width:100%;padding:12px;margin-top:8px;border:none;background:none;color:#b09898;font-size:13px;cursor:pointer;" onclick="pyqCloseCompose()">取消</button>';
+  panel.innerHTML=h;
+  ov.style.display='block';
+  setTimeout(function(){var t=document.getElementById('pyqComposeText');if(t)t.focus();},200);
+};
+window.pyqCloseCompose=function(){
+  document.getElementById('pyqComposeOv').style.display='none';
+};
+window.pyqSelectCat=function(id){
+  _pyqCat=id;
+  var btns=document.querySelectorAll('#pyqCatSelect .pyq-cat-opt');
+  btns.forEach(function(b){b.className='pyq-cat-opt'+(b.dataset.cat===id?' active':'');});
+};
+window.pyqAddPhotos=function(input){
+  var files=Array.from(input.files);
+  var remain=9-_pyqPhotos.length;
+  files=files.slice(0,remain);
+  var processed=0;
+  files.forEach(function(f){
+    var reader=new FileReader();
+    reader.onload=function(e){
+      var img=new Image();
+      img.onload=function(){
+        var cv=document.createElement('canvas');
+        var w=img.width,h=img.height;
+        var max=600;
+        if(w>max){h=h*max/w;w=max;}
+        if(h>max){w=w*max/h;h=max;}
+        cv.width=w;cv.height=h;
+        cv.getContext('2d').drawImage(img,0,0,w,h);
+        _pyqPhotos.push(cv.toDataURL('image/jpeg',0.7));
+        processed++;
+        if(processed>=files.length)pyqRenderPhotos();
+      };
+      img.src=e.target.result;
+    };
+    reader.readAsDataURL(f);
+  });
+  input.value='';
+};
+function pyqRenderPhotos(){
+  var grid=document.getElementById('pyqPhotoGrid');
+  if(!grid)return;
+  var h='';
+  _pyqPhotos.forEach(function(src,i){
+    h+='<div class="pyq-photo-thumb"><img src="'+src+'"><div class="pyq-photo-rm" onclick="pyqRemovePhoto('+i+')">✕</div></div>';
+  });
+  if(_pyqPhotos.length<9){
+    h+='<div class="pyq-photo-add" onclick="document.getElementById(\'pyqPhotoInput\').click()">＋</div>';
+  }
+  grid.innerHTML=h;
+}
+window.pyqRemovePhoto=function(i){
+  _pyqPhotos.splice(i,1);
+  pyqRenderPhotos();
+};
+window.pyqSubmit=function(){
+  var text=(document.getElementById('pyqComposeText').value||'').trim();
+  if(!text){if(typeof flash==='function')flash('写点什么再发吧','fail');return;}
+  pyqInit();
+  S.pyqPosts.unshift({
+    id:'pyq_'+Date.now(),
+    cat:_pyqCat,
+    text:text,
+    photos:_pyqPhotos.slice(),
+    date:new Date().toISOString(),
+    achieved:false,
+    achievedDate:null
+  });
+  if(typeof saveState==='function')saveState();
+  pyqCloseCompose();
+  pyqRender();
+  if(typeof flash==='function')flash('📸 朋友圈已发布！','earn');
+};
+
+/* delete */
+window.pyqDelete=function(i){
+  if(!confirm('删除这条动态？'))return;
+  pyqInit();
+  S.pyqPosts.splice(i,1);
+  if(typeof saveState==='function')saveState();
+  pyqRender();
+  if(typeof flash==='function')flash('已删除','penalty');
+};
+
+/* image preview */
+window.pyqPreviewImg=function(src){
+  var ov=document.createElement('div');
+  ov.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;z-index:4000;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;cursor:pointer;';
+  ov.onclick=function(){ov.remove();};
+  var img=document.createElement('img');
+  img.src=src;
+  img.style.cssText='max-width:92vw;max-height:90vh;border-radius:8px;object-fit:contain;';
+  ov.appendChild(img);
+  document.body.appendChild(ov);
+};
+
+/* ACHIEVE with celebration */
+window.pyqAchieve=function(i){
+  pyqInit();
+  var post=S.pyqPosts[i];
+  if(!post||post.achieved)return;
+  post.achieved=true;
+  post.achievedDate=new Date().toISOString();
+  S.h.unshift({t:'a',n:'📸 朋友圈目标达成：'+post.text.slice(0,20)+(post.text.length>20?'...':''),p:0,d:new Date().toISOString()});
+  if(typeof saveState==='function')saveState();
+  pyqRender();
+  setTimeout(function(){pyqCelebrate(post);},200);
+};
+
+function pyqCelebrate(post){
+  var cat=PYQ_CATS.find(function(c){return c.id===post.cat;})||PYQ_CATS[0];
+  var ov=document.getElementById('pyqCelebOv');
+  ov.style.pointerEvents='auto';
+  var cx=window.innerWidth/2;
+  var cy=window.innerHeight/2;
+  var cols=[cat.color,'#c4868e','#d4a0a0','#ffd700','#fff','#e8b4b8','#c9b8a8'];
+
+  // ripple waves
+  for(var r=0;r<3;r++){
+    var rip=document.createElement('div');
+    rip.style.cssText='position:fixed;left:'+cx+'px;top:'+cy+'px;width:80px;height:80px;border-radius:50%;background:'+cat.color+'30;pointer-events:none;animation:pyqRipple 1.2s ease-out '+(r*0.25)+'s forwards;opacity:0;';
+    ov.appendChild(rip);
+  }
+
+  // star particles
+  for(var s=0;s<20;s++){
+    var star=document.createElement('div');
+    var sx=10+Math.random()*80;
+    var delay=Math.random()*1.5;
+    var size=12+Math.random()*18;
+    var symbols=['✦','✧','★','❋','✿','♡','🌸'];
+    star.textContent=symbols[Math.floor(Math.random()*symbols.length)];
+    star.style.cssText='position:fixed;left:'+sx+'vw;bottom:0;font-size:'+size+'px;color:'+cols[Math.floor(Math.random()*cols.length)]+';pointer-events:none;animation:pyqStarFloat '+(1.5+Math.random())+'s ease-out '+delay+'s forwards;opacity:0;';
+    ov.appendChild(star);
+  }
+
+  // flower burst from center
+  var flowers=['🌸','🌺','💮','✿','❀','🏵'];
+  for(var f=0;f<16;f++){
+    var fl=document.createElement('div');
+    var ang=Math.random()*Math.PI*2;
+    var dist=80+Math.random()*160;
+    fl.textContent=flowers[Math.floor(Math.random()*flowers.length)];
+    fl.style.cssText='position:fixed;left:'+cx+'px;top:'+cy+'px;font-size:'+(14+Math.random()*14)+'px;pointer-events:none;--bx:'+(Math.cos(ang)*dist)+'px;--by:'+(Math.sin(ang)*dist)+'px;--br:'+(Math.random()*360)+'deg;animation:pyqFlowerBurst 1.4s ease-out '+(0.1+Math.random()*0.6)+'s forwards;opacity:0;';
+    ov.appendChild(fl);
+  }
+
+  // central banner card
+  var banner=document.createElement('div');
+  banner.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:80vw;max-width:320px;padding:32px 24px;border-radius:20px;text-align:center;z-index:3001;cursor:pointer;'+
+    'background:linear-gradient(145deg,#fdf2f0,#f5e6e0);border:2px solid '+cat.color+'50;'+
+    '--glow-color:'+cat.color+'60;animation:pyqBannerDrop 0.8s ease-out 0.3s both,pyqGlowPulse 2s ease-in-out 1.1s infinite;';
+  var checkSvg='<svg width="56" height="56" viewBox="0 0 56 56" style="margin-bottom:12px;"><circle cx="28" cy="28" r="26" fill="none" stroke="'+cat.color+'" stroke-width="2.5" opacity="0.3"/><path d="M16 28 L24 36 L40 20" fill="none" stroke="'+cat.color+'" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="60" style="animation:pyqCheckDraw 0.8s ease-out 1s both;"/></svg>';
+  var shimmerBg='background:linear-gradient(90deg,transparent 30%,'+cat.color+'15 50%,transparent 70%);background-size:200% 100%;animation:pyqShimmer 2s ease-in-out 1.5s infinite;';
+  banner.innerHTML=checkSvg+
+    '<div style="font-family:Playfair Display,serif;font-size:20px;font-weight:600;color:#6a5555;margin-bottom:8px;animation:pyqTextReveal 1s ease-out 0.8s both;">目标达成！</div>'+
+    '<div style="font-size:13px;color:#8a7070;line-height:1.6;margin-bottom:16px;max-height:60px;overflow:hidden;">'+pyqEsc(post.text.slice(0,60))+(post.text.length>60?'...':'')+'</div>'+
+    '<div style="display:inline-block;padding:4px 16px;border-radius:20px;font-size:12px;font-weight:600;'+shimmerBg+'color:'+cat.color+';border:1px solid '+cat.color+'30;">'+cat.emoji+' '+cat.name+'</div>'+
+    '<div style="margin-top:16px;font-size:11px;color:#c0a8a8;">点击任意位置关闭</div>';
+  banner.onclick=function(){pyqEndCelebrate();};
+  ov.appendChild(banner);
+
+  // confetti
+  if(typeof spawnConfetti==='function'){
+    spawnConfetti(80,cols);
+    setTimeout(function(){spawnConfetti(60,cols);},500);
+    setTimeout(function(){spawnConfetti(50,cols);},1000);
+  }
+
+  // sparkle ring
+  for(var sp=0;sp<12;sp++){
+    var sparkle=document.createElement('div');
+    var spAng=(sp/12)*Math.PI*2;
+    var spR=100;
+    sparkle.textContent='✦';
+    sparkle.style.cssText='position:fixed;left:'+(cx+Math.cos(spAng)*spR)+'px;top:'+(cy+Math.sin(spAng)*spR)+'px;font-size:16px;color:'+cols[sp%cols.length]+';pointer-events:none;animation:pyqSparkleRotate 1.5s ease-out '+(0.5+sp*0.1)+'s forwards;opacity:0;';
+    ov.appendChild(sparkle);
+  }
+
+  // heartbeat emoji
+  var heart=document.createElement('div');
+  heart.textContent='💗';
+  heart.style.cssText='position:fixed;left:'+(cx-15)+'px;top:'+(cy-160)+'px;font-size:30px;pointer-events:none;animation:pyqHeartBeat 1.2s ease-in-out 1.2s both;';
+  ov.appendChild(heart);
+}
+
+function pyqEndCelebrate(){
+  var ov=document.getElementById('pyqCelebOv');
+  ov.innerHTML='';
+  ov.style.pointerEvents='none';
+}
+window.pyqEndCelebrate=pyqEndCelebrate;
+
+function pyqBoot(){
+  if(typeof S==='undefined'){setTimeout(pyqBoot,300);return;}
+  pyqInit();
+  pyqInjectTab();
+  pyqHookTabs();
+  if(typeof saveState==='function')saveState();
+}
+if(document.readyState==='complete'||document.readyState==='interactive'){setTimeout(pyqBoot,500);}
+else{document.addEventListener('DOMContentLoaded',function(){setTimeout(pyqBoot,500);});}
+})();
+</script>
+<!-- ════════════ 朋友圈模块结束 ════════════ -->
 </body></html>
