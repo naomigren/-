@@ -2009,4 +2009,261 @@ else{document.addEventListener('DOMContentLoaded',function(){setTimeout(pyqBoot,
 })();
 </script>
 <!-- ════════════ 朋友圈模块结束 ════════════ -->
+
+<!-- ════════════ 30天早睡早起模块 ════════════ -->
+<script>
+/* ═══════ 30-DAY EARLY SLEEP CHALLENGE TAB ═══════ */
+(function(){
+var SL_KEY="klara-sleep30";
+function slLoad(){try{return JSON.parse(localStorage.getItem(SL_KEY))||{days:{},start:""};}catch(e){return {days:{},start:""};}}
+function slSave(d){localStorage.setItem(SL_KEY,JSON.stringify(d));}
+function slToday(){return new Date().toISOString().slice(0,10);}
+
+function slInjectTab(){
+  var anchor=document.getElementById("tab-tasks");
+  if(!anchor)return;
+  var bar=anchor.parentElement;
+  if(document.getElementById("tab-sleep30"))return;
+  var btn=document.createElement("button");
+  btn.className="tab-btn tab-inactive";
+  btn.id="tab-sleep30";
+  btn.style.cssText="flex:0 0 auto;min-width:52px;";
+  btn.textContent="🌙 早睡";
+  btn.onclick=slSwitchTo;
+  bar.appendChild(btn);
+  var host=document.querySelector('[id^="content-tasks"]').parentElement;
+  if(!document.getElementById("content-sleep30")){
+    var div=document.createElement("div");
+    div.id="content-sleep30";
+    div.className="hidden";
+    host.appendChild(div);
+  }
+}
+
+var SL_ALL_TABS=["tasks","attrs","achieve","palace","shop","history","wishes","savings","pyq","sleep30"];
+function slSwitchTo(){
+  SL_ALL_TABS.forEach(function(k){
+    var c=document.getElementById("content-"+k);
+    var t=document.getElementById("tab-"+k);
+    if(c)c.classList.toggle("hidden",k!=="sleep30");
+    if(t)t.className="tab-btn "+(k==="sleep30"?"tab-active":"tab-inactive");
+  });
+  slRender();
+  setTimeout(slPlayEntryEffect,100);
+}
+
+function slHookTabs(){
+  ["tasks","attrs","achieve","palace","shop","history","wishes","savings","pyq"].forEach(function(k){
+    var t=document.getElementById("tab-"+k);
+    if(!t)return;
+    t.addEventListener("click",function(){
+      var sc=document.getElementById("content-sleep30");
+      var st=document.getElementById("tab-sleep30");
+      if(sc)sc.classList.add("hidden");
+      if(st)st.className="tab-btn tab-inactive";
+    });
+  });
+}
+
+function slPlayEntryEffect(){
+  var host=document.getElementById("content-sleep30");
+  if(!host)return;
+  var canvas=document.getElementById("sl-stars-canvas");
+  if(!canvas)return;
+  var ctx=canvas.getContext("2d");
+  canvas.width=canvas.offsetWidth*2;
+  canvas.height=canvas.offsetHeight*2;
+  ctx.scale(2,2);
+  var stars=[];
+  for(var i=0;i<50;i++){
+    stars.push({
+      x:Math.random()*canvas.offsetWidth,
+      y:Math.random()*canvas.offsetHeight,
+      r:Math.random()*2+0.5,
+      a:Math.random(),
+      da:(Math.random()-0.5)*0.03,
+      dy:Math.random()*0.3+0.1
+    });
+  }
+  var frame=0,maxFrame=180;
+  function draw(){
+    if(frame>=maxFrame)return;
+    ctx.clearRect(0,0,canvas.offsetWidth,canvas.offsetHeight);
+    stars.forEach(function(s){
+      s.a+=s.da;
+      if(s.a>1)s.da=-Math.abs(s.da);
+      if(s.a<0)s.da=Math.abs(s.da);
+      s.y-=s.dy;
+      if(s.y<-5)s.y=canvas.offsetHeight+5;
+      ctx.beginPath();
+      ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+      ctx.fillStyle="rgba(255,248,220,"+Math.max(0,s.a*(1-frame/maxFrame))+")";
+      ctx.fill();
+    });
+    // moon glow
+    var mx=canvas.offsetWidth*0.8,my=30;
+    var grd=ctx.createRadialGradient(mx,my,5,mx,my,60);
+    grd.addColorStop(0,"rgba(255,248,220,"+(0.4*(1-frame/maxFrame))+")");
+    grd.addColorStop(1,"rgba(255,248,220,0)");
+    ctx.fillStyle=grd;
+    ctx.fillRect(mx-60,my-60,120,120);
+    frame++;
+    requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+function slRender(){
+  var host=document.getElementById("content-sleep30");
+  if(!host)return;
+  var d=slLoad();
+  var today=slToday();
+  var checkedCount=Object.keys(d.days).length;
+  var todayDone=!!d.days[today];
+  var streak=0;
+  var dt=new Date();
+  for(var i=0;i<30;i++){
+    var ds=dt.toISOString().slice(0,10);
+    if(d.days[ds])streak++;
+    else break;
+    dt.setDate(dt.getDate()-1);
+  }
+
+  var h='';
+  h+='<div style="position:relative;overflow:hidden;border-radius:20px;padding:28px 20px 20px;margin-bottom:20px;background:linear-gradient(160deg,#1a1a2e 0%,#16213e 40%,#0f3460 100%);min-height:200px;">';
+  h+='<canvas id="sl-stars-canvas" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;"></canvas>';
+  h+='<div style="position:relative;z-index:2;text-align:center;">';
+  h+='<div style="font-size:36px;margin-bottom:8px;">🌙</div>';
+  h+='<div style="font-family:\'Playfair Display\',serif;font-size:20px;font-weight:500;color:rgba(255,248,220,0.9);letter-spacing:2px;margin-bottom:4px;">30天早睡早起</div>';
+  h+='<div style="font-family:\'Outfit\';font-size:13px;color:rgba(199,186,172,0.6);letter-spacing:1px;">EARLY TO BED · EARLY TO RISE</div>';
+  h+='<div style="margin-top:16px;font-family:\'Outfit\';font-size:42px;font-weight:800;color:rgba(255,248,220,0.85);">'+checkedCount+'<span style="font-size:16px;font-weight:400;color:rgba(199,186,172,0.5);"> / 30</span></div>';
+  if(streak>0)h+='<div style="margin-top:6px;font-size:13px;color:rgba(255,200,150,0.7);">🔥 连续 '+streak+' 天</div>';
+  h+='</div></div>';
+
+  // calendar grid
+  h+='<div style="padding:0 4px;">';
+  h+='<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:20px;">';
+  for(var i=1;i<=30;i++){
+    var dayKey="d"+i;
+    var isDone=!!d.days[dayKey]||false;
+    // check by actual date too
+    var allKeys=Object.keys(d.days);
+    var sortedDays=allKeys.sort();
+    isDone=sortedDays.length>=i;
+
+    // rebuild: use sequential day approach
+  }
+  h+='</div></div>';
+
+  // rebuild calendar properly
+  h='';
+  h+='<div style="position:relative;overflow:hidden;border-radius:20px;padding:28px 20px 20px;margin-bottom:20px;background:linear-gradient(160deg,#1a1a2e 0%,#16213e 40%,#0f3460 100%);min-height:200px;">';
+  h+='<canvas id="sl-stars-canvas" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;"></canvas>';
+  h+='<div style="position:relative;z-index:2;text-align:center;">';
+  h+='<div style="font-size:36px;margin-bottom:8px;">🌙</div>';
+  h+='<div style="font-family:\'Playfair Display\',serif;font-size:20px;font-weight:500;color:rgba(255,248,220,0.9);letter-spacing:2px;margin-bottom:4px;">30天早睡早起</div>';
+  h+='<div style="font-family:\'Outfit\';font-size:13px;color:rgba(199,186,172,0.6);letter-spacing:1px;">EARLY TO BED · EARLY TO RISE</div>';
+  h+='<div style="margin-top:16px;font-family:\'Outfit\';font-size:42px;font-weight:800;color:rgba(255,248,220,0.85);">'+checkedCount+'<span style="font-size:16px;font-weight:400;color:rgba(199,186,172,0.5);"> / 30</span></div>';
+  if(streak>0)h+='<div style="margin-top:6px;font-size:13px;color:rgba(255,200,150,0.7);">🔥 连续 '+streak+' 天</div>';
+  h+='</div></div>';
+
+  h+='<div style="padding:0 4px;margin-bottom:20px;">';
+  h+='<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;">';
+  for(var i=1;i<=30;i++){
+    var sortedDays=Object.keys(d.days).sort();
+    var isDone=i<=sortedDays.length;
+    var isNext=i===sortedDays.length+1;
+    var bg=isDone?'linear-gradient(135deg,rgba(255,248,220,0.15),rgba(180,160,120,0.1))':'rgba(255,255,255,0.03)';
+    var border=isDone?'1px solid rgba(255,248,220,0.25)':isNext?'1.5px dashed rgba(255,200,150,0.4)':'1px solid rgba(255,255,255,0.06)';
+    var color=isDone?'rgba(255,248,220,0.9)':isNext?'rgba(255,200,150,0.7)':'rgba(255,255,255,0.2)';
+    var content=isDone?'✦':''+i;
+    var glow=isDone?'box-shadow:0 0 12px rgba(255,248,220,0.15);':'';
+    var pulse=isNext?'animation:legendLockedPulse 2s ease-in-out infinite;':'';
+    h+='<div style="aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:12px;background:'+bg+';border:'+border+';color:'+color+';font-family:\'Outfit\';font-size:'+(isDone?'16px':'14px')+';font-weight:'+(isDone?'700':'400')+';'+glow+pulse+'">';
+    h+=content;
+    h+='</div>';
+  }
+  h+='</div></div>';
+
+  // check-in button
+  if(!todayDone){
+    h+='<div style="text-align:center;margin-bottom:20px;">';
+    h+='<button onclick="slCheckIn()" style="padding:14px 40px;border-radius:14px;font-size:15px;font-weight:600;color:rgba(255,248,220,0.9);background:linear-gradient(135deg,#1a1a2e,#16213e);border:1.5px solid rgba(255,248,220,0.2);box-shadow:0 4px 20px rgba(0,0,0,0.2);letter-spacing:1px;">🌙 今日打卡</button>';
+    h+='</div>';
+  }else{
+    h+='<div style="text-align:center;margin-bottom:20px;padding:14px;border-radius:14px;background:rgba(255,248,220,0.05);border:1px solid rgba(255,248,220,0.1);">';
+    h+='<span style="font-size:14px;color:rgba(255,248,220,0.5);">✦ 今日已打卡 ✦</span>';
+    h+='</div>';
+  }
+
+  // completion message
+  if(checkedCount>=30){
+    h+='<div style="text-align:center;padding:24px 20px;border-radius:16px;background:linear-gradient(135deg,rgba(255,248,220,0.08),rgba(180,160,120,0.04));border:1px solid rgba(255,248,220,0.15);margin-bottom:20px;">';
+    h+='<div style="font-size:28px;margin-bottom:8px;">🎉</div>';
+    h+='<div style="font-size:16px;font-weight:600;color:rgba(255,248,220,0.85);margin-bottom:6px;">30天达成！</div>';
+    h+='<div style="font-size:13px;color:rgba(199,186,172,0.6);line-height:1.7;">你做到了。连续30天早睡早起。<br>你的身体记住了这个节奏。</div>';
+    h+='</div>';
+  }
+
+  // reset button
+  h+='<div style="text-align:center;margin-top:12px;">';
+  h+='<button onclick="slReset()" style="font-size:12px;color:rgba(180,160,140,0.4);background:none;border:none;padding:8px 16px;">重置挑战</button>';
+  h+='</div>';
+
+  host.innerHTML=h;
+}
+
+window.slCheckIn=function(){
+  var d=slLoad();
+  var today=slToday();
+  if(d.days[today])return;
+  d.days[today]=true;
+  if(!d.start)d.start=today;
+  slSave(d);
+  // celebration effect
+  slCelebrate();
+  setTimeout(slRender,800);
+};
+
+window.slReset=function(){
+  if(!confirm("确定要重置30天早睡早起挑战吗？"))return;
+  localStorage.removeItem(SL_KEY);
+  slRender();
+};
+
+function slCelebrate(){
+  var colors=["#fffde8","#ffd89b","#f8e8c8","#d4c5a0","#fff5d4"];
+  for(var i=0;i<20;i++){
+    var el=document.createElement("div");
+    el.style.cssText="position:fixed;top:-10px;left:"+Math.random()*100+"vw;width:"+
+      (Math.random()*4+2)+"px;height:"+(Math.random()*4+2)+"px;background:"+
+      colors[Math.floor(Math.random()*colors.length)]+
+      ";border-radius:50%;z-index:3000;pointer-events:none;opacity:0.8;"+
+      "animation:confettiFall "+(Math.random()*2+1.5)+"s linear forwards;";
+    document.body.appendChild(el);
+    setTimeout(function(e){e.remove();},(Math.random()*2+1.5)*1000+100,el);
+  }
+}
+
+// init
+setTimeout(function(){
+  slInjectTab();
+  slHookTabs();
+  // also add sleep30 to the main switchTab list
+  var orig=window.switchTab;
+  if(orig){
+    window.switchTab=function(t){
+      orig(t);
+      var sc=document.getElementById("content-sleep30");
+      var st=document.getElementById("tab-sleep30");
+      if(sc)sc.classList.add("hidden");
+      if(st)st.className="tab-btn tab-inactive";
+    };
+  }
+},200);
+
+})();
+
+</script>
+<!-- ════════════ 30天早睡早起模块结束 ════════════ -->
 </body></html>
