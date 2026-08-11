@@ -501,7 +501,7 @@ function startGentleCelebration(text){
   if(!ov){
     ov=document.createElement('div');
     ov.id='celebOverlay';
-    ov.style.cssText='position:fixed;inset:0;z-index:500;pointer-events:all;cursor:pointer;background:rgba(237,232,244,.85);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);';
+    ov.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;z-index:500;pointer-events:all;cursor:pointer;background:rgba(237,232,244,.85);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);padding-bottom:env(safe-area-inset-bottom);box-sizing:content-box;';
     ov.innerHTML='<canvas id="celebCanvas" style="width:100%;height:100%;display:block"></canvas>';
     ov.onclick=()=>endGentleCelebration();
     document.body.appendChild(ov);
@@ -760,7 +760,7 @@ function startFireworksCelebration(text){
   if(!ov){
     ov=document.createElement('div');
     ov.id='celebOverlay';
-    ov.style.cssText='position:fixed;inset:0;z-index:500;pointer-events:all;cursor:pointer;background:rgba(237,232,244,.85);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);';
+    ov.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;z-index:500;pointer-events:all;cursor:pointer;background:rgba(237,232,244,.85);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);padding-bottom:env(safe-area-inset-bottom);box-sizing:content-box;';
     ov.innerHTML='<canvas id="celebCanvas" style="width:100%;height:100%;display:block"></canvas>';
     ov.onclick=()=>endCelebration();
     document.body.appendChild(ov);
