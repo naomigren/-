@@ -508,6 +508,8 @@ function startGentleCelebration(text){
   }
   ov.style.display='block';
   ov.onclick=()=>endGentleCelebration();
+  document.documentElement.style.backgroundColor='rgba(196,192,206,1)';
+  document.body.style.backgroundColor='rgba(196,192,206,1)';
 
   gentleCanvas=document.getElementById('celebCanvas');
   gentleCtx=gentleCanvas.getContext('2d');
@@ -683,6 +685,8 @@ function drawGentle(now){
 function endGentleCelebration(){
   if(gentleAnim){cancelAnimationFrame(gentleAnim);gentleAnim=null;}
   const ov=document.getElementById('celebOverlay');if(ov)ov.style.display='none';
+  document.documentElement.style.backgroundColor='';
+  document.body.style.backgroundColor='#ede8f4';
 }
 
 /* ═══════════════════════════════════════════
@@ -767,6 +771,8 @@ function startFireworksCelebration(text){
   }
   ov.style.display='block';
   ov.onclick=()=>endCelebration();
+  document.documentElement.style.backgroundColor='rgba(196,192,206,1)';
+  document.body.style.backgroundColor='rgba(196,192,206,1)';
 
   celebCanvas=document.getElementById('celebCanvas');
   celebCtx=celebCanvas.getContext('2d');
@@ -1170,6 +1176,8 @@ function endCelebration(){
   if(celebAnim){cancelAnimationFrame(celebAnim);celebAnim=null;}
   const ov=document.getElementById('celebOverlay');
   if(ov)ov.style.display='none';
+  document.documentElement.style.backgroundColor='';
+  document.body.style.backgroundColor='#ede8f4';
 }
 
 /* ═══ 蒲公英花田 Canvas ═══ */
