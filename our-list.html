@@ -29,6 +29,7 @@ html,body{min-height:100%;min-height:calc(100% + env(safe-area-inset-bottom));ov
 html{overflow-y:overlay;background-color:rgba(237,232,244,1)}
 #celebOverlay::after{content:'';position:fixed;left:0;right:0;bottom:-1px;height:calc(env(safe-area-inset-bottom) + 10px);background:rgba(196,192,206,1);z-index:9999}
 ::-webkit-scrollbar{width:0;background:transparent}
+#safeAreaCover{position:fixed;left:0;right:0;bottom:0;height:env(safe-area-inset-bottom,0px);background:#ede8f4;z-index:9998;pointer-events:none}
 body{
   font-family:"Noto Serif SC","Cormorant Garamond",serif;color:var(--ink);
   background-color:#ede8f4;
@@ -287,6 +288,7 @@ body{
 </style>
 </head>
 <body>
+<div id="safeAreaCover"></div>
 
 <div class="bg-layer"></div>
 
@@ -511,6 +513,7 @@ function startGentleCelebration(text){
   ov.onclick=()=>endGentleCelebration();
   document.documentElement.style.backgroundColor='rgba(196,192,206,1)';
   document.body.style.backgroundColor='rgba(196,192,206,1)';
+  var sac=document.getElementById('safeAreaCover');if(sac)sac.style.background='rgba(196,192,206,1)';
 
   gentleCanvas=document.getElementById('celebCanvas');
   gentleCtx=gentleCanvas.getContext('2d');
@@ -688,6 +691,7 @@ function endGentleCelebration(){
   const ov=document.getElementById('celebOverlay');if(ov)ov.style.display='none';
   document.documentElement.style.backgroundColor='';
   document.body.style.backgroundColor='#ede8f4';
+  var sac=document.getElementById('safeAreaCover');if(sac)sac.style.background='#ede8f4';
 }
 
 /* ═══════════════════════════════════════════
@@ -774,6 +778,7 @@ function startFireworksCelebration(text){
   ov.onclick=()=>endCelebration();
   document.documentElement.style.backgroundColor='rgba(196,192,206,1)';
   document.body.style.backgroundColor='rgba(196,192,206,1)';
+  var sac=document.getElementById('safeAreaCover');if(sac)sac.style.background='rgba(196,192,206,1)';
 
   celebCanvas=document.getElementById('celebCanvas');
   celebCtx=celebCanvas.getContext('2d');
@@ -1179,6 +1184,7 @@ function endCelebration(){
   if(ov)ov.style.display='none';
   document.documentElement.style.backgroundColor='';
   document.body.style.backgroundColor='#ede8f4';
+  var sac=document.getElementById('safeAreaCover');if(sac)sac.style.background='#ede8f4';
 }
 
 /* ═══ 蒲公英花田 Canvas ═══ */
