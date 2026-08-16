@@ -577,7 +577,19 @@ const ACHS=[
 {id:"a43",name:"身材管理月",r:"legend",pts:200,at:{sport:12,weight:12,health:10,will:15},msg:"三十天。一整个月。每一天你都对自己的身体负了责。你做到了。",cat:"身心"},
 {id:"a44",name:"克拉拉全属性",r:"legend",pts:300,at:{will:1},msg:"每一个属性都到了Lv.2。你不是某一个方面强——你是全面的。这就是完整的克拉拉。",cat:"成长"},
 {id:"a45",name:"满级人类",r:"legend",pts:250,at:{will:1},msg:"五个属性满级。你把自己练成了这个形状——没有人替你做过哪怕一天的决定。",cat:"成长"},
-{id:"a46",name:"终极克拉拉",r:"legend",pts:500,at:{will:1},msg:"五千分。克拉拉，你已经不是当初那个觉得自己什么都做不好的人了。你亲手把自己养成了现在的样子。",cat:"彩蛋"}
+{id:"a46",name:"终极克拉拉",r:"legend",pts:500,at:{will:1},msg:"五千分。克拉拉，你已经不是当初那个觉得自己什么都做不好的人了。你亲手把自己养成了现在的样子。",cat:"彩蛋"},
+{id:"a47",name:"第一笔",r:"normal",pts:15,at:{creative:2,will:1},msg:"拿起笔画了。不管画成什么样——你开始了，这就是全部意义。",cat:"才艺"},
+{id:"a48",name:"第一步棋",r:"normal",pts:15,at:{intel:2,will:1},msg:"棋盘摆好了，第一步走出去了。欢迎进入需要动脑子的世界。",cat:"才艺"},
+{id:"a49",name:"第一首曲子",r:"normal",pts:15,at:{creative:2,piano:1},msg:"脑子里的旋律变成了真实的音符。你不只是弹别人的曲子——你开始写自己的了。",cat:"才艺"},
+{id:"a50",name:"全才艺日",r:"rare",pts:50,at:{creative:5,piano:3,grace:3,will:3},msg:"画画、作曲、练琴、唱歌、跳舞——你今天一个人把整个艺术学院的课都上了。",cat:"才艺"},
+{id:"a51",name:"画了十次",r:"rare",pts:40,at:{creative:6,grace:2,will:3},msg:"十次了。你的线条已经不是第一天的样子了。进步藏在每一笔里，你自己可能还没发现。",cat:"才艺"},
+{id:"a52",name:"棋瘾上来了",r:"rare",pts:40,at:{intel:6,will:3,anti_proc:2},msg:"十盘了。你已经开始在脑子里自动推演下一步了吧。",cat:"才艺"},
+{id:"a53",name:"创作连击",r:"rare",pts:45,at:{creative:8,will:4},msg:"连续三天都在创作——画画或者作曲。你的大脑正在长出新的回路。",cat:"才艺"},
+{id:"a54",name:"文艺复兴人",r:"epic",pts:80,at:{creative:8,piano:4,lit:4,intel:4,grace:4},msg:"你画画、写曲子、弹琴、读书、写作。达芬奇看了都得说一句——这姑娘行。",cat:"才艺"},
+{id:"a55",name:"棋盘上的女王",r:"epic",pts:70,at:{intel:10,will:6,anti_proc:4},msg:"三十盘。你已经不是在学下棋了——你在学怎么在压力下做决定。这比棋本身重要得多。",cat:"才艺"},
+{id:"a56",name:"画家克拉拉",r:"epic",pts:75,at:{creative:10,grace:4,will:6},msg:"三十次画画。从第一笔到现在，你的手记住的东西比你的脑子知道的还多。",cat:"才艺"},
+{id:"a57",name:"作曲家克拉拉",r:"epic",pts:75,at:{creative:10,piano:6,will:6},msg:"写了十首曲子。每一首都是你脑子里曾经只有你能听见的声音——现在它们真实存在了。",cat:"才艺"},
+{id:"a58",name:"全能创造者",r:"legend",pts:200,at:{creative:15,piano:8,intel:8,will:10},msg:"画画三十次、作曲十次、下棋三十盘。你不是在消遣——你在建造一个完整的自己。别人二十四岁在刷手机，你在创造。",cat:"才艺"}
 ];
 /* ═══════ CONFETTI & POPUP ═══════ */
 function spawnConfetti(n,cols){const c=document.getElementById("confettiContainer");for(let i=0;i<n;i++){const p=document.createElement("div");p.className="confetti-piece";const sz=Math.random()*8+4;p.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}vw;background:${cols[Math.floor(Math.random()*cols.length)]};border-radius:${Math.random()>0.5?"50%":"2px"};animation-duration:${Math.random()*2+2}s;animation-delay:${Math.random()*0.5}s`;c.appendChild(p);setTimeout(()=>p.remove(),4500);}}
@@ -647,6 +659,18 @@ function checkAchievements(){
   if(ATTRS.every(a=>(S.attrs[a.id]||0)>=50))tryU("a44");
   if(ATTRS.filter(a=>(S.attrs[a.id]||0)>=300).length>=5)tryU("a45");
   if(S.tp>=5000)tryU("a46");
+  if(cnt("drawing")>=1)tryU("a47");
+  if(cnt("chess")>=1)tryU("a48");
+  if(cnt("compose")>=1)tryU("a49");
+  if(t.includes("drawing")&&t.includes("compose")&&t.includes("piano")&&t.includes("sing")&&t.includes("dance_t"))tryU("a50");
+  if(cnt("drawing")>=10)tryU("a51");
+  if(cnt("chess")>=10)tryU("a52");
+  if(grpStrk(["drawing","compose"],3)>=3)tryU("a53");
+  if(cnt("drawing")>=5&&cnt("compose")>=3&&cnt("piano")>=5&&cnt("reading")>=5)tryU("a54");
+  if(cnt("chess")>=30)tryU("a55");
+  if(cnt("drawing")>=30)tryU("a56");
+  if(cnt("compose")>=10)tryU("a57");
+  if(cnt("drawing")>=30&&cnt("compose")>=10&&cnt("chess")>=30)tryU("a58");
   if(unlocked.length){saveState();render();_achQ.push(...unlocked);if(_achQ.length===unlocked.length)showAchPopup(_achQ.shift());}
 }
 /* ═══════ RENDER ACHIEVEMENTS + CARD CAROUSEL ═══════ */
