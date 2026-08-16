@@ -1,0 +1,12 @@
+{
+  "name": "阿姜的德语城堡",
+  "short_name": "德语城堡",
+  "icons": [
+    {"src": "deutschburg-icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "deutschburg-icon-512.png", "sizes": "512x512", "type": "image/png"}
+  ],
+  "start_url": "./deutschburg-forest.html",
+  "display": "standalone",
+  "background_color": "#edf2f5",
+  "theme_color": "#1a2332"
+}
