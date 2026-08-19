@@ -434,17 +434,19 @@ function flash(msg,type){const t=document.getElementById("toast");t.textContent=
 function applyAttrs(mapping){if(!mapping)return;Object.entries(mapping).forEach(([k,v])=>{if(S.attrs[k]!==undefined)S.attrs[k]=Math.max(0,S.attrs[k]+v);});}
 const DE_TASKS=new Set(["de_vocab","de_grammar","de_friends","de_speak","de_listen","de_write","de_read","de_shadow","de_mistakes","de_mock","de_level"]);
 function doTask(id,name,pts,em,praise,attrMap){
-  S.h.unshift({t:"e",n:name,p:pts,d:new Date().toISOString()});if(S.h.length>200)S.h.length=200;
+  var _a=TASK_ATTRS[id]||attrMap||{will:1};
+  S.h.unshift({t:"e",n:name,p:pts,d:new Date().toISOString(),_id:id,_attrs:{..._a}});if(S.h.length>200)S.h.length=200;
   S.cp+=pts;S.tp+=pts;if(DE_TASKS.has(id))S.de=(S.de||0)+pts;
-  applyAttrs(TASK_ATTRS[id]||attrMap||{will:1});
+  applyAttrs(_a);
   const td=todayStr();if(!S.dailyTasks[td])S.dailyTasks[td]=[];S.dailyTasks[td].push(id);S.taskCounts[id]=(S.taskCounts[id]||0)+1;S.dailyPts[td]=(S.dailyPts[td]||0)+pts;
   saveState();render();const pl=PRAISE[id];const pr=pl?rp(pl):(praise||`+${pts}分！`);
   flash(pts>=100?pr:`${em} ${pr}`,pts>=100?"big":"earn");
   setTimeout(()=>{checkAchievements();checkCardFragments();},300);
 }
 function doPen(id,name,pts,em,attrMap){
-  S.h.unshift({t:"p",n:name,p:pts,d:new Date().toISOString()});if(S.h.length>200)S.h.length=200;
-  S.cp=Math.max(0,S.cp+pts);S.tp=Math.max(0,S.tp+pts);applyAttrs(PEN_ATTRS[id]||attrMap||{});
+  var _a=PEN_ATTRS[id]||attrMap||{};
+  S.h.unshift({t:"p",n:name,p:pts,d:new Date().toISOString(),_id:id,_attrs:{..._a}});if(S.h.length>200)S.h.length=200;
+  S.cp=Math.max(0,S.cp+pts);S.tp=Math.max(0,S.tp+pts);applyAttrs(_a);
   const td=todayStr();if(!S.dailyPens[td])S.dailyPens[td]=[];S.dailyPens[td].push(id);
   saveState();render();const ms=PEN_MSG[id];flash(ms?rp(ms):`${name} ${pts}分`,"penalty");
   setTimeout(()=>{checkAchievements();checkCardFragments();},300);
@@ -452,6 +454,26 @@ function doPen(id,name,pts,em,attrMap){
 function doRedeem(name,cost){if(S.cp<cost){flash("积分不够啦，再攒攒！","fail");return;}S.h.unshift({t:"r",n:name,p:-cost,d:new Date().toISOString()});S.cp-=cost;saveState();render();flash(`🎁 兑换成功：${name}！好好享受！`,"redeem");}
 function doBonus(){if(S.bc)return;S.bc=true;S.h.unshift({t:"e",n:"🎉 开学首日奖励——小克请你吃泡芙",p:50,d:new Date().toISOString()});S.cp+=50;S.tp+=50;applyAttrs({will:5});saveState();render();flash("🎉 泡芙基金到账！这是小克请你的！","big");}
 function doReset(){if(confirm("确定要重置所有数据吗？")){S={cp:0,tp:0,h:[],rd:[],bc:false,ct:[],cs:[],cpn:[],attrs:initAttrs(),de:0,ach:{},taskCounts:{},dailyTasks:{},dailyPens:{},dailyPts:{},cards:initCards(),dailyPlan:{date:"",items:[]},wishes:{},pl:{days:{},rewards:{r30:"",r60:"",r90:""},visionItems:[]}};saveState();render();flash("已重置","penalty");}}
+function undoLast(){
+  if(!S.h.length){flash("没有可撤回的记录！","fail");return;}
+  const last=S.h[0];
+  const confirmMsg="撤回「"+last.n+"」（"+(last.p>0?"+":"")+last.p+"分）？";
+  if(!confirm(confirmMsg))return;
+  S.h.shift();
+  /* reverse points */
+  if(last.t==="e"){S.cp-=last.p;S.tp-=last.p;if(DE_TASKS.has(last._id))S.de=Math.max(0,(S.de||0)-last.p);}
+  else if(last.t==="p"){S.cp=Math.max(0,S.cp-last.p);S.tp=Math.max(0,S.tp-last.p);}
+  else if(last.t==="r"){S.cp+=Math.abs(last.p);}
+  else if(last.t==="a"){S.cp-=last.p;S.tp-=last.p;}
+  /* reverse attrs */
+  if(last._attrs){Object.entries(last._attrs).forEach(([k,v])=>{if(S.attrs[k]!==undefined)S.attrs[k]=Math.max(0,S.attrs[k]-v);});}
+  /* reverse dailyTasks/dailyPens */
+  if(last._id&&last.d){const td=last.d.slice(0,10);
+    if(last.t==="e"&&S.dailyTasks[td]){const idx=S.dailyTasks[td].lastIndexOf(last._id);if(idx!==-1)S.dailyTasks[td].splice(idx,1);S.taskCounts[last._id]=Math.max(0,(S.taskCounts[last._id]||1)-1);S.dailyPts[td]=Math.max(0,(S.dailyPts[td]||0)-last.p);}
+    if(last.t==="p"&&S.dailyPens[td]){const idx=S.dailyPens[td].lastIndexOf(last._id);if(idx!==-1)S.dailyPens[td].splice(idx,1);}
+  }
+  saveState();render();flash("↩️ 已撤回："+last.n,"penalty");
+}
 function addCT(){const n=document.getElementById("ct_name").value.trim();if(!n){flash("任务名不能为空！","fail");return;}const pts=Math.max(1,Math.min(500,parseInt(document.getElementById("ct_pts").value)||5));const em=document.getElementById("ct_em").value||"⭐";const pr=document.getElementById("ct_pr").value.trim()||`完成了${n}，好棒！`;S.ct.push({id:"c_"+Date.now(),name:n,pts,em,praise:pr,attrMap:{will:1}});saveState();render();flash(`✨ 新任务已添加：${n}`,"earn");}
 function rmCT(id){S.ct=S.ct.filter(t=>t.id!==id);saveState();render();flash("任务已删除","penalty");}
 function addCS(){const n=document.getElementById("cs_name").value.trim();if(!n){flash("奖励名不能为空！","fail");return;}const cost=Math.max(1,parseInt(document.getElementById("cs_cost").value)||50);const em=document.getElementById("cs_em").value||"🎁";S.cs.push({id:"cs_"+Date.now(),name:n,cost,em});saveState();render();flash(`✨ 新奖励已上架：${n}`,"earn");}
@@ -512,8 +534,10 @@ function renderShop(){
   document.getElementById("content-shop").innerHTML=h;
 }
 function renderHistory(){
-  let h="";if(!S.h.length){h=`<div style="text-align:center;padding:40px 20px;color:#b09898;font-size:14px;">还没有记录，去完成第一个任务吧！</div>`;}
-  else{h=`<div style="display:flex;flex-direction:column;gap:4px;">`;S.h.forEach(e=>{const col=e.t==="e"?"#c4868e":e.t==="r"?"#c9b8a8":e.t==="a"?"#d4a840":"#c07070";h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:rgba(255,255,255,0.02);border-radius:8px;border-left:3px solid ${col};"><div><div style="font-size:13px;color:#6a5555;">${e.n}</div><div style="font-size:11px;color:#b09898;margin-top:2px;">${fmtDate(e.d)}</div></div><div style="font-size:14px;font-weight:700;font-family:'Outfit';color:${col};">${e.p>0?"+"+e.p:e.p}</div></div>`;});h+=`</div>`;}
+  let h="";
+  if(S.h.length){h+=`<div style="text-align:center;margin-bottom:12px;"><button onclick="undoLast()" style="padding:8px 20px;border-radius:10px;font-size:13px;font-weight:600;color:#c07070;background:rgba(210,140,140,0.1);border:1px solid rgba(210,140,140,0.25);cursor:pointer;">↩️ 撤回上一条</button></div>`;}
+  if(!S.h.length){h=`<div style="text-align:center;padding:40px 20px;color:#b09898;font-size:14px;">还没有记录，去完成第一个任务吧！</div>`;}
+  else{h+=`<div style="display:flex;flex-direction:column;gap:4px;">`;S.h.forEach(e=>{const col=e.t==="e"?"#c4868e":e.t==="r"?"#c9b8a8":e.t==="a"?"#d4a840":"#c07070";h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:rgba(255,255,255,0.02);border-radius:8px;border-left:3px solid ${col};"><div><div style="font-size:13px;color:#6a5555;">${e.n}</div><div style="font-size:11px;color:#b09898;margin-top:2px;">${fmtDate(e.d)}</div></div><div style="font-size:14px;font-weight:700;font-family:'Outfit';color:${col};">${e.p>0?"+"+e.p:e.p}</div></div>`;});h+=`</div>`;}
   document.getElementById("content-history").innerHTML=h;
 }
 /* ═══════ ACHIEVEMENT HELPERS ═══════ */
