@@ -280,10 +280,73 @@ body{
   border-radius:0 0 2px 2px;margin:0 -4.5px;z-index:1;border:none;
 }
 
+/* ── miss counter ── */
+.miss-section{
+  max-width:520px;margin:48px auto 0;padding:0 20px;position:relative;z-index:2;
+}
+.miss-toggle{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  cursor:pointer;padding:14px 0;user-select:none;
+}
+.miss-toggle-line{flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--lavender),transparent);opacity:.4}
+.miss-toggle-label{
+  font-family:"Cormorant Garamond",serif;font-style:italic;
+  font-size:12px;color:var(--ink-faint);letter-spacing:.3em;
+  white-space:nowrap;transition:opacity .3s;
+}
+.miss-toggle-arrow{
+  font-size:9px;color:var(--ink-faint);transition:transform .35s ease;display:inline-block;
+}
+.miss-toggle.open .miss-toggle-arrow{transform:rotate(180deg)}
+
+.miss-panel{
+  max-height:0;overflow:hidden;transition:max-height .5s cubic-bezier(.4,0,.2,1);
+}
+.miss-panel.open{max-height:2000px;transition:max-height .6s cubic-bezier(.4,0,.2,1)}
+
+.miss-inner{
+  display:flex;flex-direction:column;align-items:center;padding:20px 0 10px;
+}
+.miss-count-display{
+  font-family:"Italiana",serif;font-weight:400;
+  font-size:56px;line-height:1;color:var(--ink-soft);
+  margin-bottom:4px;transition:opacity .2s;letter-spacing:.02em;
+}
+.miss-count-sub{
+  font-family:"Cormorant Garamond",serif;font-style:italic;
+  font-size:11px;color:var(--ink-faint);letter-spacing:.25em;margin-bottom:24px;
+}
+.miss-btn{
+  width:52px;height:52px;border-radius:50%;border:1.5px solid var(--lavender-pale);
+  background:rgba(255,255,255,.45);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .3s ease;color:var(--ink-faint);font-size:18px;
+}
+.miss-btn:active{transform:scale(.92);border-color:var(--silver-deep);background:rgba(255,255,255,.7)}
+
+.miss-log{
+  width:100%;margin-top:24px;
+}
+.miss-log-entry{
+  font-family:"Noto Serif SC","Cormorant Garamond",serif;font-weight:200;
+  font-size:12px;color:var(--ink-faint);letter-spacing:.08em;
+  padding:8px 0;border-bottom:1px solid var(--hairline);
+  display:flex;justify-content:space-between;align-items:center;
+  opacity:0;animation:missEntryIn .4s ease forwards;
+}
+.miss-log-entry:last-child{border-bottom:none}
+.miss-log-entry .miss-n{color:var(--ink-soft);font-weight:300}
+.miss-log-entry .miss-time{color:var(--silver-deep);font-style:italic;font-family:"Cormorant Garamond",serif;font-size:11px;letter-spacing:.12em}
+@keyframes missEntryIn{
+  from{opacity:0;transform:translateY(-6px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
 @media(max-width:380px){
   .header-title{font-size:24px}
   .progress-done{font-size:52px}
   .wish-card{padding:16px 18px}
+  .miss-count-display{font-size:44px}
 }
 </style>
 </head>
@@ -322,6 +385,23 @@ body{
 </div>
 
 <div class="list-section" id="listSection"></div>
+
+<div class="miss-section">
+  <div class="miss-toggle" id="missToggle" onclick="toggleMissPanel()">
+    <div class="miss-toggle-line"></div>
+    <span class="miss-toggle-label">想他的次数</span>
+    <span class="miss-toggle-arrow">▼</span>
+    <div class="miss-toggle-line"></div>
+  </div>
+  <div class="miss-panel" id="missPanel">
+    <div class="miss-inner">
+      <div class="miss-count-display" id="missCount">0</div>
+      <div class="miss-count-sub">次</div>
+      <div class="miss-btn" id="missBtn" onclick="recordMiss()">+</div>
+      <div class="miss-log" id="missLog"></div>
+    </div>
+  </div>
+</div>
 
 <div class="piano-deco">
   <div class="p-key"></div><div class="p-key black"></div><div class="p-key"></div><div class="p-key black"></div><div class="p-key"></div>
@@ -1344,6 +1424,53 @@ function initFloatNotes(){
   }
 }
 
+/* ── miss counter logic ── */
+const MISS_KEY='miss-counter-v1';
+let missState={count:0,log:[]};
+
+function loadMiss(){
+  try{const r=localStorage.getItem(MISS_KEY);if(r){missState=JSON.parse(r);if(!missState.log)missState.log=[];}}catch(e){}
+}
+function saveMiss(){try{localStorage.setItem(MISS_KEY,JSON.stringify(missState));}catch(e){}}
+
+function renderMiss(){
+  document.getElementById('missCount').textContent=missState.count;
+  const logEl=document.getElementById('missLog');
+  let html='';
+  missState.log.forEach((entry,i)=>{
+    html+='<div class="miss-log-entry" style="animation-delay:'+(i*0.04)+'s">';
+    html+='<span class="miss-n">第 '+entry.n+' 次</span>';
+    html+='<span class="miss-time">'+entry.time+'</span>';
+    html+='</div>';
+  });
+  logEl.innerHTML=html;
+}
+
+function recordMiss(){
+  missState.count++;
+  const now=new Date();
+  const y=now.getFullYear();
+  const mo=String(now.getMonth()+1).padStart(2,'0');
+  const d=String(now.getDate()).padStart(2,'0');
+  const h=String(now.getHours()).padStart(2,'0');
+  const mi=String(now.getMinutes()).padStart(2,'0');
+  const timeStr=y+'年'+mo+'月'+d+'日 '+h+':'+mi;
+  missState.log.unshift({n:missState.count,time:timeStr});
+  saveMiss();
+  const countEl=document.getElementById('missCount');
+  countEl.style.opacity='0';
+  setTimeout(()=>{countEl.textContent=missState.count;countEl.style.opacity='1';},150);
+  renderMiss();
+}
+
+function toggleMissPanel(){
+  const toggle=document.getElementById('missToggle');
+  const panel=document.getElementById('missPanel');
+  toggle.classList.toggle('open');
+  panel.classList.toggle('open');
+}
+
+loadMiss();renderMiss();
 loadState();initDust();initFloatNotes();render();
 setTimeout(startFlowerAnim,100);
 
