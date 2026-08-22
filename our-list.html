@@ -337,6 +337,16 @@ body{
 .miss-log-entry:last-child{border-bottom:none}
 .miss-log-entry .miss-n{color:var(--ink-soft);font-weight:300}
 .miss-log-entry .miss-time{color:var(--silver-deep);font-style:italic;font-family:"Cormorant Garamond",serif;font-size:11px;letter-spacing:.12em}
+.miss-star{
+  cursor:pointer;font-size:14px;margin-left:10px;flex-shrink:0;
+  color:var(--hairline-strong);transition:all .3s ease;user-select:none;
+}
+.miss-star.lit{color:var(--lavender);text-shadow:0 0 6px rgba(181,177,196,.4)}
+.miss-star:active{transform:scale(1.3)}
+.miss-redeemed-count{
+  font-family:"Cormorant Garamond",serif;font-style:italic;
+  font-size:11px;color:var(--lavender);letter-spacing:.2em;margin-top:6px;
+}
 @keyframes missEntryIn{
   from{opacity:0;transform:translateY(-6px)}
   to{opacity:1;transform:translateY(0)}
@@ -398,6 +408,7 @@ body{
       <div class="miss-count-display" id="missCount">0</div>
       <div class="miss-count-sub">次</div>
       <div class="miss-btn" id="missBtn" onclick="recordMiss()">+</div>
+      <div class="miss-redeemed-count" id="missRedeemed"></div>
       <div class="miss-log" id="missLog"></div>
     </div>
   </div>
@@ -1438,13 +1449,28 @@ function renderMiss(){
   document.getElementById('missCount').textContent=missState.count;
   const logEl=document.getElementById('missLog');
   let html='';
+  let redeemed=0;
   missState.log.forEach((entry,i)=>{
+    if(entry.star) redeemed++;
+    const starClass=entry.star?'miss-star lit':'miss-star';
     html+='<div class="miss-log-entry" style="animation-delay:'+(i*0.04)+'s">';
     html+='<span class="miss-n">第 '+entry.n+' 次</span>';
     html+='<span class="miss-time">'+entry.time+'</span>';
+    html+='<span class="'+starClass+'" onclick="toggleStar('+entry.n+')">✦</span>';
     html+='</div>';
   });
   logEl.innerHTML=html;
+  const redeemedEl=document.getElementById('missRedeemed');
+  if(redeemed>0){
+    redeemedEl.textContent='已兑 '+redeemed+' 顿';
+  } else {
+    redeemedEl.textContent='';
+  }
+}
+
+function toggleStar(n){
+  const entry=missState.log.find(e=>e.n===n);
+  if(entry){entry.star=!entry.star;saveMiss();renderMiss();}
 }
 
 function recordMiss(){
