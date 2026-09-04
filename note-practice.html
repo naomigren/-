@@ -15,6 +15,7 @@ body{font-family:Georgia,serif;background:#1a1a2e;color:#e0e0e0;min-height:100vh
 .note-card{margin-bottom:12px;padding:10px 28px;background:#252545;border-radius:12px;text-align:center;}
 .note-card .label{font-size:13px;color:#8888aa;margin-bottom:4px;}
 .note-card .note-name{font-size:28px;font-weight:700;color:#e8c8f8;}
+.clef-label{font-size:12px;color:#8888aa;margin-top:4px;}
 .listen-btn{margin-top:8px;padding:4px 16px;background:transparent;border:1px solid #555;border-radius:8px;color:#aaa;font-size:13px;cursor:pointer;}
 .listen-btn:active{background:rgba(255,255,255,0.05);}
 svg{cursor:crosshair;touch-action:none;user-select:none;}
@@ -24,7 +25,6 @@ svg{cursor:crosshair;touch-action:none;user-select:none;}
 .info-text{color:#888;font-size:13px;margin-top:4px;}
 .next-btn{margin-top:10px;padding:8px 28px;background:#353560;border:none;border-radius:10px;color:#e0e0e0;font-size:15px;cursor:pointer;}
 .next-btn:active{background:#404070;}
-.answer-btn{margin-top:6px;padding:4px 16px;background:transparent;border:1px solid #553;border-radius:8px;color:#998;font-size:12px;cursor:pointer;}
 .hint-text{color:#aa9;font-size:13px;margin-top:6px;}
 .bottom-hint{margin-top:12px;font-size:11px;color:#444;text-align:center;max-width:320px;line-height:1.6;}
 .prompt-text{color:#555;font-size:13px;}
@@ -42,126 +42,196 @@ svg{cursor:crosshair;touch-action:none;user-select:none;}
 <div class="note-card">
   <div class="label">找到这个音</div>
   <div class="note-name" id="noteName">—</div>
+  <div class="clef-label" id="clefLabel"></div>
   <button class="listen-btn" id="listenBtn">♪ 听一下</button>
 </div>
 
-<svg id="staff" width="400" height="380"></svg>
+<svg id="staff" width="400" height="340"></svg>
 
 <div class="feedback" id="feedback">
   <div class="prompt-text">点击五线谱上的位置来回答</div>
 </div>
 
-<div class="bottom-hint">包含上下加线 · C3 到 C6</div>
+<div class="bottom-hint">高音谱号 + 低音谱号 · 最多两条加线</div>
 
 <script>
-const NOTES=[
-  {name:"C3",sol:"do",let:"c",pos:-6},{name:"D3",sol:"re",let:"d",pos:-5},
-  {name:"E3",sol:"mi",let:"e",pos:-4},{name:"F3",sol:"fa",let:"f",pos:-3},
-  {name:"G3",sol:"sol",let:"g",pos:-2},{name:"A3",sol:"la",let:"a",pos:-1},
-  {name:"B3",sol:"si",let:"b",pos:0},{name:"C4",sol:"do",let:"c'",pos:1},
-  {name:"D4",sol:"re",let:"d'",pos:2},{name:"E4",sol:"mi",let:"e'",pos:3},
-  {name:"F4",sol:"fa",let:"f'",pos:4},{name:"G4",sol:"sol",let:"g'",pos:5},
-  {name:"A4",sol:"la",let:"a'",pos:6},{name:"B4",sol:"si",let:"b'",pos:7},
-  {name:"C5",sol:"do",let:"c''",pos:8},{name:"D5",sol:"re",let:"d''",pos:9},
-  {name:"E5",sol:"mi",let:"e''",pos:10},{name:"F5",sol:"fa",let:"f''",pos:11},
-  {name:"G5",sol:"sol",let:"g''",pos:12},{name:"A5",sol:"la",let:"a''",pos:13},
-  {name:"B5",sol:"si",let:"b''",pos:14},{name:"C6",sol:"do",let:"c'''",pos:15},
+// Treble clef notes: lines bottom to top = E4(1), G4(2), B4(3), D5(4), F5(5)
+// Positions: line1=1, space above=2, line2=3, space=4, line3=5, space=6, line4=7, space=8, line5=9
+// Below: ledger1 below = pos -1 (line), space below that = -2
+// Above: ledger1 above = pos 11 (line), space above = 12
+// With max 2 ledger lines: pos range -3 to 13
+
+// Bass clef notes: lines bottom to top = G2(1), B2(2), D3(3), F3(4), A3(5) 
+// Same position numbering
+
+// TREBLE CLEF: positions -3 to 13 (max 2 ledger lines each side)
+// pos: -3=B3, -2=C4(middle C), -1=D4, 0=space, 1=E4(line1), 2=F4, 3=G4(line2), 4=A4, 
+// 5=B4(line3), 6=C5, 7=D5(line4), 8=E5, 9=F5(line5), 10=G5, 11=A5(ledger1), 12=B5, 13=C6(ledger2)
+const TREBLE_NOTES = [
+  {name:"B3", sol:"si", let:"b",  pos:-3},  // ledger line 2 below
+  {name:"C4", sol:"do", let:"c'", pos:-2},  // ledger line 1 below (middle C)
+  {name:"D4", sol:"re", let:"d'", pos:-1},  // space below ledger 1
+  {name:"E4", sol:"mi", let:"e'", pos:1},   // line 1
+  {name:"F4", sol:"fa", let:"f'", pos:2},   // space 1
+  {name:"G4", sol:"sol",let:"g'", pos:3},   // line 2
+  {name:"A4", sol:"la", let:"a'", pos:4},   // space 2
+  {name:"B4", sol:"si", let:"b'", pos:5},   // line 3
+  {name:"C5", sol:"do", let:"c''",pos:6},   // space 3
+  {name:"D5", sol:"re", let:"d''",pos:7},   // line 4
+  {name:"E5", sol:"mi", let:"e''",pos:8},   // space 4
+  {name:"F5", sol:"fa", let:"f''",pos:9},   // line 5
+  {name:"G5", sol:"sol",let:"g''",pos:10},  // space above line 5
+  {name:"A5", sol:"la", let:"a''",pos:11},  // ledger line 1 above
+  {name:"B5", sol:"si", let:"b''",pos:12},  // space above ledger 1
+  {name:"C6", sol:"do", let:"c'''",pos:13}, // ledger line 2 above
 ];
-const LINES=[3,5,7,9,11];
-const HS=14;
-const FREQS={C3:130.81,D3:146.83,E3:164.81,F3:174.61,G3:196,A3:220,B3:246.94,C4:261.63,D4:293.66,E4:329.63,F4:349.23,G4:392,A4:440,B4:493.88,C5:523.25,D5:587.33,E5:659.25,F5:698.46,G5:783.99,A5:880,B5:987.77,C6:1046.5};
+
+// BASS CLEF: lines = G2, B2, D3, F3, A3
+// pos 1=G2(line1), 2=A2, 3=B2(line2), 4=C3, 5=D3(line3), 6=E3, 7=F3(line4), 8=G3, 9=A3(line5)
+// ledger above: 10=B3, 11=C4(middle C, ledger1 above)
+// ledger below: -1=F2, -2=E2(ledger1 below), -3=D2(space below ledger1)
+const BASS_NOTES = [
+  {name:"D2", sol:"re", let:"D",  pos:-3},  // below ledger 2
+  {name:"E2", sol:"mi", let:"E",  pos:-2},  // ledger line 2 below
+  {name:"F2", sol:"fa", let:"F",  pos:-1},  // space below line 1
+  {name:"G2", sol:"sol",let:"G",  pos:1},   // line 1
+  {name:"A2", sol:"la", let:"A",  pos:2},   // space 1
+  {name:"B2", sol:"si", let:"B",  pos:3},   // line 2
+  {name:"C3", sol:"do", let:"c",  pos:4},   // space 2
+  {name:"D3", sol:"re", let:"d",  pos:5},   // line 3
+  {name:"E3", sol:"mi", let:"e",  pos:6},   // space 3
+  {name:"F3", sol:"fa", let:"f",  pos:7},   // line 4
+  {name:"G3", sol:"sol",let:"g",  pos:8},   // space 4
+  {name:"A3", sol:"la", let:"a",  pos:9},   // line 5
+  {name:"B3", sol:"si", let:"b",  pos:10},  // space above line 5
+  {name:"C4", sol:"do", let:"c'", pos:11},  // ledger line 1 above (middle C)
+];
+
+const STAFF_LINES = [1,3,5,7,9]; // same positions for both clefs
+const HS = 14; // pixels per half position
+const FREQS={D2:73.42,E2:82.41,F2:87.31,G2:98,A2:110,B2:123.47,C3:130.81,D3:146.83,E3:164.81,F3:174.61,G3:196,A3:220,B3:246.94,C4:261.63,D4:293.66,E4:329.63,F4:349.23,G4:392,A4:440,B4:493.88,C5:523.25,D5:587.33,E5:659.25,F5:698.46,G5:783.99,A5:880,B5:987.77,C6:1046.5};
 const MSGS=["对了 ♪","没错!","就是这个~","漂亮","稳!","好眼力"];
 const SVG_NS="http://www.w3.org/2000/svg";
+
 const staffEl=document.getElementById("staff");
 const feedbackEl=document.getElementById("feedback");
 const noteNameEl=document.getElementById("noteName");
+const clefLabelEl=document.getElementById("clefLabel");
 const scoreTextEl=document.getElementById("scoreText");
 const pctTextEl=document.getElementById("pctText");
 const streakTextEl=document.getElementById("streakText");
 const listenBtn=document.getElementById("listenBtn");
 
-const staffLeft=40,staffWidth=320,svgW=400,centerY=180,centerPos=7;
-let cur=null,fb=null,correct=0,total=0,streak=0;
+const staffLeft=40, staffWidth=320, svgW=400, centerY=170;
+let cur=null, curClef=null, fb=null, correct=0, total=0, streak=0;
 
-function y4p(p){return centerY-(p-centerPos)*HS;}
+function y4p(p){ return centerY - (p - 5) * HS; } // pos 5 (middle line) at center
 
-function ledgers(p){
-  const ls=[];
-  if(p<=2)for(let i=1;i>=p-1;i-=2)if(i<=1)ls.push(i);
-  if(p>=12)for(let i=13;i<=p+1;i+=2)if(i>=13)ls.push(i);
-  return ls;
+function getLedgerLines(pos) {
+  const lines = [];
+  // Below staff: ledger lines at positions -2, 0 (below line 1)
+  if (pos <= 0) {
+    for (let p = 0; p >= pos; p -= 2) {
+      if (p < 1) lines.push(p);
+    }
+  }
+  // Above staff: ledger lines at positions 11, 13
+  if (pos >= 10) {
+    for (let p = 11; p <= pos + 1; p += 2) {
+      if (p > 9) lines.push(p);
+    }
+  }
+  return lines;
 }
 
-function drawStaff(){
-  staffEl.innerHTML="";
-  // background rect for clicks
-  const bg=document.createElementNS(SVG_NS,"rect");
-  bg.setAttribute("x",0);bg.setAttribute("y",0);bg.setAttribute("width",svgW);bg.setAttribute("height",380);
-  bg.setAttribute("fill","transparent");staffEl.appendChild(bg);
+function drawStaff() {
+  staffEl.innerHTML = "";
+  // clickable background
+  const bg = document.createElementNS(SVG_NS,"rect");
+  bg.setAttribute("x",0); bg.setAttribute("y",0);
+  bg.setAttribute("width",svgW); bg.setAttribute("height",340);
+  bg.setAttribute("fill","transparent"); staffEl.appendChild(bg);
+
   // five lines
-  LINES.forEach(p=>{
-    const l=document.createElementNS(SVG_NS,"line");
-    l.setAttribute("x1",staffLeft);l.setAttribute("x2",staffLeft+staffWidth);
-    l.setAttribute("y1",y4p(p));l.setAttribute("y2",y4p(p));
-    l.setAttribute("stroke","#555");l.setAttribute("stroke-width","1.2");
+  STAFF_LINES.forEach(p => {
+    const l = document.createElementNS(SVG_NS,"line");
+    l.setAttribute("x1",staffLeft); l.setAttribute("x2",staffLeft+staffWidth);
+    l.setAttribute("y1",y4p(p)); l.setAttribute("y2",y4p(p));
+    l.setAttribute("stroke","#555"); l.setAttribute("stroke-width","1.2");
     staffEl.appendChild(l);
   });
-  // clef
-  const t=document.createElementNS(SVG_NS,"text");
-  t.setAttribute("x",staffLeft+6);t.setAttribute("y",y4p(5)+28);
-  t.setAttribute("font-size","64");t.setAttribute("fill","#777");t.setAttribute("font-family","serif");
-  t.textContent="𝄞";staffEl.appendChild(t);
+
+  // clef symbol
+  const t = document.createElementNS(SVG_NS,"text");
+  t.setAttribute("x", staffLeft + 6);
+  t.setAttribute("font-family","serif");
+  t.setAttribute("fill","#777");
+  
+  if (curClef === "bass") {
+    t.setAttribute("y", y4p(7) + 10);
+    t.setAttribute("font-size","48");
+    t.textContent = "𝄢";
+  } else {
+    t.setAttribute("y", y4p(3) + 28);
+    t.setAttribute("font-size","64");
+    t.textContent = "𝄞";
+  }
+  staffEl.appendChild(t);
 }
 
-function drawNote(p,color,stroke){
-  const nx=svgW/2;
-  ledgers(p).forEach(lp=>{
-    const l=document.createElementNS(SVG_NS,"line");
-    l.setAttribute("x1",nx-22);l.setAttribute("x2",nx+22);
-    l.setAttribute("y1",y4p(lp));l.setAttribute("y2",y4p(lp));
-    l.setAttribute("stroke","#666");l.setAttribute("stroke-width","1.2");
-    l.classList.add("answer-el");staffEl.appendChild(l);
+function drawNote(p, color, stroke) {
+  const nx = svgW / 2;
+  getLedgerLines(p).forEach(lp => {
+    const l = document.createElementNS(SVG_NS,"line");
+    l.setAttribute("x1",nx-22); l.setAttribute("x2",nx+22);
+    l.setAttribute("y1",y4p(lp)); l.setAttribute("y2",y4p(lp));
+    l.setAttribute("stroke","#666"); l.setAttribute("stroke-width","1.2");
+    l.classList.add("answer-el"); staffEl.appendChild(l);
   });
-  const e=document.createElementNS(SVG_NS,"ellipse");
-  e.setAttribute("cx",nx);e.setAttribute("cy",y4p(p));
-  e.setAttribute("rx","11");e.setAttribute("ry","8");
-  e.setAttribute("fill",color);e.setAttribute("stroke",stroke);e.setAttribute("stroke-width","1.5");
+  const e = document.createElementNS(SVG_NS,"ellipse");
+  e.setAttribute("cx",nx); e.setAttribute("cy",y4p(p));
+  e.setAttribute("rx","11"); e.setAttribute("ry","8");
+  e.setAttribute("fill",color); e.setAttribute("stroke",stroke);
+  e.setAttribute("stroke-width","1.5");
   e.setAttribute("transform",`rotate(-12,${nx},${y4p(p)})`);
-  e.classList.add("answer-el");staffEl.appendChild(e);
+  e.classList.add("answer-el"); staffEl.appendChild(e);
 }
 
-function drawX(p){
-  const nx=svgW/2;const yy=y4p(p);
-  const l1=document.createElementNS(SVG_NS,"line");
-  l1.setAttribute("x1",nx-8);l1.setAttribute("y1",yy-8);
-  l1.setAttribute("x2",nx+8);l1.setAttribute("y2",yy+8);
-  l1.setAttribute("stroke","#cf6f6f");l1.setAttribute("stroke-width","2.5");
-  l1.setAttribute("stroke-linecap","round");l1.classList.add("answer-el");staffEl.appendChild(l1);
-  const l2=document.createElementNS(SVG_NS,"line");
-  l2.setAttribute("x1",nx+8);l2.setAttribute("y1",yy-8);
-  l2.setAttribute("x2",nx-8);l2.setAttribute("y2",yy+8);
-  l2.setAttribute("stroke","#cf6f6f");l2.setAttribute("stroke-width","2.5");
-  l2.setAttribute("stroke-linecap","round");l2.classList.add("answer-el");staffEl.appendChild(l2);
+function drawX(p) {
+  const nx=svgW/2, yy=y4p(p);
+  [[-8,-8,8,8],[8,-8,-8,8]].forEach(([x1,y1,x2,y2])=>{
+    const l=document.createElementNS(SVG_NS,"line");
+    l.setAttribute("x1",nx+x1);l.setAttribute("y1",yy+y1);
+    l.setAttribute("x2",nx+x2);l.setAttribute("y2",yy+y2);
+    l.setAttribute("stroke","#cf6f6f");l.setAttribute("stroke-width","2.5");
+    l.setAttribute("stroke-linecap","round");l.classList.add("answer-el");
+    staffEl.appendChild(l);
+  });
 }
 
 function clearAnswerEls(){staffEl.querySelectorAll(".answer-el").forEach(e=>e.remove());}
 
-function pick(){
+function pick() {
   clearAnswerEls();
-  cur=NOTES[Math.floor(Math.random()*NOTES.length)];
-  fb=null;
-  noteNameEl.textContent=cur.sol+" / "+cur.let;
-  feedbackEl.innerHTML='<div class="prompt-text">点击五线谱上的位置来回答</div>';
+  // randomly choose treble or bass
+  curClef = Math.random() < 0.5 ? "treble" : "bass";
+  const pool = curClef === "treble" ? TREBLE_NOTES : BASS_NOTES;
+  cur = pool[Math.floor(Math.random() * pool.length)];
+  fb = null;
+  noteNameEl.textContent = cur.sol + " / " + cur.let;
+  clefLabelEl.textContent = curClef === "treble" ? "高音谱号 𝄞" : "低音谱号 𝄢";
+  drawStaff();
+  feedbackEl.innerHTML = '<div class="prompt-text">点击五线谱上的位置来回答</div>';
 }
 
-function updateScore(){
-  scoreTextEl.textContent=correct+"/"+total;
-  pctTextEl.textContent=total>0?Math.round(correct/total*100)+"%":"0%";
+function updateScore() {
+  scoreTextEl.textContent = correct+"/"+total;
+  pctTextEl.textContent = total>0 ? Math.round(correct/total*100)+"%" : "0%";
   if(streak>=3){streakTextEl.style.display="";streakTextEl.textContent="🔥 "+streak+"连对";}
   else streakTextEl.style.display="none";
 }
 
-function playNote(n){
+function playNote(n) {
   try{
     const ctx=new(window.AudioContext||window.webkitAudioContext)();
     const f=FREQS[n];if(!f)return;
@@ -174,14 +244,19 @@ function playNote(n){
   }catch(e){}
 }
 
-function handleClick(e){
+function handleClick(e) {
   if(fb==="correct")return;
   const rect=staffEl.getBoundingClientRect();
-  const cy=(e.clientY??e.changedTouches?.[0]?.clientY)
+  const cy=e.clientY??e.changedTouches?.[0]?.clientY;
   if(cy==null)return;
   const y=cy-rect.top;
-  let best=-6,bestD=Infinity;
-  for(let p=-6;p<=15;p++){const d=Math.abs(y-y4p(p));if(d<bestD){bestD=d;best=p;}}
+
+  // find nearest position
+  let best=-3,bestD=Infinity;
+  for(let p=-3;p<=13;p++){
+    const d=Math.abs(y-y4p(p));
+    if(d<bestD){bestD=d;best=p;}
+  }
   if(bestD>HS)return;
   if(!cur)return;
 
@@ -196,7 +271,6 @@ function handleClick(e){
   }else{
     fb="wrong";streak=0;
     drawX(best);
-    // also show correct position
     drawNote(cur.pos,"#e8c8f8","#b89fd8");
     feedbackEl.innerHTML=`<div class="wrong-text">不对 — 正确位置已显示</div><div class="hint-text">${cur.sol} = ${cur.let} = ${cur.name}</div><button class="next-btn" id="nextBtn">下一个</button>`;
     document.getElementById("nextBtn").addEventListener("click",()=>{pick();updateScore();});
@@ -207,7 +281,6 @@ function handleClick(e){
 staffEl.addEventListener("pointerdown",e=>{e.preventDefault();handleClick(e);});
 listenBtn.addEventListener("click",()=>{if(cur)playNote(cur.name);});
 
-drawStaff();
 pick();
 </script>
 </body>
