@@ -65,12 +65,13 @@ svg{cursor:crosshair;touch-action:none;user-select:none;}
 // Same position numbering
 
 // TREBLE CLEF: positions -3 to 13 (max 2 ledger lines each side)
-// pos: -3=B3, -2=C4(middle C), -1=D4, 0=space, 1=E4(line1), 2=F4, 3=G4(line2), 4=A4, 
+// pos: -3=A3(ledger2), -2=B3, -1=C4(middle C, ledger1), 0=D4, 1=E4(line1), 2=F4, 3=G4(line2), 4=A4, 
 // 5=B4(line3), 6=C5, 7=D5(line4), 8=E5, 9=F5(line5), 10=G5, 11=A5(ledger1), 12=B5, 13=C6(ledger2)
 const TREBLE_NOTES = [
-  {name:"B3", sol:"si", let:"b",  pos:-3},  // ledger line 2 below
-  {name:"C4", sol:"do", let:"c'", pos:-2},  // ledger line 1 below (middle C)
-  {name:"D4", sol:"re", let:"d'", pos:-1},  // space below ledger 1
+  {name:"A3", sol:"la", let:"a",  pos:-3},  // ledger line 2 below (下加二线)
+  {name:"B3", sol:"si", let:"b",  pos:-2},  // space between ledger 1 and 2 (下加二间)
+  {name:"C4", sol:"do", let:"c'", pos:-1},  // ledger line 1 below (下加一线, middle C)
+  {name:"D4", sol:"re", let:"d'", pos:0},   // space below line 1 (下加一间)
   {name:"E4", sol:"mi", let:"e'", pos:1},   // line 1
   {name:"F4", sol:"fa", let:"f'", pos:2},   // space 1
   {name:"G4", sol:"sol",let:"g'", pos:3},   // line 2
@@ -80,10 +81,10 @@ const TREBLE_NOTES = [
   {name:"D5", sol:"re", let:"d''",pos:7},   // line 4
   {name:"E5", sol:"mi", let:"e''",pos:8},   // space 4
   {name:"F5", sol:"fa", let:"f''",pos:9},   // line 5
-  {name:"G5", sol:"sol",let:"g''",pos:10},  // space above line 5
-  {name:"A5", sol:"la", let:"a''",pos:11},  // ledger line 1 above
-  {name:"B5", sol:"si", let:"b''",pos:12},  // space above ledger 1
-  {name:"C6", sol:"do", let:"c'''",pos:13}, // ledger line 2 above
+  {name:"G5", sol:"sol",let:"g''",pos:10},  // space above line 5 (上加一间)
+  {name:"A5", sol:"la", let:"a''",pos:11},  // ledger line 1 above (上加一线)
+  {name:"B5", sol:"si", let:"b''",pos:12},  // space above ledger 1 (上加二间)
+  {name:"C6", sol:"do", let:"c'''",pos:13}, // ledger line 2 above (上加二线)
 ];
 
 // BASS CLEF: lines = G2, B2, D3, F3, A3
@@ -91,9 +92,9 @@ const TREBLE_NOTES = [
 // ledger above: 10=B3, 11=C4(middle C, ledger1 above)
 // ledger below: -1=F2, -2=E2(ledger1 below), -3=D2(space below ledger1)
 const BASS_NOTES = [
-  {name:"D2", sol:"re", let:"D",  pos:-3},  // below ledger 2
-  {name:"E2", sol:"mi", let:"E",  pos:-2},  // ledger line 2 below
-  {name:"F2", sol:"fa", let:"F",  pos:-1},  // space below line 1
+  {name:"D2", sol:"re", let:"D",  pos:-2},  // space below ledger 1 (下加二间)
+  {name:"E2", sol:"mi", let:"E",  pos:-1},  // ledger line 1 below (下加一线)
+  {name:"F2", sol:"fa", let:"F",  pos:0},   // space below line 1 (下加一间)
   {name:"G2", sol:"sol",let:"G",  pos:1},   // line 1
   {name:"A2", sol:"la", let:"A",  pos:2},   // space 1
   {name:"B2", sol:"si", let:"B",  pos:3},   // line 2
@@ -103,8 +104,8 @@ const BASS_NOTES = [
   {name:"F3", sol:"fa", let:"f",  pos:7},   // line 4
   {name:"G3", sol:"sol",let:"g",  pos:8},   // space 4
   {name:"A3", sol:"la", let:"a",  pos:9},   // line 5
-  {name:"B3", sol:"si", let:"b",  pos:10},  // space above line 5
-  {name:"C4", sol:"do", let:"c'", pos:11},  // ledger line 1 above (middle C)
+  {name:"B3", sol:"si", let:"b",  pos:10},  // space above line 5 (上加一间)
+  {name:"C4", sol:"do", let:"c'", pos:11},  // ledger line 1 above (上加一线, middle C)
 ];
 
 const STAFF_LINES = [1,3,5,7,9]; // same positions for both clefs
@@ -129,13 +130,15 @@ function y4p(p){ return centerY - (p - 5) * HS; } // pos 5 (middle line) at cent
 
 function getLedgerLines(pos) {
   const lines = [];
-  // Below staff: ledger lines at positions -2, 0 (below line 1)
+  // Below staff: ledger lines at odd negative positions
+  // 下加一线 = pos -1, 下加二线 = pos -3
   if (pos <= 0) {
-    for (let p = 0; p >= pos; p -= 2) {
+    for (let p = -1; p >= pos - 1; p -= 2) {
       if (p < 1) lines.push(p);
     }
   }
-  // Above staff: ledger lines at positions 11, 13
+  // Above staff: ledger lines at odd positions above 9
+  // 上加一线 = pos 11, 上加二线 = pos 13
   if (pos >= 10) {
     for (let p = 11; p <= pos + 1; p += 2) {
       if (p > 9) lines.push(p);
@@ -177,6 +180,30 @@ function drawStaff() {
     t.textContent = "𝄞";
   }
   staffEl.appendChild(t);
+
+  // permanent ledger line guides (short, dimmed) so user knows where to click
+  const ledgerGuides = [
+    {pos:-3, label:"下加二线"},
+    {pos:-1, label:"下加一线"},
+    {pos:11, label:"上加一线"},
+    {pos:13, label:"上加二线"},
+  ];
+  const guideX = svgW / 2;
+  ledgerGuides.forEach(({pos:p, label}) => {
+    const l = document.createElementNS(SVG_NS,"line");
+    l.setAttribute("x1", guideX - 30); l.setAttribute("x2", guideX + 30);
+    l.setAttribute("y1", y4p(p)); l.setAttribute("y2", y4p(p));
+    l.setAttribute("stroke","#383848"); l.setAttribute("stroke-width","1");
+    staffEl.appendChild(l);
+    const txt = document.createElementNS(SVG_NS,"text");
+    txt.setAttribute("x", guideX + 38);
+    txt.setAttribute("y", y4p(p) + 4);
+    txt.setAttribute("font-size","10");
+    txt.setAttribute("fill","#444");
+    txt.setAttribute("font-family","sans-serif");
+    txt.textContent = label;
+    staffEl.appendChild(txt);
+  });
 }
 
 function drawNote(p, color, stroke) {
