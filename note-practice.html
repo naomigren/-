@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>识谱练习</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:Georgia,serif;background:#1a1a2e;color:#e0e0e0;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;align-items:center;padding:20px 12px;padding-top:max(20px,env(safe-area-inset-top));}
+.subtitle{margin-bottom:8px;font-size:13px;color:#8888aa;letter-spacing:2px;}
+.stats{display:flex;gap:24px;margin-bottom:16px;font-size:14px;color:#aaa;}
+.streak{color:#f0c060;}
+.note-card{margin-bottom:12px;padding:10px 28px;background:#252545;border-radius:12px;text-align:center;}
+.note-card .label{font-size:13px;color:#8888aa;margin-bottom:4px;}
+.note-card .note-name{font-size:28px;font-weight:700;color:#e8c8f8;}
+.listen-btn{margin-top:8px;padding:4px 16px;background:transparent;border:1px solid #555;border-radius:8px;color:#aaa;font-size:13px;cursor:pointer;}
+.listen-btn:active{background:rgba(255,255,255,0.05);}
+svg{cursor:crosshair;touch-action:none;user-select:none;}
+.feedback{min-height:70px;text-align:center;margin-top:4px;}
+.correct-text{color:#6fcf6f;font-size:18px;font-weight:600;}
+.wrong-text{color:#cf8f6f;font-size:15px;}
+.info-text{color:#888;font-size:13px;margin-top:4px;}
+.next-btn{margin-top:10px;padding:8px 28px;background:#353560;border:none;border-radius:10px;color:#e0e0e0;font-size:15px;cursor:pointer;}
+.next-btn:active{background:#404070;}
+.answer-btn{margin-top:6px;padding:4px 16px;background:transparent;border:1px solid #553;border-radius:8px;color:#998;font-size:12px;cursor:pointer;}
+.hint-text{color:#aa9;font-size:13px;margin-top:6px;}
+.bottom-hint{margin-top:12px;font-size:11px;color:#444;text-align:center;max-width:320px;line-height:1.6;}
+.prompt-text{color:#555;font-size:13px;}
+</style>
+</head>
+<body>
+
+<div class="subtitle">给我崽做的识谱练习</div>
+<div class="stats">
+  <span id="scoreText">0/0</span>
+  <span id="pctText">0%</span>
+  <span id="streakText" class="streak" style="display:none"></span>
+</div>
+
+<div class="note-card">
+  <div class="label">找到这个音</div>
+  <div class="note-name" id="noteName">—</div>
+  <button class="listen-btn" id="listenBtn">♪ 听一下</button>
+</div>
+
+<svg id="staff" width="400" height="380"></svg>
+
+<div class="feedback" id="feedback">
+  <div class="prompt-text">点击五线谱上的位置来回答</div>
+</div>
+
+<div class="bottom-hint">包含上下加线 · C3 到 C6</div>
+
+<script>
+const NOTES=[
+  {name:"C3",sol:"do",let:"c",pos:-6},{name:"D3",sol:"re",let:"d",pos:-5},
+  {name:"E3",sol:"mi",let:"e",pos:-4},{name:"F3",sol:"fa",let:"f",pos:-3},
+  {name:"G3",sol:"sol",let:"g",pos:-2},{name:"A3",sol:"la",let:"a",pos:-1},
+  {name:"B3",sol:"si",let:"b",pos:0},{name:"C4",sol:"do",let:"c'",pos:1},
+  {name:"D4",sol:"re",let:"d'",pos:2},{name:"E4",sol:"mi",let:"e'",pos:3},
+  {name:"F4",sol:"fa",let:"f'",pos:4},{name:"G4",sol:"sol",let:"g'",pos:5},
+  {name:"A4",sol:"la",let:"a'",pos:6},{name:"B4",sol:"si",let:"b'",pos:7},
+  {name:"C5",sol:"do",let:"c''",pos:8},{name:"D5",sol:"re",let:"d''",pos:9},
+  {name:"E5",sol:"mi",let:"e''",pos:10},{name:"F5",sol:"fa",let:"f''",pos:11},
+  {name:"G5",sol:"sol",let:"g''",pos:12},{name:"A5",sol:"la",let:"a''",pos:13},
+  {name:"B5",sol:"si",let:"b''",pos:14},{name:"C6",sol:"do",let:"c'''",pos:15},
+];
+const LINES=[3,5,7,9,11];
+const HS=14;
+const FREQS={C3:130.81,D3:146.83,E3:164.81,F3:174.61,G3:196,A3:220,B3:246.94,C4:261.63,D4:293.66,E4:329.63,F4:349.23,G4:392,A4:440,B4:493.88,C5:523.25,D5:587.33,E5:659.25,F5:698.46,G5:783.99,A5:880,B5:987.77,C6:1046.5};
+const MSGS=["对了 ♪","没错!","就是这个~","漂亮","稳!","好眼力"];
+const SVG_NS="http://www.w3.org/2000/svg";
+const staffEl=document.getElementById("staff");
+const feedbackEl=document.getElementById("feedback");
+const noteNameEl=document.getElementById("noteName");
+const scoreTextEl=document.getElementById("scoreText");
+const pctTextEl=document.getElementById("pctText");
+const streakTextEl=document.getElementById("streakText");
+const listenBtn=document.getElementById("listenBtn");
+
+const staffLeft=40,staffWidth=320,svgW=400,centerY=180,centerPos=7;
+let cur=null,fb=null,correct=0,total=0,streak=0;
+
+function y4p(p){return centerY-(p-centerPos)*HS;}
+
+function ledgers(p){
+  const ls=[];
+  if(p<=2)for(let i=1;i>=p-1;i-=2)if(i<=1)ls.push(i);
+  if(p>=12)for(let i=13;i<=p+1;i+=2)if(i>=13)ls.push(i);
+  return ls;
+}
+
+function drawStaff(){
+  staffEl.innerHTML="";
+  // background rect for clicks
+  const bg=document.createElementNS(SVG_NS,"rect");
+  bg.setAttribute("x",0);bg.setAttribute("y",0);bg.setAttribute("width",svgW);bg.setAttribute("height",380);
+  bg.setAttribute("fill","transparent");staffEl.appendChild(bg);
+  // five lines
+  LINES.forEach(p=>{
+    const l=document.createElementNS(SVG_NS,"line");
+    l.setAttribute("x1",staffLeft);l.setAttribute("x2",staffLeft+staffWidth);
+    l.setAttribute("y1",y4p(p));l.setAttribute("y2",y4p(p));
+    l.setAttribute("stroke","#555");l.setAttribute("stroke-width","1.2");
+    staffEl.appendChild(l);
+  });
+  // clef
+  const t=document.createElementNS(SVG_NS,"text");
+  t.setAttribute("x",staffLeft+6);t.setAttribute("y",y4p(5)+28);
+  t.setAttribute("font-size","64");t.setAttribute("fill","#777");t.setAttribute("font-family","serif");
+  t.textContent="𝄞";staffEl.appendChild(t);
+}
+
+function drawNote(p,color,stroke){
+  const nx=svgW/2;
+  ledgers(p).forEach(lp=>{
+    const l=document.createElementNS(SVG_NS,"line");
+    l.setAttribute("x1",nx-22);l.setAttribute("x2",nx+22);
+    l.setAttribute("y1",y4p(lp));l.setAttribute("y2",y4p(lp));
+    l.setAttribute("stroke","#666");l.setAttribute("stroke-width","1.2");
+    l.classList.add("answer-el");staffEl.appendChild(l);
+  });
+  const e=document.createElementNS(SVG_NS,"ellipse");
+  e.setAttribute("cx",nx);e.setAttribute("cy",y4p(p));
+  e.setAttribute("rx","11");e.setAttribute("ry","8");
+  e.setAttribute("fill",color);e.setAttribute("stroke",stroke);e.setAttribute("stroke-width","1.5");
+  e.setAttribute("transform",`rotate(-12,${nx},${y4p(p)})`);
+  e.classList.add("answer-el");staffEl.appendChild(e);
+}
+
+function drawX(p){
+  const nx=svgW/2;const yy=y4p(p);
+  const l1=document.createElementNS(SVG_NS,"line");
+  l1.setAttribute("x1",nx-8);l1.setAttribute("y1",yy-8);
+  l1.setAttribute("x2",nx+8);l1.setAttribute("y2",yy+8);
+  l1.setAttribute("stroke","#cf6f6f");l1.setAttribute("stroke-width","2.5");
+  l1.setAttribute("stroke-linecap","round");l1.classList.add("answer-el");staffEl.appendChild(l1);
+  const l2=document.createElementNS(SVG_NS,"line");
+  l2.setAttribute("x1",nx+8);l2.setAttribute("y1",yy-8);
+  l2.setAttribute("x2",nx-8);l2.setAttribute("y2",yy+8);
+  l2.setAttribute("stroke","#cf6f6f");l2.setAttribute("stroke-width","2.5");
+  l2.setAttribute("stroke-linecap","round");l2.classList.add("answer-el");staffEl.appendChild(l2);
+}
+
+function clearAnswerEls(){staffEl.querySelectorAll(".answer-el").forEach(e=>e.remove());}
+
+function pick(){
+  clearAnswerEls();
+  cur=NOTES[Math.floor(Math.random()*NOTES.length)];
+  fb=null;
+  noteNameEl.textContent=cur.sol+" / "+cur.let;
+  feedbackEl.innerHTML='<div class="prompt-text">点击五线谱上的位置来回答</div>';
+}
+
+function updateScore(){
+  scoreTextEl.textContent=correct+"/"+total;
+  pctTextEl.textContent=total>0?Math.round(correct/total*100)+"%":"0%";
+  if(streak>=3){streakTextEl.style.display="";streakTextEl.textContent="🔥 "+streak+"连对";}
+  else streakTextEl.style.display="none";
+}
+
+function playNote(n){
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const f=FREQS[n];if(!f)return;
+    const o1=ctx.createOscillator(),o2=ctx.createOscillator(),g1=ctx.createGain(),g2=ctx.createGain();
+    o1.type="triangle";o1.frequency.value=f;o2.type="sine";o2.frequency.value=f*2;
+    g1.gain.setValueAtTime(0.35,ctx.currentTime);g1.gain.exponentialRampToValueAtTime(0.01,ctx.currentTime+1.2);
+    g2.gain.setValueAtTime(0.1,ctx.currentTime);g2.gain.exponentialRampToValueAtTime(0.01,ctx.currentTime+0.6);
+    o1.connect(g1);o2.connect(g2);g1.connect(ctx.destination);g2.connect(ctx.destination);
+    o1.start();o2.start();o1.stop(ctx.currentTime+1.5);o2.stop(ctx.currentTime+1);
+  }catch(e){}
+}
+
+function handleClick(e){
+  if(fb==="correct")return;
+  const rect=staffEl.getBoundingClientRect();
+  const cy=(e.clientY??e.changedTouches?.[0]?.clientY)
+  if(cy==null)return;
+  const y=cy-rect.top;
+  let best=-6,bestD=Infinity;
+  for(let p=-6;p<=15;p++){const d=Math.abs(y-y4p(p));if(d<bestD){bestD=d;best=p;}}
+  if(bestD>HS)return;
+  if(!cur)return;
+
+  total++;
+  if(best===cur.pos){
+    fb="correct";correct++;streak++;
+    drawNote(cur.pos,"#6fcf6f","#4a4");
+    const msg=MSGS[Math.floor(Math.random()*MSGS.length)];
+    feedbackEl.innerHTML=`<div class="correct-text">${msg}</div><div class="info-text">${cur.sol} = ${cur.let} = ${cur.name}</div><button class="next-btn" id="nextBtn">下一个</button>`;
+    document.getElementById("nextBtn").addEventListener("click",()=>{pick();updateScore();});
+    playNote(cur.name);
+  }else{
+    fb="wrong";streak=0;
+    drawX(best);
+    // also show correct position
+    drawNote(cur.pos,"#e8c8f8","#b89fd8");
+    feedbackEl.innerHTML=`<div class="wrong-text">不对 — 正确位置已显示</div><div class="hint-text">${cur.sol} = ${cur.let} = ${cur.name}</div><button class="next-btn" id="nextBtn">下一个</button>`;
+    document.getElementById("nextBtn").addEventListener("click",()=>{pick();updateScore();});
+  }
+  updateScore();
+}
+
+staffEl.addEventListener("pointerdown",e=>{e.preventDefault();handleClick(e);});
+listenBtn.addEventListener("click",()=>{if(cur)playNote(cur.name);});
+
+drawStaff();
+pick();
+</script>
+</body>
+</html>
