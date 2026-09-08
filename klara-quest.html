@@ -117,6 +117,12 @@ textarea,input{font-family:inherit;-webkit-appearance:none;}
 .dp-add-btn:active{transform:scale(0.95);background:rgba(219,147,158,0.2);}
 .dp-done-card{padding:20px;border-radius:16px;text-align:center;background:linear-gradient(145deg,rgba(219,147,158,0.12),rgba(199,163,163,0.06));border:1px solid rgba(219,147,158,0.25);margin-top:16px;animation:dpBounceIn 0.5s ease-out;}
 
+.hq-panel{margin-top:12px;padding:12px 14px;border-radius:14px;background:linear-gradient(135deg,rgba(180,165,200,0.1),rgba(200,185,210,0.06));border:1px solid rgba(180,165,200,0.2);}
+.hq-btn{display:inline-flex;align-items:center;gap:4px;padding:6px 14px;border-radius:10px;font-size:12px;font-weight:600;color:#9b8ab8;background:rgba(180,165,200,0.12);border:1px solid rgba(180,165,200,0.25);cursor:pointer;transition:all 0.2s;}
+.hq-btn:active{transform:scale(0.95);background:rgba(180,165,200,0.25);}
+.hq-input{width:100%;padding:8px 10px;border-radius:8px;font-size:13px;background:rgba(255,255,255,0.7);border:1px solid rgba(180,165,200,0.2);color:#5a4a5a;outline:none;margin-bottom:6px;font-family:'Noto Sans SC',sans-serif;}
+.hq-sel{padding:5px 8px;border-radius:8px;font-size:12px;background:rgba(255,255,255,0.7);border:1px solid rgba(180,165,200,0.2);color:#5a4a5a;outline:none;font-family:'Noto Sans SC',sans-serif;}
+
 /* PALACE TAB */
 .hide-scrollbar::-webkit-scrollbar{display:none;}
 .pl-flower-wrap{position:relative;width:100%;height:180px;border-radius:16px;margin-bottom:16px;overflow:hidden;}
@@ -465,6 +471,7 @@ function undoLast(){
   else if(last.t==="p"){S.cp=Math.max(0,S.cp-last.p);S.tp=Math.max(0,S.tp-last.p);}
   else if(last.t==="r"){S.cp+=Math.abs(last.p);}
   else if(last.t==="a"){S.cp-=last.p;S.tp-=last.p;}
+  else if(last.t==="hq"){S.cp-=last.p;S.tp-=last.p;}
   /* reverse attrs */
   if(last._attrs){Object.entries(last._attrs).forEach(([k,v])=>{if(S.attrs[k]!==undefined)S.attrs[k]=Math.max(0,S.attrs[k]-v);});}
   /* reverse dailyTasks/dailyPens */
@@ -537,7 +544,7 @@ function renderHistory(){
   let h="";
   if(S.h.length){h+=`<div style="text-align:center;margin-bottom:12px;"><button onclick="undoLast()" style="padding:8px 20px;border-radius:10px;font-size:13px;font-weight:600;color:#c07070;background:rgba(210,140,140,0.1);border:1px solid rgba(210,140,140,0.25);cursor:pointer;">↩️ 撤回上一条</button></div>`;}
   if(!S.h.length){h=`<div style="text-align:center;padding:40px 20px;color:#b09898;font-size:14px;">还没有记录，去完成第一个任务吧！</div>`;}
-  else{h+=`<div style="display:flex;flex-direction:column;gap:4px;">`;S.h.forEach(e=>{const col=e.t==="e"?"#c4868e":e.t==="r"?"#c9b8a8":e.t==="a"?"#d4a840":"#c07070";h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:rgba(255,255,255,0.02);border-radius:8px;border-left:3px solid ${col};"><div><div style="font-size:13px;color:#6a5555;">${e.n}</div><div style="font-size:11px;color:#b09898;margin-top:2px;">${fmtDate(e.d)}</div></div><div style="font-size:14px;font-weight:700;font-family:'Outfit';color:${col};">${e.p>0?"+"+e.p:e.p}</div></div>`;});h+=`</div>`;}
+  else{h+=`<div style="display:flex;flex-direction:column;gap:4px;">`;S.h.forEach(e=>{const col=e.t==="hq"?"#9b8ab8":e.t==="e"?"#c4868e":e.t==="r"?"#c9b8a8":e.t==="a"?"#d4a840":"#c07070";h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:rgba(255,255,255,0.02);border-radius:8px;border-left:3px solid ${col};"><div><div style="font-size:13px;color:#6a5555;">${e.n}</div><div style="font-size:11px;color:#b09898;margin-top:2px;">${fmtDate(e.d)}</div></div><div style="font-size:14px;font-weight:700;font-family:'Outfit';color:${col};">${e.p>0?"+"+e.p:e.p}</div></div>`;});h+=`</div>`;}
   document.getElementById("content-history").innerHTML=h;
 }
 /* ═══════ ACHIEVEMENT HELPERS ═══════ */
@@ -910,8 +917,43 @@ function renderDaily(){
       h+=`<div style="font-family:'Outfit';font-size:18px;font-weight:800;color:#c4868e;margin-top:6px;">+${totalPts} ✨</div></div>`;
     }
   }
+  /* ── hidden quest panel ── */
+  h+=`<div style="margin-top:14px;"><div onclick="toggleHqPanel()" style="display:flex;align-items:center;gap:6px;cursor:pointer;"><span style="font-size:13px;">🎯</span><span style="font-size:13px;font-weight:600;color:#9b8ab8;">隐藏任务</span><span style="font-size:11px;color:#c0b0d0;transition:transform 0.3s;display:inline-block;transform:rotate(${_hqOpen?'180':'0'}deg);">▼</span></div>`;
+  if(_hqOpen){
+    h+=`<div class="hq-panel"><input id="hq_name" class="hq-input" placeholder="任务名称（如：做一道新菜）"><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:6px;"><span style="font-size:12px;color:#9b8ab8;">积分</span><input id="hq_pts" class="hq-input" type="number" value="8" min="1" max="50" style="width:50px;margin:0;"><span style="font-size:12px;color:#9b8ab8;">属性</span><select id="hq_attr1" class="hq-sel"><option value="">无</option></select><input id="hq_av1" class="hq-input" type="number" value="1" min="1" max="3" style="width:40px;margin:0;"><select id="hq_attr2" class="hq-sel"><option value="">无</option></select><input id="hq_av2" class="hq-input" type="number" value="1" min="1" max="3" style="width:40px;margin:0;"></div><button class="hq-btn" onclick="submitHQ()">✨ 完成隐藏任务</button></div>`;
+  }
+  h+=`</div>`;
+
   h+=`</div>`;
   document.getElementById("content-daily").innerHTML=h;
+  if(_hqOpen)populateHqSelects();
+}
+var _hqOpen=false;
+function toggleHqPanel(){_hqOpen=!_hqOpen;renderDaily();}
+function populateHqSelects(){
+  var s1=document.getElementById('hq_attr1'),s2=document.getElementById('hq_attr2');
+  if(!s1)return;
+  ATTRS.forEach(function(a){
+    var o1=document.createElement('option');o1.value=a.id;o1.textContent=a.em+a.name;s1.appendChild(o1);
+    var o2=document.createElement('option');o2.value=a.id;o2.textContent=a.em+a.name;s2.appendChild(o2);
+  });
+}
+function submitHQ(){
+  var name=document.getElementById('hq_name').value.trim();
+  if(!name){flash('任务名不能为空！','fail');return;}
+  var pts=Math.max(1,Math.min(50,parseInt(document.getElementById('hq_pts').value)||8));
+  var aMap={};
+  var a1=document.getElementById('hq_attr1').value,av1=Math.max(0,Math.min(3,parseInt(document.getElementById('hq_av1').value)||0));
+  var a2=document.getElementById('hq_attr2').value,av2=Math.max(0,Math.min(3,parseInt(document.getElementById('hq_av2').value)||0));
+  if(a1&&av1>0)aMap[a1]=av1;
+  if(a2&&av2>0&&a2!==a1)aMap[a2]=av2;
+  S.cp+=pts;S.tp+=pts;
+  applyAttrs(aMap);
+  S.h.unshift({t:'hq',n:'🎯 '+name,p:pts,d:new Date().toISOString(),_id:'hq_'+Date.now(),_attrs:{...aMap}});
+  if(S.h.length>200)S.h.length=200;
+  var td=todayStr();S.dailyPts[td]=(S.dailyPts[td]||0)+pts;
+  saveState();_hqOpen=false;renderDaily();render();
+  flash('🎯 隐藏任务完成：'+name+'  +'+pts,'earn');
 }
 
 /* ═══════ PALACE / SHUBIAN MODULE ═══════ */
