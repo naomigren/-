@@ -480,7 +480,7 @@ function undoLast(){
   /* reverse dailyTasks/dailyPens */
   if(last._id&&last.d){const td=last.d.slice(0,10);
     if(last.t==="e"&&S.dailyTasks[td]){const idx=S.dailyTasks[td].lastIndexOf(last._id);if(idx!==-1)S.dailyTasks[td].splice(idx,1);S.taskCounts[last._id]=Math.max(0,(S.taskCounts[last._id]||1)-1);S.dailyPts[td]=Math.max(0,(S.dailyPts[td]||0)-last.p);}
-    if(last.t==="p"&&S.dailyPens[td]){const idx=S.dailyPens[td].lastIndexOf(last._id);if(idx!==-1)S.dailyPens[td].splice(idx,1);}
+    if(last.t==="p"){var _ptd=td;if(!S.dailyPens[_ptd]||!S.dailyPens[_ptd].includes(last._id)){_ptd=todayStr();}if(S.dailyPens[_ptd]){const idx=S.dailyPens[_ptd].lastIndexOf(last._id);if(idx!==-1)S.dailyPens[_ptd].splice(idx,1);}}
   }
   saveState();render();renderDaily();flash("↩️ 已撤回："+last.n,"penalty");
 }
