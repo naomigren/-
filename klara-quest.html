@@ -454,7 +454,7 @@ function doPen(id,name,pts,em,attrMap){
   S.h.unshift({t:"p",n:name,p:pts,d:new Date().toISOString(),_id:id,_attrs:{..._a}});if(S.h.length>200)S.h.length=200;
   S.cp=Math.max(0,S.cp+pts);S.tp=Math.max(0,S.tp+pts);applyAttrs(_a);
   const td=todayStr();if(!S.dailyPens[td])S.dailyPens[td]=[];S.dailyPens[td].push(id);
-  saveState();render();const ms=PEN_MSG[id];flash(ms?rp(ms):`${name} ${pts}分`,"penalty");
+  saveState();render();renderDaily();const ms=PEN_MSG[id];flash(ms?rp(ms):`${name} ${pts}分`,"penalty");
   setTimeout(()=>{checkAchievements();checkCardFragments();},300);
 }
 function doRedeem(name,cost){if(S.cp<cost){flash("积分不够啦，再攒攒！","fail");return;}S.h.unshift({t:"r",n:name,p:-cost,d:new Date().toISOString()});S.cp-=cost;saveState();render();flash(`🎁 兑换成功：${name}！好好享受！`,"redeem");}
@@ -479,7 +479,7 @@ function undoLast(){
     if(last.t==="e"&&S.dailyTasks[td]){const idx=S.dailyTasks[td].lastIndexOf(last._id);if(idx!==-1)S.dailyTasks[td].splice(idx,1);S.taskCounts[last._id]=Math.max(0,(S.taskCounts[last._id]||1)-1);S.dailyPts[td]=Math.max(0,(S.dailyPts[td]||0)-last.p);}
     if(last.t==="p"&&S.dailyPens[td]){const idx=S.dailyPens[td].lastIndexOf(last._id);if(idx!==-1)S.dailyPens[td].splice(idx,1);}
   }
-  saveState();render();flash("↩️ 已撤回："+last.n,"penalty");
+  saveState();render();renderDaily();flash("↩️ 已撤回："+last.n,"penalty");
 }
 function addCT(){const n=document.getElementById("ct_name").value.trim();if(!n){flash("任务名不能为空！","fail");return;}const pts=Math.max(1,Math.min(500,parseInt(document.getElementById("ct_pts").value)||5));const em=document.getElementById("ct_em").value||"⭐";const pr=document.getElementById("ct_pr").value.trim()||`完成了${n}，好棒！`;S.ct.push({id:"c_"+Date.now(),name:n,pts,em,praise:pr,attrMap:{will:1}});saveState();render();flash(`✨ 新任务已添加：${n}`,"earn");}
 function rmCT(id){S.ct=S.ct.filter(t=>t.id!==id);saveState();render();flash("任务已删除","penalty");}
