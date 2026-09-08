@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<script>if(!location.search.includes('_v=0908b')){location.replace(location.pathname+'?_v=0908b');}</script>
+<script>if(!location.search.includes('_v=0908c')){location.replace(location.pathname+'?_v=0908c');}</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="克拉拉养成">
@@ -740,7 +740,10 @@ function renderAchieve(){
   setTimeout(initCarouselDots,50);
 }
 /* ═══════ INIT ═══════ */
-try{loadState();render();setTimeout(checkCardFragments,500);ensureDailyPlan();(function(){function _sr(){var n=new Date(),t=new Date(n.getFullYear(),n.getMonth(),n.getDate(),23,0,0,0);if(n>=t)t.setDate(t.getDate()+1);setTimeout(function(){ensureDailyPlan();render();_sr();},t-n);}_sr();})();}catch(e){document.body.innerHTML+='<pre style="color:red;padding:20px;font-size:12px;">ERROR: '+e.message+'\n'+e.stack+'</pre>';}
+try{loadState();
+/* one-time cleanup: sync dailyPens with S.h */
+(function(){var penIds={};S.h.forEach(function(e){if(e.t==="p"&&e._id&&e.d){var td=e.d.slice(0,10);var eh=parseInt(e.d.slice(11,13))||0;var key=eh>=23?(function(){var dd=new Date(td);dd.setDate(dd.getDate()+1);return dd.toISOString().slice(0,10);}()):td;if(!penIds[key])penIds[key]={};penIds[key][e._id]=(penIds[key][e._id]||0)+1;}});Object.keys(S.dailyPens).forEach(function(d){if(!penIds[d]){S.dailyPens[d]=[];return;}var clean=[];S.dailyPens[d].forEach(function(pid){if(penIds[d][pid]&&penIds[d][pid]>0){clean.push(pid);penIds[d][pid]--;}});S.dailyPens[d]=clean;});saveState();})();
+render();setTimeout(checkCardFragments,500);ensureDailyPlan();(function(){function _sr(){var n=new Date(),t=new Date(n.getFullYear(),n.getMonth(),n.getDate(),23,0,0,0);if(n>=t)t.setDate(t.getDate()+1);setTimeout(function(){ensureDailyPlan();render();_sr();},t-n);}_sr();})();}catch(e){document.body.innerHTML+='<pre style="color:red;padding:20px;font-size:12px;">ERROR: '+e.message+'\n'+e.stack+'</pre>';}
 /* ═══════ DAILY PLAN ═══════ */
 function ensureDailyPlan(){
   const td=todayStr();
