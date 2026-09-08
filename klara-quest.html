@@ -896,7 +896,9 @@ function renderDaily(){
         if(!aMap){var ct=S.ct.find(function(c){return c.id===item.taskId;});if(ct)aMap=ct.attrMap;}
         if(aMap)Object.entries(aMap).forEach(function(e){if(e[1]>0)_planAttrs[e[0]]=(_planAttrs[e[0]]||0)+e[1];});
       });
-      var _todayPens=S.dailyPens[todayStr()]||[];
+      var _tdStr=todayStr();
+      var _todayPens=[];
+      S.h.forEach(function(e){if(e.t==="p"&&e.d){var ed=e.d.slice(0,10);var eh=parseInt(e.d.slice(11,13))||0;var realTd=eh>=23?(function(){var dd=new Date(ed);dd.setDate(dd.getDate()+1);return dd.toISOString().slice(0,10);}()):ed;if(realTd===_tdStr)_todayPens.push(e._id);}});
       var _hasPen=_todayPens.length>0;
       var _paKeys=Object.keys(_planAttrs).filter(function(k){return _planAttrs[k]>0;});
       if(_paKeys.length>0||_hasPen){
