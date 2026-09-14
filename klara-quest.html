@@ -760,6 +760,7 @@ function ensureDailyPlan(){
 }
 
 /* ═══════ 衰减结算 ═══════ */
+const LANG_PENALTY=2;   /* 每个未完成的语言任务扣的分数 */
 const DECAY_SKILLS=[
   {attr:"dance", name:"舞蹈", em:"💃", tasks:["dance_t"],            grace:4},
   {attr:"piano", name:"乐器", em:"🎹", tasks:["piano","compose"],    grace:4},
@@ -789,9 +790,10 @@ function settleDecay(){
     var plan=(S.planArchive&&S.planArchive[day])||null;
     if(plan){
       var deItems=plan.filter(function(i){return DE_TASKS.has(i.taskId);});
-      if(deItems.length&&deItems.some(function(i){return !i.done;})){
-        var miss=deItems.filter(function(i){return !i.done;}).map(function(i){return i.name;}).join("、");
-        _applyDecay("lang",1,"语言任务没完成："+miss,day,log);
+      var undone=deItems.filter(function(i){return !i.done;});
+      if(undone.length){
+        var miss=undone.map(function(i){return i.name;}).join("、");
+        _applyDecay("lang",undone.length*LANG_PENALTY,"语言"+undone.length+"项没完成："+miss,day,log);
       }
     }
     /* ── 技能：连续 grace 天零打卡，每满一轮 -1 ── */
