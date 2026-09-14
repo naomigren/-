@@ -426,7 +426,7 @@ function initAttrs(){const a={};ATTRS.forEach(at=>a[at.id]=0);return a;}
 function initCards(){const c={};CARD_DEFS.forEach(cd=>{c[cd.id]=new Array(cd.total).fill(false);});return c;}
 let S;
 function loadState(){
-  try{const s=localStorage.getItem("lila-quest-v3");if(s){S=JSON.parse(s);S.ct=S.ct||[];S.cs=S.cs||[];S.cpn=S.cpn||[];S.attrs=S.attrs?{...initAttrs(),...S.attrs}:initAttrs();S.de=S.de||0;S.ach=S.ach||{};S.taskCounts=S.taskCounts||{};S.dailyTasks=S.dailyTasks||{};S.dailyPens=S.dailyPens||{};S.dailyPts=S.dailyPts||{};S.dailyPlan=S.dailyPlan||{date:"",items:[]};
+  try{const s=localStorage.getItem("lila-quest-v3");if(s){S=JSON.parse(s);S.ct=S.ct||[];S.cs=S.cs||[];S.cpn=S.cpn||[];S.attrs=S.attrs?{...initAttrs(),...S.attrs}:initAttrs();S.de=S.de||0;S.ach=S.ach||{};S.taskCounts=S.taskCounts||{};S.dailyTasks=S.dailyTasks||{};S.dailyPens=S.dailyPens||{};S.dailyPts=S.dailyPts||{};S.dailyPlan=S.dailyPlan||{date:"",items:[]};S.planArchive=S.planArchive||{};S.decay=S.decay||{last:"",log:[],seen:true};
   if(!S.cards)S.cards=initCards(); else{const ic=initCards();Object.keys(ic).forEach(k=>{if(!S.cards[k])S.cards[k]=ic[k];});}S.pl=S.pl||{days:{},rewards:{r30:"",r60:"",r90:""},visionItems:[]};if(S.attrs.mood!==undefined){delete S.attrs.mood;}if(!S.attrs.beauty||S.attrs.beauty===0){var _bm={skincare:3,outfit:3,posture:3,exercise:2,run:2,badminton:1,dance_t:2,bath:2,no_sugar:2,no_snack:2,diet_meal:2,water:2,stretch:1,early_sleep:2,brush:1,foot_soak:1,vitamin:1};var _bt=0;var tc=S.taskCounts||{};Object.keys(_bm).forEach(function(k){_bt+=(_bm[k]||0)*(tc[k]||0);});S.attrs.beauty=_bt;saveState();}if(typeof loadImagesFromLS==="function")loadImagesFromLS();return;}}catch(e){}
   S={cp:0,tp:0,h:[],rd:[],bc:false,ct:[],cs:[],cpn:[],attrs:initAttrs(),de:0,ach:{},taskCounts:{},dailyTasks:{},dailyPens:{},dailyPts:{},cards:initCards(),dailyPlan:{date:"",items:[]},wishes:{},pl:{days:{},rewards:{r30:"",r60:"",r90:""},visionItems:[]}};
 }
@@ -743,12 +743,99 @@ function renderAchieve(){
 try{loadState();
 /* one-time cleanup: sync dailyPens with S.h */
 (function(){var penIds={};S.h.forEach(function(e){if(e.t==="p"&&e._id&&e.d){var td=e.d.slice(0,10);var eh=parseInt(e.d.slice(11,13))||0;var key=eh>=23?(function(){var dd=new Date(td);dd.setDate(dd.getDate()+1);return dd.toISOString().slice(0,10);}()):td;if(!penIds[key])penIds[key]={};penIds[key][e._id]=(penIds[key][e._id]||0)+1;}});Object.keys(S.dailyPens).forEach(function(d){if(!penIds[d]){S.dailyPens[d]=[];return;}var clean=[];S.dailyPens[d].forEach(function(pid){if(penIds[d][pid]&&penIds[d][pid]>0){clean.push(pid);penIds[d][pid]--;}});S.dailyPens[d]=clean;});saveState();})();
-render();setTimeout(checkCardFragments,500);ensureDailyPlan();(function(){function _sr(){var n=new Date(),t=new Date(n.getFullYear(),n.getMonth(),n.getDate(),23,0,0,0);if(n>=t)t.setDate(t.getDate()+1);setTimeout(function(){ensureDailyPlan();render();_sr();},t-n);}_sr();})();}catch(e){document.body.innerHTML+='<pre style="color:red;padding:20px;font-size:12px;">ERROR: '+e.message+'\n'+e.stack+'</pre>';}
+render();setTimeout(checkCardFragments,500);ensureDailyPlan();setTimeout(function(){if(typeof renderDecayBanner==="function")renderDecayBanner();},300);(function(){function _sr(){var n=new Date(),t=new Date(n.getFullYear(),n.getMonth(),n.getDate(),23,0,0,0);if(n>=t)t.setDate(t.getDate()+1);setTimeout(function(){ensureDailyPlan();render();_sr();},t-n);}_sr();})();}catch(e){document.body.innerHTML+='<pre style="color:red;padding:20px;font-size:12px;">ERROR: '+e.message+'\n'+e.stack+'</pre>';}
 /* ═══════ DAILY PLAN ═══════ */
 function ensureDailyPlan(){
   const td=todayStr();
-  if(!S.dailyPlan||S.dailyPlan.date!==td){S.dailyPlan={date:td,items:[],msg:"",allDoneMsg:""};saveState();}
+  if(!S.dailyPlan||S.dailyPlan.date!==td){
+    if(S.dailyPlan&&S.dailyPlan.date&&S.dailyPlan.items&&S.dailyPlan.items.length){
+      S.planArchive=S.planArchive||{};
+      S.planArchive[S.dailyPlan.date]=S.dailyPlan.items.map(function(i){return {taskId:i.taskId,name:i.name,em:i.em,done:!!i.done};});
+      var _ks=Object.keys(S.planArchive).sort();
+      while(_ks.length>120){delete S.planArchive[_ks.shift()];}
+    }
+    S.dailyPlan={date:td,items:[],msg:"",allDoneMsg:""};saveState();
+  }
+  settleDecay();
 }
+
+/* ═══════ 衰减结算 ═══════ */
+const DECAY_SKILLS=[
+  {attr:"dance", name:"舞蹈", em:"💃", tasks:["dance_t"],            grace:4},
+  {attr:"piano", name:"乐器", em:"🎹", tasks:["piano","compose"],    grace:4},
+  {attr:"drawing",name:"画画",em:"🖌️", tasks:["drawing"],            grace:4}
+];
+function _dstr(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function _shift(ds,n){var d=new Date(ds+"T12:00:00");d.setDate(d.getDate()+n);return _dstr(d);}
+function _applyDecay(attr,amt,label,day,log){
+  var cur=S.attrs[attr]||0;
+  if(cur<=0)return;                      /* 从没开始的属性不衰减 */
+  var next=Math.max(0,cur-amt);
+  if(next===cur)return;
+  S.attrs[attr]=next;
+  log.push({d:day,attr:attr,amt:cur-next,label:label});
+}
+function settleDecay(){
+  S.decay=S.decay||{last:"",log:[],seen:true};
+  var today=todayStr();
+  var yest=_shift(today,-1);
+  if(!S.decay.last){S.decay.last=yest;saveState();return;}   /* 首次运行不追溯 */
+  if(S.decay.last>=yest)return;
+  var log=[];
+  var day=_shift(S.decay.last,1);
+  var guard=0;
+  while(day<=yest&&guard++<400){
+    /* ── 语言：当天计划里的语言任务，有一个没完成就 -1 ── */
+    var plan=(S.planArchive&&S.planArchive[day])||null;
+    if(plan){
+      var deItems=plan.filter(function(i){return DE_TASKS.has(i.taskId);});
+      if(deItems.length&&deItems.some(function(i){return !i.done;})){
+        var miss=deItems.filter(function(i){return !i.done;}).map(function(i){return i.name;}).join("、");
+        _applyDecay("lang",1,"语言任务没完成："+miss,day,log);
+      }
+    }
+    /* ── 技能：连续 grace 天零打卡，每满一轮 -1 ── */
+    DECAY_SKILLS.forEach(function(sk){
+      var streak=0;
+      for(var i=0;i<sk.grace+2;i++){
+        var d2=_shift(day,-i);
+        var done=(S.dailyTasks[d2]||[]).some(function(id){return sk.tasks.indexOf(id)!==-1;});
+        if(done)break;
+        streak++;
+      }
+      if(streak>0&&streak%sk.grace===0){
+        _applyDecay(sk.attr,1,sk.em+" "+sk.name+"连续"+streak+"天没练",day,log);
+      }
+    });
+    day=_shift(day,1);
+  }
+  S.decay.last=yest;
+  if(log.length){
+    S.decay.log=(S.decay.log||[]).concat(log).slice(-60);
+    S.decay.seen=false;
+  }
+  saveState();
+  if(log.length&&typeof renderDecayBanner==="function")renderDecayBanner();
+}
+function renderDecayBanner(){
+  var box=document.getElementById("decayBanner");if(!box)return;
+  if(S.decay&&S.decay.seen===false&&S.decay.log&&S.decay.log.length){
+    var recent=S.decay.log.slice(-8).reverse();
+    var rows=recent.map(function(e){
+      var a=ATTRS.find(function(x){return x.id===e.attr;});
+      return '<div style="display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid rgba(192,112,112,0.12);font-size:12px;">'
+        +'<span style="color:#8a7a7a;">'+e.d.slice(5)+' '+e.label+'</span>'
+        +'<span style="color:#c07070;font-weight:700;white-space:nowrap;">'+(a?a.em+a.name:e.attr)+' −'+e.amt+'</span></div>';
+    }).join("");
+    box.innerHTML='<div style="padding:14px;margin-bottom:14px;border-radius:12px;background:rgba(210,140,140,0.07);border:1px solid rgba(210,140,140,0.22);">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">'
+      +'<div style="font-size:13px;font-weight:700;color:#c07070;">⏳ 属性衰减结算</div>'
+      +'<button onclick="dismissDecay()" style="padding:3px 10px;border-radius:8px;font-size:11px;background:rgba(210,140,140,0.15);color:#c08888;border:1px solid rgba(210,140,140,0.2);">知道了</button></div>'
+      +rows+'</div>';
+    box.classList.remove("hidden");
+  }else{box.innerHTML="";box.classList.add("hidden");}
+}
+function dismissDecay(){S.decay.seen=true;saveState();renderDecayBanner();}
 function findTaskDef(taskId){
   for(const cat of Object.values(TASKS)){const t=cat.items.find(i=>i.id===taskId);if(t)return t;}
   const ct=S.ct.find(t=>t.id===taskId);if(ct)return ct;
@@ -853,7 +940,8 @@ function renderDaily(){
   const doneCount=plan.items.filter(i=>i.done).length;
   const totalCount=plan.items.length;
   const allDone=totalCount>0&&doneCount===totalCount;
-  let h=`<div style="margin:0 0 20px;background:rgba(255,255,255,0.45);border-radius:16px;padding:14px 16px;border:1px solid rgba(219,147,158,0.18);">`;
+  let h=`<div id="decayBanner" class="hidden"></div>`;
+  h+=`<div style="margin:0 0 20px;background:rgba(255,255,255,0.45);border-radius:16px;padding:14px 16px;border:1px solid rgba(219,147,158,0.18);">`;
   h+=`<div onclick="toggleDpExpand()" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;"><div style="display:flex;align-items:center;gap:8px;"><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,#c4868e,#d4a0a0);color:#fff;font-family:Outfit;font-size:13px;font-weight:700;line-height:1;">${new Date().getDate()}</span><span style="font-size:14px;font-weight:600;color:#8a6a6e;">今日计划</span><span style="font-size:12px;color:#b09898;font-family:'Outfit';">${doneCount}/${totalCount}</span></div><span style="font-size:12px;color:#c4868e;transition:transform 0.3s;display:inline-block;transform:rotate(${_dpExpanded?'180':'0'}deg);">▼</span></div>`;
   if(totalCount>0){
     const pct=Math.round(doneCount/totalCount*100);
@@ -985,6 +1073,7 @@ function renderDaily(){
 
   h+=`</div>`;
   document.getElementById("content-daily").innerHTML=h;
+  if(typeof renderDecayBanner==="function")renderDecayBanner();
   if(_hqOpen)populateHqSelects();
 }
 var _hqOpen=false;
