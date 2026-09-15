@@ -15,8 +15,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Caveat:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
-html{background:#fdf2f0;}
-body{min-height:100vh;background:linear-gradient(160deg,#fdf2f0 0%,#f5e6e0 40%,#f0e0da 100%);color:#5a4a4a;font-family:'Noto Sans SC','Segoe UI',sans-serif;overflow-x:hidden;-webkit-tap-highlight-color:transparent;}
+html{background:#fdf2f0;overflow-x:hidden;max-width:100%;}
+body{min-height:100vh;width:100%;max-width:100%;overflow-x:hidden;overscroll-behavior-x:none;touch-action:pan-y;position:relative;background:linear-gradient(160deg,#fdf2f0 0%,#f5e6e0 40%,#f0e0da 100%);color:#5a4a4a;font-family:'Noto Sans SC','Segoe UI',sans-serif;overflow-x:hidden;-webkit-tap-highlight-color:transparent;}
 button{cursor:pointer;border:none;background:none;font-family:inherit;-webkit-tap-highlight-color:transparent;}
 textarea,input{font-family:inherit;-webkit-appearance:none;}
 ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(219,147,158,0.3);border-radius:4px;}
@@ -31,7 +31,7 @@ textarea,input{font-family:inherit;-webkit-appearance:none;}
 .tab-btn{flex:1;padding:10px;border-radius:10px;font-size:13px;transition:all 0.2s ease;}
 .tab-active{font-weight:600;color:#fff;background:linear-gradient(135deg,rgba(219,147,158,0.3),rgba(199,163,163,0.2));}
 .tab-inactive{font-weight:400;color:#a08888;background:transparent;}
-.task-btn{display:flex;align-items:center;justify-content:space-between;width:100%;padding:12px 14px;border-radius:10px;color:#5a4a4a;border:1px solid rgba(219,147,158,0.2);background:rgba(255,255,255,0.5);}
+.task-btn{display:flex;align-items:center;justify-content:space-between;width:100%;min-width:0;box-sizing:border-box;padding:12px 14px;border-radius:10px;color:#5a4a4a;border:1px solid rgba(219,147,158,0.2);background:rgba(255,255,255,0.5);}
 .task-btn-big{background:linear-gradient(135deg,rgba(219,147,158,0.12),rgba(199,163,163,0.08));border:1px solid rgba(219,147,158,0.25);}
 .pen-btn{display:flex;align-items:center;justify-content:space-between;width:100%;padding:12px 14px;background:rgba(210,140,140,0.06);border-radius:10px;border:1px solid rgba(210,140,140,0.15);color:#c08888;}
 .pts{font-size:13px;font-weight:700;font-family:'Outfit';white-space:nowrap;margin-left:8px;}
@@ -67,7 +67,7 @@ textarea,input{font-family:inherit;-webkit-appearance:none;}
 
 /* CARD FRAGMENT SYSTEM */
 .card-carousel-wrap{position:relative;margin:0 0 20px;overflow:hidden;}
-.card-carousel{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;gap:14px;padding:0 8px;}
+.card-carousel{display:flex;overflow-x:auto;touch-action:pan-x;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;gap:14px;padding:0 8px;}
 .card-carousel::-webkit-scrollbar{display:none;}
 .card-slot{flex:0 0 82vw;max-width:360px;scroll-snap-align:center;border-radius:16px;overflow:hidden;position:relative;background:#3a3035;box-shadow:0 6px 24px rgba(80,60,68,0.22);}
 @keyframes cardGlow{0%,100%{box-shadow:0 6px 24px rgba(212,180,140,0.25);}50%{box-shadow:0 8px 32px rgba(212,180,140,0.45);}}
@@ -129,6 +129,7 @@ textarea,input{font-family:inherit;-webkit-appearance:none;}
 
 /* PALACE TAB */
 .hide-scrollbar::-webkit-scrollbar{display:none;}
+.hide-scrollbar{touch-action:pan-x;overscroll-behavior-x:contain;}
 .pl-flower-wrap{position:relative;width:100%;height:180px;border-radius:16px;margin-bottom:16px;overflow:hidden;}
 .pl-flower-wrap canvas{width:100%;height:100%;display:block;}
 .pl-header{text-align:center;padding:18px 16px 14px;background:rgba(253,250,249,0.85);backdrop-filter:blur(8px);border-radius:16px;box-shadow:0 2px 12px rgba(138,90,96,0.06);margin-bottom:16px;position:relative;overflow:hidden;}
@@ -508,7 +509,7 @@ function render(){
 function renderTasks(){
   let h="";
   if(!S.bc)h+=`<button onclick="doBonus()" style="width:100%;padding:14px 16px;margin-bottom:20px;border-radius:12px;background:linear-gradient(135deg,#c4868e,#d4a0a0);color:#fff;font-size:15px;font-weight:600;animation:glow 2s ease-in-out infinite;">🎁 领取开学首日奖励 +50分</button>`;
-  Object.entries(TASKS).forEach(([k,cat])=>{h+=`<div style="margin-bottom:20px;"><div class="section-title" style="color:#8a6a6e;">${cat.label}</div><div style="display:flex;flex-direction:column;gap:6px;">`;cat.items.forEach(t=>{const big=t.pts>=100;h+=`<div style="display:flex;align-items:center;gap:4px;"><button class="task-btn${big?" task-btn-big":""}" onclick="doTask('${t.id}',\`${t.name}\`,${t.pts},'${t.em}')" style="flex:1;"><span style="font-size:14px;text-align:left;">${t.em} ${t.name}</span><span class="pts" style="color:${big?"#e8b4b8":"#c4868e"};">+${t.pts}</span></button><button onclick="addToPlan('${t.id}')" style="padding:6px 8px;border-radius:8px;font-size:13px;background:rgba(219,147,158,0.08);border:1px solid rgba(219,147,158,0.15);" title="加入今日计划">📌</button></div>`;});h+=`</div></div>`;});
+  Object.entries(TASKS).forEach(([k,cat])=>{h+=`<div style="margin-bottom:20px;"><div class="section-title" style="color:#8a6a6e;">${cat.label}</div><div style="display:flex;flex-direction:column;gap:6px;">`;cat.items.forEach(t=>{const big=t.pts>=100;h+=`<div style="display:flex;align-items:center;gap:4px;min-width:0;max-width:100%;"><button class="task-btn${big?" task-btn-big":""}" onclick="doTask('${t.id}',\`${t.name}\`,${t.pts},'${t.em}')" style="flex:1 1 0;min-width:0;"><span style="font-size:14px;text-align:left;min-width:0;overflow-wrap:anywhere;">${t.em} ${t.name}</span><span class="pts" style="color:${big?"#e8b4b8":"#c4868e"};">+${t.pts}</span></button><button onclick="addToPlan('${t.id}')" style="flex:0 0 auto;padding:6px 8px;border-radius:8px;font-size:13px;background:rgba(219,147,158,0.08);border:1px solid rgba(219,147,158,0.15);" title="加入今日计划">📌</button></div>`;});h+=`</div></div>`;});
   h+=`<div style="margin-bottom:20px;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><div class="section-title" style="color:#8a6a6e;">🌟 自定义任务</div><button onclick="document.getElementById('ctForm').classList.toggle('hidden')" style="padding:4px 12px;border-radius:8px;font-size:12px;font-weight:600;background:linear-gradient(135deg,#c4868e,#b07078);color:#fff;">+ 添加</button></div>`;
   h+=`<div id="ctForm" class="hidden" style="padding:14px;margin-bottom:12px;border-radius:12px;background:rgba(219,147,158,0.08);border:1px solid rgba(219,147,158,0.2);"><div style="margin-bottom:10px;"><div style="font-size:12px;color:#c4868e;margin-bottom:4px;">任务名称</div><input id="ct_name" class="inp" placeholder="比如：读书30分钟"></div><div style="display:flex;gap:10px;margin-bottom:10px;"><div style="flex:1;"><div style="font-size:12px;color:#c4868e;margin-bottom:4px;">积分</div><input id="ct_pts" type="number" value="5" class="inp"></div><div style="flex:1;"><div style="font-size:12px;color:#c4868e;margin-bottom:4px;">图标</div><input id="ct_em" value="⭐" class="inp"></div></div><div style="margin-bottom:12px;"><div style="font-size:12px;color:#c4868e;margin-bottom:4px;">完成褒奖</div><input id="ct_pr" class="inp" placeholder="比如：好棒！"></div><button onclick="addCT()" style="width:100%;padding:10px;border-radius:8px;font-size:14px;font-weight:600;background:linear-gradient(135deg,#c4868e,#d4a0a0);color:#fff;">确认添加</button></div>`;
   if(S.ct.length){h+=`<div style="display:flex;flex-direction:column;gap:6px;">`;S.ct.forEach(t=>{h+=`<div style="display:flex;align-items:center;width:100%;padding:12px 14px;background:rgba(219,147,158,0.06);border-radius:10px;border:1px solid rgba(219,147,158,0.15);"><button onclick="doTask('${t.id}',\`${t.name}\`,${t.pts},'${t.em}',\`${t.praise||""}\`)" style="flex:1;display:flex;align-items:center;justify-content:space-between;color:#5a4a4a;"><span style="font-size:14px;">${t.em} ${t.name}</span><span class="pts" style="color:#c4868e;">+${t.pts}</span></button><button onclick="rmCT('${t.id}')" style="margin-left:8px;padding:4px 8px;border-radius:6px;font-size:11px;color:#c07070;background:rgba(210,140,140,0.1);">删除</button></div>`;});h+=`</div>`;}h+=`</div>`;
