@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<script>if(!location.search.includes('_v=0916t')){location.replace(location.pathname+'?_v=0916t');}</script>
+<script>if(!location.search.includes('_v=0916u')){location.replace(location.pathname+'?_v=0916u');}</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="克拉拉养成">
@@ -1394,6 +1394,7 @@ var RK_REBOUND=1.0;         /* 体重比晋升时反弹超过这么多就掉一�
 var RK_MIN_STAY=7;          /* 每一品至少停留天数 */
 var RK_DIET_MISS=3;         /* 连续几天没打卡「吃减脂餐」掉一品 */
 var RK_CHEAT_PER_WEEK=1;    /* 每周放纵日次数，放纵日不触发掉品 */
+var RK_DIET_PER_DAY=3;      /* 一天打满几次「吃减脂餐」才算完整打卡日 */
 var RK_EX_DAYS=4;           /* 身体区每一品：7 天里至少几天有运动 */
 var RK_EX_FULL=["exercise","badminton"];  /* 算一整天运动的任务 */
 var RK_EX_HALF=["dance_t"];                /* 只跳舞的日子算半天 */
@@ -1473,7 +1474,7 @@ function settleRank(){
 }
 function rkFullDays(){
   var R=S.rank,td=todayStr(),n=0,d=R.since,g=0;
-  while(d<=td&&g++<400){var t=S.dailyTasks[d]||[];if(t.indexOf("diet_meal")!==-1&&t.indexOf("no_takeout")!==-1&&t.indexOf("no_snack")!==-1)n++;d=_shift(d,1);}
+  while(d<=td&&g++<400){var t=S.dailyTasks[d]||[];var dm=t.filter(function(x){return x==="diet_meal";}).length;if(dm>=RK_DIET_PER_DAY&&t.indexOf("no_takeout")!==-1&&t.indexOf("no_snack")!==-1)n++;d=_shift(d,1);}
   return n;
 }
 function rkExDays(){
@@ -1494,7 +1495,7 @@ function rkReqs(){
   if(i<8){
     out.push({n:"本品停留满 "+RK_MIN_STAY+" 天（"+Math.min(stay,RK_MIN_STAY)+"/"+RK_MIN_STAY+"）",ok:stay>=RK_MIN_STAY});
     var fd=rkFullDays();
-    out.push({n:"本品完整打卡 7 天：减脂餐+没吃外卖+没吃零食（"+Math.min(fd,7)+"/7）",ok:fd>=7});
+    out.push({n:"本品完整打卡 7 天：三顿减脂餐+没吃外卖+没吃零食（"+Math.min(fd,7)+"/7）",ok:fd>=7});
     var ex=rkExDays();
     out.push({n:"本品运动满 "+RK_EX_DAYS+" 天：运动/羽毛球算 1 天，只跳舞算半天（"+Math.min(ex,RK_EX_DAYS)+"/"+RK_EX_DAYS+"）",ok:ex>=RK_EX_DAYS});
     var base=rkMeasByTs(R.baseTs),lt=rkLatest(),ok=false,txt;
@@ -1625,8 +1626,9 @@ function rkRenderCard(){
   if(cheatToday){h+='<div class="rk-req ok"><b>✓</b><span>今天是放纵日，不会掉品</span></div>';}
   else{
     [["no_takeout","今天没点外卖"],["no_snack","今天没吃零食"]].forEach(function(p){var ok=tt.indexOf(p[0])!==-1;h+='<div class="rk-req'+(ok?' ok':' warn')+'"><b>'+(ok?'✓':'!')+'</b><span>'+p[1]+(ok?'':'：23 点前没打卡就掉一品')+'</span></div>';});
-    var dm=tt.indexOf("diet_meal")!==-1;
-    h+='<div class="rk-req'+(dm?' ok':(R.dietMiss>=RK_DIET_MISS-1?' warn':''))+'"><b>'+(dm?'✓':R.dietMiss>=RK_DIET_MISS-1?'!':'○')+'</b><span>吃减脂餐'+(dm?'':'：已经连续 '+R.dietMiss+' 天没打卡，满 '+RK_DIET_MISS+' 天掉一品')+'</span></div>';
+    var dmn=tt.filter(function(x){return x==="diet_meal";}).length,dm=dmn>0;
+    h+='<div class="rk-req'+(dm?' ok':(R.dietMiss>=RK_DIET_MISS-1?' warn':''))+'"><b>'+(dm?'✓':R.dietMiss>=RK_DIET_MISS-1?'!':'○')+'</b><span>吃减脂餐'+(dm?'：今天不会因为它掉品':'：已经连续 '+R.dietMiss+' 天没打卡，满 '+RK_DIET_MISS+' 天掉一品')+'</span></div>';
+    h+='<div class="rk-req'+(dmn>=RK_DIET_PER_DAY?' ok':'')+'"><b>'+(dmn>=RK_DIET_PER_DAY?'✓':'○')+'</b><span>今天减脂餐 '+Math.min(dmn,RK_DIET_PER_DAY)+'/'+RK_DIET_PER_DAY+' 顿：打满才算完整打卡日</span></div>';
   }
   var wk=rkWeekKey(td),used=R.cheat.filter(function(d){return rkWeekKey(d)===wk;}).length;
   if(!cheatToday)h+='<button class="rk-cheat" onclick="rkCheat()"'+(used>=RK_CHEAT_PER_WEEK?' disabled':'')+'>🍰 '+(used>=RK_CHEAT_PER_WEEK?'这周放纵日已用':'把今天设为放纵日（每周 '+RK_CHEAT_PER_WEEK+' 次）')+'</button>';
