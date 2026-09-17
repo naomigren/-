@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<script>if(!location.search.includes('_v=0917c')){location.replace(location.pathname+'?_v=0917c');}</script>
+<script>if(!location.search.includes('_v=0917d')){location.replace(location.pathname+'?_v=0917d');}</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="克拉拉养成">
@@ -209,6 +209,37 @@ textarea,input{font-family:inherit;-webkit-appearance:none;}
 .pl-ex-row .unit,.pl-meal-row .unit{white-space:nowrap;}
 .pl-ex-row .unit{font-size:0.65rem;color:#7a9a6a;}
 .pl-meal-row input[type="number"]{flex:0 0 56px;width:56px;}
+/* BIRTHDAY 生日月 */
+#bdBanner:empty{display:none;}
+#bdBanner{margin:0 20px 16px;}
+.bd-banner{border-radius:12px;padding:12px 16px;text-align:center;border:1px solid rgba(200,168,96,0.3);background:linear-gradient(135deg,rgba(255,248,236,0.9),rgba(253,236,238,0.9));}
+.bd-banner.today{background:linear-gradient(135deg,#f6e3c8,#f3d2d6);border-color:rgba(200,168,96,0.5);animation:bdGlow 3s ease-in-out infinite;}
+.bd-big{font-size:14px;font-weight:700;color:#8a5a60;letter-spacing:1px;}
+.bd-big b{font-family:'Outfit';font-size:18px;color:#c8a860;margin:0 2px;}
+.bd-small{font-size:11px;color:#a08080;margin-top:4px;line-height:1.5;}
+@keyframes bdGlow{0%,100%{box-shadow:0 0 0 rgba(200,168,96,0)}50%{box-shadow:0 0 18px rgba(200,168,96,0.35)}}
+.bd-shop{margin-bottom:20px;padding:14px;border-radius:14px;background:linear-gradient(135deg,rgba(255,244,228,0.9),rgba(253,234,236,0.9));border:1px solid rgba(200,168,96,0.35);}
+.bd-shop-h{font-size:13px;font-weight:700;color:#b08a50;letter-spacing:1px;margin-bottom:10px;}
+.bd-shop-h span{display:block;font-size:11px;font-weight:400;color:#b09898;letter-spacing:0;margin-top:2px;}
+.bd-shop-item{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;margin-top:8px;background:rgba(255,255,255,0.65);border-radius:10px;}
+.bd-shop-item.got{opacity:0.6;}
+.bd-shop-name{font-size:14px;color:#5a4a4a;}
+.bd-shop-cost{font-size:12px;color:#a08888;font-family:'Outfit';margin-top:2px;}
+.bd-shop-item button{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;background:linear-gradient(135deg,#c8a860,#c4868e);color:#fff;}
+.bd-shop-item button.dim{background:rgba(200,168,96,0.2);color:#8a7a6a;}
+.bd-shop-done{color:#7a9a6a;font-weight:700;padding:0 10px;}
+#bdOverlay{display:none;position:fixed;inset:0;z-index:450;background:rgba(90,58,64,0.4);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:22px;overflow:hidden;}
+.bd-confetti{position:absolute;inset:0;pointer-events:none;}
+.bd-confetti i{position:absolute;top:-20px;width:8px;height:12px;border-radius:2px;animation-name:bdFall;animation-timing-function:linear;animation-iteration-count:2;}
+@keyframes bdFall{to{top:105%;transform:rotate(540deg) translateX(30px);}}
+.bd-card{position:relative;width:100%;max-width:330px;background:#fffaf6;border-radius:20px;padding:26px 22px 20px;text-align:center;box-shadow:0 14px 50px rgba(90,58,64,0.25);animation:rkIn .6s cubic-bezier(.2,.9,.3,1.2);}
+.bd-card-cake{font-size:46px;line-height:1;}
+.bd-card-title{font-family:'Playfair Display','Songti SC',serif;font-size:26px;color:#8a5a60;margin-top:10px;letter-spacing:2px;}
+.bd-card-name{font-size:12px;color:#c8a860;letter-spacing:3px;margin-top:4px;}
+.bd-card-msg{font-size:13px;color:#6a5555;line-height:1.8;text-align:left;margin-top:16px;}
+.bd-card-sign{font-size:12px;color:#b08a8e;text-align:right;margin-top:10px;}
+.bd-card button{margin-top:16px;padding:10px 40px;border-radius:10px;font-size:14px;letter-spacing:2px;background:linear-gradient(135deg,#c8a860,#c4868e);color:#fff;}
+@media(prefers-reduced-motion:reduce){.bd-confetti,.bd-banner.today{animation:none;display:none;}.bd-banner.today{display:block;}}
 /* RANK 品级 */
 .rk-card{padding:0 0 16px;}
 .rk-card::before{z-index:2;}
@@ -361,6 +392,8 @@ textarea,input{font-family:inherit;-webkit-appearance:none;}
     <div id="deBar" style="height:100%;border-radius:3px;width:0%;background:linear-gradient(90deg,#c9b8a8,#b07078,#c4868e);transition:width 0.5s ease;"></div>
   </div>
 </div>
+
+<div id="bdBanner"></div>
 
 <div style="margin:0 20px 20px;background:rgba(255,255,255,0.5);border-radius:12px;padding:3px;overflow-x:auto;-webkit-overflow-scrolling:touch;display:flex;gap:2px;" class="hide-scrollbar">
   <button class="tab-btn tab-active" onclick="switchTab('tasks')" id="tab-tasks" style="flex:0 0 auto;min-width:52px;">📋 任务</button>
@@ -531,6 +564,7 @@ function applyAttrs(mapping){if(!mapping)return;Object.entries(mapping).forEach(
 const DE_TASKS=new Set(["de_vocab","de_grammar","de_friends","de_speak","de_listen","de_write","de_read","de_shadow","de_mistakes","de_mock","de_level"]);
 function doTask(id,name,pts,em,praise,attrMap){
   var _a=TASK_ATTRS[id]||attrMap||{will:1};
+  if(typeof bdIsWeek==="function"&&typeof BD_SHOP!=="undefined"&&BD_SHOP&&bdIsWeek()&&pts>0){pts=pts*2;name=name+" 🎂×2";}
   S.h.unshift({t:"e",n:name,p:pts,d:new Date().toISOString(),_id:id,_attrs:{..._a}});if(S.h.length>200)S.h.length=200;
   S.cp+=pts;S.tp+=pts;if(DE_TASKS.has(id))S.de=(S.de||0)+pts;
   applyAttrs(_a);
@@ -585,6 +619,7 @@ function loadSave(){const d=decode(document.getElementById("loadCode").value);if
 let currentTab="tasks";
 function switchTab(t){currentTab=t;["tasks","attrs","achieve","palace","shop","history","wishes","savings","pyq","sleep30"].forEach(k=>{var c=document.getElementById("content-"+k);var b=document.getElementById("tab-"+k);if(c)c.classList.toggle("hidden",k!==t);if(b)b.className="tab-btn "+(k===t?"tab-active":"tab-inactive");});if(t==="savings"){if(typeof svRender==="function")svRender();renderDaily();return;}if(t==="pyq"){if(typeof pyqRender==="function")pyqRender();return;}render();}
 function render(){
+  if(typeof bdRenderBanner==="function"&&typeof BD_SHOP!=="undefined"&&BD_SHOP)bdRenderBanner();
   document.getElementById("cpVal").textContent=S.cp;document.getElementById("tpVal").textContent=S.tp;
   document.getElementById("japanText").textContent=S.cp+"/2000";document.getElementById("japanBar").style.width=Math.min(100,S.cp/2000*100)+"%";
   document.getElementById("deText").textContent=(S.de||0)+"/2000";document.getElementById("deBar").style.width=Math.min(100,(S.de||0)/2000*100)+"%";
@@ -624,7 +659,7 @@ function renderAttrs(){
   h+=`</div>`;document.getElementById("content-attrs").innerHTML=h;
 }
 function renderShop(){
-  let h="";["s","m","l","x"].forEach(tier=>{const items=SHOP.filter(i=>i.t===tier);if(!items.length)return;h+=`<div style="margin-bottom:20px;"><div style="font-size:13px;font-weight:600;margin-bottom:10px;color:${TIER_COLORS[tier]};letter-spacing:1px;">${TIER_NAMES[tier]}</div><div style="display:flex;flex-direction:column;gap:8px;">`;items.forEach(item=>{const ok=S.cp>=item.cost;const bg=tier==="x"?"linear-gradient(135deg,rgba(199,163,163,0.1),rgba(199,163,163,0.06))":"rgba(255,255,255,0.5)";const brd=tier==="x"?"1px solid rgba(199,163,163,0.25)":"1px solid rgba(219,147,158,0.15)";const anim=tier==="x"?"animation:glow 3s ease-in-out infinite;":"";h+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:${bg};border-radius:12px;border:${brd};${anim}"><div><div style="font-size:14px;color:#5a4a4a;">${item.em} ${item.name}</div><div style="font-size:12px;color:#a08888;font-family:'Outfit';margin-top:2px;">${item.cost} 积分</div></div><button onclick="doRedeem(\`${item.name}\`,${item.cost})" style="padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;background:${ok?"linear-gradient(135deg,#c4868e,#d4a0a0)":"rgba(219,147,158,0.2)"};color:${ok?"#fff":"#4b4560"};opacity:${ok?1:0.5};">${ok?"兑换":"攒攒"}</button></div>`;});h+=`</div></div>`;});
+  let h=(typeof bdShopHtml==="function"&&typeof BD_SHOP!=="undefined"&&BD_SHOP)?bdShopHtml():"";["s","m","l","x"].forEach(tier=>{const items=SHOP.filter(i=>i.t===tier);if(!items.length)return;h+=`<div style="margin-bottom:20px;"><div style="font-size:13px;font-weight:600;margin-bottom:10px;color:${TIER_COLORS[tier]};letter-spacing:1px;">${TIER_NAMES[tier]}</div><div style="display:flex;flex-direction:column;gap:8px;">`;items.forEach(item=>{const ok=S.cp>=item.cost;const bg=tier==="x"?"linear-gradient(135deg,rgba(199,163,163,0.1),rgba(199,163,163,0.06))":"rgba(255,255,255,0.5)";const brd=tier==="x"?"1px solid rgba(199,163,163,0.25)":"1px solid rgba(219,147,158,0.15)";const anim=tier==="x"?"animation:glow 3s ease-in-out infinite;":"";h+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:${bg};border-radius:12px;border:${brd};${anim}"><div><div style="font-size:14px;color:#5a4a4a;">${item.em} ${item.name}</div><div style="font-size:12px;color:#a08888;font-family:'Outfit';margin-top:2px;">${item.cost} 积分</div></div><button onclick="doRedeem(\`${item.name}\`,${item.cost})" style="padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;background:${ok?"linear-gradient(135deg,#c4868e,#d4a0a0)":"rgba(219,147,158,0.2)"};color:${ok?"#fff":"#4b4560"};opacity:${ok?1:0.5};">${ok?"兑换":"攒攒"}</button></div>`;});h+=`</div></div>`;});
   h+=`<div style="margin-bottom:20px;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><div style="font-size:13px;font-weight:600;color:#c4868e;letter-spacing:1px;">🌟 自定义奖励</div><button onclick="document.getElementById('csForm').classList.toggle('hidden')" style="padding:4px 12px;border-radius:8px;font-size:12px;font-weight:600;background:linear-gradient(135deg,#c4868e,#b07078);color:#fff;">+ 上架</button></div>`;
   h+=`<div id="csForm" class="hidden" style="padding:14px;margin-bottom:12px;border-radius:12px;background:rgba(219,147,158,0.08);border:1px solid rgba(219,147,158,0.2);"><div style="margin-bottom:10px;"><div style="font-size:12px;color:#c4868e;margin-bottom:4px;">奖励名称</div><input id="cs_name" class="inp" placeholder="比如：一双好看的鞋"></div><div style="display:flex;gap:10px;margin-bottom:12px;"><div style="flex:1;"><div style="font-size:12px;color:#c4868e;margin-bottom:4px;">所需积分</div><input id="cs_cost" type="number" value="50" class="inp"></div><div style="flex:1;"><div style="font-size:12px;color:#c4868e;margin-bottom:4px;">图标</div><input id="cs_em" value="🎁" class="inp"></div></div><button onclick="addCS()" style="width:100%;padding:10px;border-radius:8px;font-size:14px;font-weight:600;background:linear-gradient(135deg,#c4868e,#d4a0a0);color:#fff;">确认上架</button></div>`;
   if(S.cs.length){h+=`<div style="display:flex;flex-direction:column;gap:8px;">`;S.cs.forEach(item=>{const ok=S.cp>=item.cost;h+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:rgba(219,147,158,0.06);border-radius:12px;border:1px solid rgba(219,147,158,0.15);"><div style="flex:1;"><div style="font-size:14px;color:#5a4a4a;">${item.em} ${item.name}</div><div style="font-size:12px;color:#a08888;font-family:'Outfit';margin-top:2px;">${item.cost} 积分</div></div><button onclick="doRedeem(\`${item.name}\`,${item.cost})" style="padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;background:${ok?"linear-gradient(135deg,#c4868e,#d4a0a0)":"rgba(219,147,158,0.2)"};color:${ok?"#fff":"#4b4560"};opacity:${ok?1:0.5};margin-right:8px;">${ok?"兑换":"攒攒"}</button><button onclick="rmCS('${item.id}')" style="padding:4px 8px;border-radius:6px;font-size:11px;color:#c07070;background:rgba(210,140,140,0.1);">下架</button></div>`;});h+=`</div>`;}h+=`</div>`;
@@ -792,6 +827,7 @@ function checkAchievements(){
   if(cnt("drawing")>=30)tryU("a56");
   if(cnt("compose")>=10)tryU("a57");
   if(cnt("drawing")>=30&&cnt("compose")>=10&&cnt("chess")>=30)tryU("a58");
+  if(typeof bdCheckAch==="function"&&typeof BD_ACHS!=="undefined"&&BD_ACHS)bdCheckAch(tryU,t,td);
   if(unlocked.length){saveState();render();_achQ.push(...unlocked);if(_achQ.length===unlocked.length)showAchPopup(_achQ.shift());}
 }
 /* ═══════ RENDER ACHIEVEMENTS + CARD CAROUSEL ═══════ */
@@ -816,7 +852,7 @@ function renderAchieve(){
   const total=ACHS.length,unlocked=Object.keys(S.ach).length;
   let h=`<div style="text-align:center;margin-bottom:20px;"><div style="font-family:'Outfit';font-size:13px;color:#a08888;margin-bottom:8px;">成就进度</div><div style="font-family:'Outfit';font-size:32px;font-weight:800;color:#5a4a4a;">${unlocked}<span style="font-size:16px;color:#b09898;">/${total}</span></div><div style="height:6px;border-radius:3px;background:rgba(219,147,158,0.15);overflow:hidden;margin:12px 20px 0;"><div style="height:100%;border-radius:3px;width:${unlocked/total*100}%;background:linear-gradient(90deg,#a3b0c4,#c4868e,#d4a840);transition:width 0.5s ease;"></div></div></div>`;
   h+=renderCardCarousel();
-  const cats=["生活","学业","德语","身心","恶女","成长","才艺","彩蛋"];const ro=["legend","epic","rare","normal"];
+  const cats=["生日","生活","学业","德语","身心","恶女","成长","才艺","彩蛋"];const ro=["legend","epic","rare","normal"];
   cats.forEach(cat=>{const ca=ACHS.filter(a=>a.cat===cat);if(!ca.length)return;const cu=ca.filter(a=>S.ach[a.id]).length;
   h+=`<div style="margin-bottom:20px;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><div class="section-title" style="color:#8a6a6e;">${cat}</div><div style="font-size:12px;color:#b09898;font-family:'Outfit';">${cu}/${ca.length}</div></div>`;
   const sorted=[...ca].sort((a,b)=>{const aU=S.ach[a.id]?1:0,bU=S.ach[b.id]?1:0;if(aU!==bU)return bU-aU;return ro.indexOf(a.r)-ro.indexOf(b.r);});
@@ -1572,7 +1608,7 @@ function rkCheat(){
   if(used>=RK_CHEAT_PER_WEEK){flash("这周的放纵日已经用掉了","fail");return;}
   if(!confirm("把今天设为放纵日？今天不会因为外卖/零食/减脂餐掉品，这周就用掉了。"))return;
   R.cheat.push(td);if(R.cheat.length>60)R.cheat=R.cheat.slice(-60);
-  saveState();render();flash("🍰 今天是放纵日","earn");
+  saveState();render();flash("🍰 今天是放纵日","earn");setTimeout(checkAchievements,300);
 }
 function rkUploadArt(tier,input){
   var f=input.files&&input.files[0];if(!f)return;
@@ -1688,8 +1724,118 @@ function rkShowOverlay(){
 }
 function rkCloseOverlay(){var ov=document.getElementById("rkOverlay");if(ov){ov.style.display="none";ov.innerHTML="";}render();}
 try{settleRank();}catch(e){console.error(e);}
+
+/* ═══════ 生日月 BIRTHDAY MODULE ═══════ */
+var BD_MONTH=10,BD_DAY=2,BD_BORN=2001;   /* 10月2日，2001年出生 */
+var BD_WEEK_BEFORE=3,BD_WEEK_AFTER=3;    /* 生日前后各3天 = 生日周 */
+var BD_COUNTDOWN=30;                     /* 生日前30天开始倒计时 */
+function bdPad(n){return String(n).padStart(2,"0");}
+function bdDate(y){return y+"-"+bdPad(BD_MONTH)+"-"+bdPad(BD_DAY);}
+function bdYear(){return parseInt(todayStr().slice(0,4));}
+function bdShiftStr(ds,n){var d=new Date(ds+"T12:00:00");d.setDate(d.getDate()+n);return d.getFullYear()+"-"+bdPad(d.getMonth()+1)+"-"+bdPad(d.getDate());}
+function bdWeekRange(y){var b=bdDate(y);return [bdShiftStr(b,-BD_WEEK_BEFORE),bdShiftStr(b,BD_WEEK_AFTER)];}
+function bdIsWeek(){var td=todayStr(),r=bdWeekRange(parseInt(td.slice(0,4)));return td>=r[0]&&td<=r[1];}
+function bdIsToday(){var td=todayStr();return td===bdDate(parseInt(td.slice(0,4)));}
+function bdAge(){return bdYear()-BD_BORN;}
+function bdDaysUntil(){var td=todayStr(),y=parseInt(td.slice(0,4)),b=bdDate(y);if(b<td)b=bdDate(y+1);return Math.round((new Date(b+"T12:00:00")-new Date(td+"T12:00:00"))/864e5);}
+function bdState(){S.bd=S.bd||{greeted:{},bought:{}};S.bd.greeted=S.bd.greeted||{};S.bd.bought=S.bd.bought||{};return S.bd;}
+
+/* ── 隐藏成就 ── */
+var BD_ACHS=[
+  {id:"b1",name:"二十五岁第一次睁眼",r:"normal",pts:25,at:{will:1},msg:"生日这天你第一件事是打开了这里。新的一岁，第一眼给了自己的养成计划。",cat:"生日"},
+  {id:"b2",name:"零点寿星",r:"rare",pts:50,at:{will:2},msg:"零点刚过就在打卡。别人还在等零点的祝福，你已经在给新的一岁挣分了。",cat:"生日"},
+  {id:"b3",name:"寿星洗白白",r:"normal",pts:25,at:{health:1,beauty:1},msg:"生日当天洗得香香的。二十五岁的第一个澡，干干净净地开始。",cat:"生日"},
+  {id:"b4",name:"今天的热量不算数",r:"rare",pts:50,at:{villain:2},msg:"生日这天用掉了放纵日。蛋糕是买给寿星的，寿星吃它天经地义。",cat:"生日"},
+  {id:"b5",name:"寿星自画像",r:"rare",pts:60,at:{creative:2,grace:1},msg:"生日这天拿起了笔。画的是什么都行，二十五岁的第一幅画是你自己画的。",cat:"生日"},
+  {id:"b6",name:"翻倍的寿星",r:"epic",pts:100,at:{will:4},msg:"生日当天挣满了 200 分。一年只有一天能翻倍，你一分都没浪费。",cat:"生日"},
+  {id:"b7",name:"一岁一礼",r:"rare",pts:40,at:{villain:1,grace:1},msg:"用自己攒的分，给自己买了生日礼物。没有人送，你就自己送，而且是挣来的。",cat:"生日"},
+  {id:"b8",name:"生日周全勤",r:"epic",pts:120,at:{will:6,anti_proc:3},msg:"生日周七天，一天都没空着。寿星没有请假，寿星在升级。",cat:"生日"},
+  {id:"b9",name:"寿星的逆袭",r:"legend",pts:150,at:{will:5,beauty:3},msg:"在生日周升了品。二十五岁的礼物，是你亲手从秤上、从腰上抢回来的。",cat:"生日"}
+];
+function bdCheckAch(tryU,t,td){
+  var y=parseInt(td.slice(0,4)),bday=bdDate(y),r=bdWeekRange(y),B=bdState();
+  if(td===bday){
+    tryU("b1");
+    var now=new Date(),real=now.getFullYear()+"-"+bdPad(now.getMonth()+1)+"-"+bdPad(now.getDate());
+    if(real===bday&&now.getHours()===0&&t.length>0)tryU("b2");
+    if(t.indexOf("bath")!==-1)tryU("b3");
+    if(S.rank&&S.rank.cheat&&S.rank.cheat.indexOf(bday)!==-1)tryU("b4");
+    if(t.indexOf("drawing")!==-1)tryU("b5");
+    if((S.dailyPts[bday]||0)>=200)tryU("b6");
+  }
+  if(Object.keys(B.bought).some(function(k){return k.indexOf(y+":")===0;}))tryU("b7");
+  if(td>=r[1]){var all=true,d=r[0],g=0;while(d<=r[1]&&g++<10){if(!(S.dailyTasks[d]||[]).length){all=false;break;}d=bdShiftStr(d,1);}if(all)tryU("b8");}
+  if(S.rank&&S.rank.log&&S.rank.log.some(function(e){return e.dir>0&&e.d>=r[0]&&e.d<=r[1];}))tryU("b9");
+}
+
+/* ── 生日限定商城 ── */
+var BD_SHOP=[
+  {id:"cake",name:"一块生日蛋糕",cost:99,em:"🎂"},
+  {id:"gift",name:"给自己挑一份生日礼物",cost:250,em:"🎁"},
+  {id:"nochore",name:"寿星特权：一天不做家务",cost:60,em:"👑"}
+];
+function bdShopHtml(){
+  if(!bdIsWeek())return "";
+  var B=bdState(),y=bdYear(),h='<div class="bd-shop"><div class="bd-shop-h">🎂 生日限定 <span>只在生日周上架，每样一年一次</span></div>';
+  BD_SHOP.forEach(function(it){
+    var got=B.bought[y+":"+it.id],ok=S.cp>=it.cost;
+    h+='<div class="bd-shop-item'+(got?' got':'')+'"><div><div class="bd-shop-name">'+it.em+' '+it.name+'</div><div class="bd-shop-cost">'+(got?'已兑换 '+got.slice(5):it.cost+' 积分')+'</div></div>';
+    h+=got?'<span class="bd-shop-done">✓</span>':'<button onclick="bdRedeem(\''+it.id+'\')" class="'+(ok?'':'dim')+'">'+(ok?'兑换':'攒攒')+'</button>';
+    h+='</div>';
+  });
+  return h+'</div>';
+}
+function bdRedeem(id){
+  var it=BD_SHOP.find(function(x){return x.id===id;});if(!it||!bdIsWeek())return;
+  var B=bdState(),key=bdYear()+":"+id;
+  if(B.bought[key]){flash("今年已经兑换过啦","fail");return;}
+  if(S.cp<it.cost){flash("积分不够啦，再攒攒！","fail");return;}
+  S.cp-=it.cost;B.bought[key]=todayStr();
+  S.h.unshift({t:"r",n:"🎂 "+it.name,p:-it.cost,d:new Date().toISOString()});
+  saveState();render();flash("🎂 生日限定兑换成功："+it.name,"redeem");
+  setTimeout(checkAchievements,300);
+}
+
+/* ── 顶部横幅 ── */
+function bdRenderBanner(){
+  var el=document.getElementById("bdBanner");if(!el)return;
+  var td=todayStr(),y=parseInt(td.slice(0,4)),r=bdWeekRange(y),h="";
+  if(bdIsToday()){
+    h='<div class="bd-banner today"><div class="bd-big">🎂 今天是克拉拉 '+bdAge()+' 岁生日</div><div class="bd-small">所有任务积分 ×2 · 商城有生日限定 · 有几个隐藏成就只有今天能拿</div></div>';
+  }else if(bdIsWeek()){
+    var left=Math.round((new Date(r[1]+"T12:00:00")-new Date(td+"T12:00:00"))/864e5)+1;
+    h='<div class="bd-banner week"><div class="bd-big">🎂 生日周 · 积分翻倍中</div><div class="bd-small">'+(td<bdDate(y)?'离生日还有 '+bdDaysUntil()+' 天 · ':'')+'翻倍还剩 '+left+' 天 · 商城生日限定已上架</div></div>';
+  }else{
+    var n=bdDaysUntil();
+    if(n>0&&n<=BD_COUNTDOWN){
+      var ws=bdWeekRange(td<=bdDate(y)?y:y+1)[0];
+      h='<div class="bd-banner soon"><div class="bd-big">🎂 离 '+(bdAge()+(td<=bdDate(y)?0:1))+' 岁生日还有 <b>'+n+'</b> 天</div><div class="bd-small">'+parseInt(ws.slice(5,7))+'月'+parseInt(ws.slice(8))+'日起生日周开始，所有任务积分 ×2</div></div>';
+    }
+  }
+  el.innerHTML=h;
+  if(bdIsToday()){var B=bdState();if(!B.greeted[y]){B.greeted[y]=todayStr();saveState();setTimeout(bdGreet,600);}}
+}
+function bdGreet(){
+  var ov=document.getElementById("bdOverlay");if(!ov)return;
+  var h='<div class="bd-confetti">';
+  var cols=["#c48e93","#e8c4a0","#c8a860","#d6a6aa","#a3b0c4","#f0d8da"];
+  for(var i=0;i<46;i++){h+='<i style="left:'+(Math.random()*100).toFixed(1)+'%;background:'+cols[i%cols.length]+';animation-delay:'+(Math.random()*1.6).toFixed(2)+'s;animation-duration:'+(2.6+Math.random()*2).toFixed(2)+'s;transform:rotate('+Math.floor(Math.random()*360)+'deg)"></i>';}
+  h+='</div><div class="bd-card"><div class="bd-card-cake">🎂</div><div class="bd-card-title">'+bdAge()+' 岁生日快乐</div><div class="bd-card-name">克拉拉 · 穆热迪拉</div>';
+  h+='<div class="bd-card-msg">新的一岁从今天算起。你给自己定下的每一条规则、打下的每一个勾，都是你自己一分一分挣来的。<br><br>今天积分翻倍，有几个隐藏成就只有今天能拿，商城也给寿星上了新货。去把它们都拿到手。</div>';
+  h+='<div class="bd-card-sign">—— 小克</div><button onclick="bdCloseGreet()">收下</button></div>';
+  ov.innerHTML=h;ov.style.display="flex";
+}
+function bdCloseGreet(){var ov=document.getElementById("bdOverlay");if(ov){ov.style.display="none";ov.innerHTML="";}checkAchievements();}
+
+/* ── 挂载 ── */
+try{
+  BD_ACHS.forEach(function(a){if(!ACHS.find(function(x){return x.id===a.id;}))ACHS.push(a);});
+  bdRenderBanner();
+  setTimeout(function(){try{checkAchievements();}catch(e){console.error(e);}},1500);
+}catch(e){console.error(e);}
 </script>
 
+<div id="bdOverlay"></div>
 <div id="rkOverlay" onclick="if(event.target===this)rkCloseOverlay()"></div>
 <div class="pl-overlay" id="plOverlay" onclick="plClosePanel()"></div>
 <div class="pl-panel" id="plPanel">
