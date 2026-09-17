@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<script>if(!location.search.includes('_v=0917e')){location.replace(location.pathname+'?_v=0917e');}</script>
+<script>if(!location.search.includes('_v=0917f')){location.replace(location.pathname+'?_v=0917f');}</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="克拉拉养成">
@@ -1915,7 +1915,7 @@ function wrLine(st){
 function wrCardHtml(mon){
   var st=wrStats(mon),h='<div class="wr-card">';
   var thisMon=wrMonday(todayStr());
-  h+='<div class="wr-nav"><button onclick="wrOpen(\''+wrShift(mon,-7)+'\')">‹</button><div><div class="wr-title">'+(st.ongoing?'本周战报':'周日战报')+'</div><div class="wr-range">'+wrFmt(st.days[0])+' – '+wrFmt(st.days[6])+(st.ongoing?' · 进行中':'')+'</div></div><button onclick="wrOpen(\''+wrShift(mon,7)+'\')"'+(mon>=thisMon?' disabled':'')+'>›</button></div>';
+  h+='<div class="wr-nav"><button onclick="wrOpen(\''+wrShift(mon,-7)+'\')">‹</button><div><div class="wr-title">'+(st.ongoing&&todayStr()!==st.days[6]?'本周战报':'周日战报')+'</div><div class="wr-range">'+wrFmt(st.days[0])+' – '+wrFmt(st.days[6])+(st.ongoing&&todayStr()!==st.days[6]?' · 进行中':'')+'</div></div><button onclick="wrOpen(\''+wrShift(mon,7)+'\')"'+(mon>=thisMon?' disabled':'')+'>›</button></div>';
   var diff=st.pts-st.prevPts;
   h+='<div class="wr-hero"><div class="wr-hero-num">'+st.pts+'</div><div class="wr-hero-lbl">本周挣到的积分</div>';
   if(st.prevPts>0||st.pts>0)h+='<div class="wr-diff '+(diff>=0?'up':'down')+'">'+(diff>=0?'比上周多 '+diff:'比上周少 '+(-diff))+' 分</div>';
