@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<script>if(!location.search.includes('_v=0917d')){location.replace(location.pathname+'?_v=0917d');}</script>
+<script>if(!location.search.includes('_v=0917e')){location.replace(location.pathname+'?_v=0917e');}</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="克拉拉养成">
@@ -209,6 +209,44 @@ textarea,input{font-family:inherit;-webkit-appearance:none;}
 .pl-ex-row .unit,.pl-meal-row .unit{white-space:nowrap;}
 .pl-ex-row .unit{font-size:0.65rem;color:#7a9a6a;}
 .pl-meal-row input[type="number"]{flex:0 0 56px;width:56px;}
+/* WEEKLY REPORT 周日战报 */
+.wr-entry{margin-bottom:14px;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,0.55);border:1px solid rgba(219,147,158,0.2);}
+.wr-entry-h{font-size:13px;font-weight:700;color:#8a5a60;margin-bottom:8px;}
+.wr-chips{display:flex;flex-wrap:wrap;gap:6px;}
+.wr-chips button{padding:6px 12px;border-radius:999px;font-size:12px;color:#8a5a60;background:#f9f0f1;border:1px solid #ecd4d6;}
+#wrOverlay{display:none;position:fixed;inset:0;z-index:420;background:rgba(90,58,64,0.38);backdrop-filter:blur(6px);align-items:flex-start;justify-content:center;padding:28px 16px;overflow-y:auto;}
+.wr-card{width:100%;max-width:360px;background:#fdfaf9;border-radius:20px;padding:18px 18px 20px;box-shadow:0 12px 50px rgba(90,58,64,0.25);animation:rkIn .5s cubic-bezier(.2,.9,.3,1.2);margin:auto 0;}
+.wr-nav{display:flex;align-items:center;justify-content:space-between;text-align:center;}
+.wr-nav button{width:34px;height:34px;border-radius:10px;font-size:20px;color:#b08a8e;background:#f9f0f1;}
+.wr-nav button:disabled{opacity:0.3;}
+.wr-title{font-family:'Playfair Display','Songti SC',serif;font-size:20px;color:#8a5a60;letter-spacing:2px;}
+.wr-range{font-size:11px;color:#b08a8e;margin-top:2px;}
+.wr-hero{text-align:center;margin:18px 0 14px;}
+.wr-hero-num{font-family:'Outfit';font-size:46px;font-weight:800;color:#c48e93;line-height:1;}
+.wr-hero-lbl{font-size:12px;color:#a08888;margin-top:4px;}
+.wr-diff{display:inline-block;margin-top:8px;padding:3px 10px;border-radius:999px;font-size:11px;}
+.wr-diff.up{background:rgba(122,154,106,0.12);color:#6a8a5a;}
+.wr-diff.down{background:rgba(192,112,112,0.1);color:#b06a6a;}
+.wr-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:6px;}
+.wr-grid div{background:#f9f0f1;border-radius:10px;padding:10px 4px;text-align:center;}
+.wr-grid b{display:block;font-family:'Outfit';font-size:17px;color:#5a3a40;}
+.wr-grid b i{font-style:normal;font-size:11px;color:#b09898;}
+.wr-grid span{display:block;font-size:10px;color:#a08888;margin-top:3px;}
+.wr-sec{margin-top:12px;padding:12px 14px;background:#f9f0f1;border-radius:12px;}
+.wr-h{font-size:12px;font-weight:700;color:#8a5a60;margin-bottom:8px;}
+.wr-bar{display:grid;grid-template-columns:64px 1fr 40px;gap:8px;align-items:center;font-size:12px;color:#6a5555;padding:3px 0;}
+.wr-bar div{height:6px;border-radius:3px;background:#ecd4d6;overflow:hidden;}
+.wr-bar i{display:block;height:100%;background:linear-gradient(90deg,#d6a6aa,#c48e93);border-radius:3px;}
+.wr-bar em{font-style:normal;font-family:'Outfit';color:#c48e93;text-align:right;}
+.wr-row{display:grid;grid-template-columns:16px 1fr auto;gap:8px;font-size:12px;color:#6a5555;padding:4px 0;}
+.wr-row span:first-child{color:#c8a860;font-family:'Outfit';font-weight:700;}
+.wr-row em{font-style:normal;color:#8a5a60;font-weight:600;}
+.wr-row.up span:first-child,.wr-row.up span:nth-child(2){color:#6a8a5a;}
+.wr-row.down span:first-child,.wr-row.down span:nth-child(2){color:#b06a6a;}
+.wr-achs{display:flex;flex-wrap:wrap;gap:4px 8px;font-size:12px;color:#b08a50;}
+.wr-line{margin-top:14px;padding:14px;border-radius:12px;border:1px dashed #e0bfc2;font-size:13px;line-height:1.8;color:#6a5555;}
+.wr-line div{text-align:right;font-size:11px;color:#b08a8e;margin-top:6px;}
+.wr-close{display:block;margin:16px auto 0;padding:10px 42px;border-radius:10px;font-size:14px;letter-spacing:2px;background:#c48e93;color:#fff;}
 /* BIRTHDAY 生日月 */
 #bdBanner:empty{display:none;}
 #bdBanner{margin:0 20px 16px;}
@@ -666,7 +704,7 @@ function renderShop(){
   document.getElementById("content-shop").innerHTML=h;
 }
 function renderHistory(){
-  let h="";
+  let h=(typeof wrHistoryHtml==="function"&&typeof WR_DOW!=="undefined"&&WR_DOW)?wrHistoryHtml():"";
   if(S.h.length){h+=`<div style="text-align:center;margin-bottom:12px;"><button onclick="undoLast()" style="padding:8px 20px;border-radius:10px;font-size:13px;font-weight:600;color:#c07070;background:rgba(210,140,140,0.1);border:1px solid rgba(210,140,140,0.25);cursor:pointer;">↩️ 撤回上一条</button></div>`;}
   if(!S.h.length){h=`<div style="text-align:center;padding:40px 20px;color:#b09898;font-size:14px;">还没有记录，去完成第一个任务吧！</div>`;}
   else{h+=`<div style="display:flex;flex-direction:column;gap:4px;">`;S.h.forEach(e=>{const col=e.t==="hq"?"#9b8ab8":e.t==="e"?"#c4868e":e.t==="r"?"#c9b8a8":e.t==="a"?"#d4a840":"#c07070";h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:rgba(255,255,255,0.02);border-radius:8px;border-left:3px solid ${col};"><div><div style="font-size:13px;color:#6a5555;">${e.n}</div><div style="font-size:11px;color:#b09898;margin-top:2px;">${fmtDate(e.d)}</div></div><div style="font-size:14px;font-weight:700;font-family:'Outfit';color:${col};">${e.p>0?"+"+e.p:e.p}</div></div>`;});h+=`</div>`;}
@@ -1833,9 +1871,109 @@ try{
   bdRenderBanner();
   setTimeout(function(){try{checkAchievements();}catch(e){console.error(e);}},1500);
 }catch(e){console.error(e);}
+
+/* ═══════ 周日战报 WEEKLY REPORT MODULE ═══════ */
+var WR_DOW=["周一","周二","周三","周四","周五","周六","周日"];
+var _wrWeek=null;
+function wrShift(ds,n){var d=new Date(ds+"T12:00:00");d.setDate(d.getDate()+n);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function wrMonday(ds){var d=new Date(ds+"T12:00:00");var wd=(d.getDay()+6)%7;return wrShift(ds,-wd);}
+function wrFmt(ds){return parseInt(ds.slice(5,7))+"."+parseInt(ds.slice(8));}
+function wrTaskName(id){
+  var n=null;Object.keys(TASKS).forEach(function(k){(TASKS[k].items||[]).forEach(function(it){if(it.id===id)n=(it.em?it.em+" ":"")+it.name;});});
+  return n||id;
+}
+function wrStats(mon){
+  var days=[],td=todayStr();for(var i=0;i<7;i++)days.push(wrShift(mon,i));
+  var st={mon:mon,sun:days[6],days:days,pts:0,active:0,tasks:0,pens:0,best:null,attrs:{},taskCnt:{},ach:[],full:0,ex:0,rankUp:[],rankDown:[],meas:[],ongoing:td<=days[6]};
+  days.forEach(function(d,i){
+    var p=S.dailyPts[d]||0,t=S.dailyTasks[d]||[],pn=S.dailyPens[d]||[];
+    st.pts+=p;st.tasks+=t.length;st.pens+=pn.length;if(t.length)st.active++;
+    if(p>0&&(!st.best||p>st.best.p))st.best={d:d,i:i,p:p};
+    t.forEach(function(id){st.taskCnt[id]=(st.taskCnt[id]||0)+1;var a=TASK_ATTRS[id];if(a)Object.keys(a).forEach(function(k){st.attrs[k]=(st.attrs[k]||0)+a[k];});});
+    var dm=t.filter(function(x){return x==="diet_meal";}).length;
+    if(dm>=(typeof RK_DIET_PER_DAY!=="undefined"?RK_DIET_PER_DAY:2)&&t.indexOf("no_takeout")!==-1&&t.indexOf("no_snack")!==-1)st.full++;
+    if(t.indexOf("exercise")!==-1||t.indexOf("badminton")!==-1)st.ex+=1;else if(t.indexOf("dance_t")!==-1)st.ex+=0.5;
+  });
+  Object.keys(S.ach||{}).forEach(function(id){var v=S.ach[id];if(!v||!v.d)return;var d=v.d.slice(0,10);if(d>=days[0]&&d<=days[6]){var a=ACHS.find(function(x){return x.id===id;});if(a)st.ach.push(a);}});
+  if(S.rank){
+    (S.rank.log||[]).forEach(function(e){if(e.d>=days[0]&&e.d<=days[6])(e.dir>0?st.rankUp:st.rankDown).push(e);});
+    st.meas=(S.rank.meas||[]).filter(function(m){return m.d>=days[0]&&m.d<=days[6];});
+  }
+  var prev=0;for(var j=1;j<=7;j++)prev+=S.dailyPts[wrShift(mon,-j)]||0;st.prevPts=prev;
+  return st;
+}
+function wrLine(st){
+  var topTask=Object.keys(st.taskCnt).sort(function(a,b){return st.taskCnt[b]-st.taskCnt[a];})[0];
+  if(st.rankUp.length){var last=st.rankUp[st.rankUp.length-1];return "这周你升品了，现在是「"+rkName(last.to)+"」。这一格是一顿一顿减脂餐换来的，没有一口是白吃的。";}
+  if(st.full>=5)return "七天里有 "+st.full+" 天完整打卡。一周只松口两天以内，这是真正在减脂的人的节奏。";
+  if(st.best&&st.best.p>=100)return WR_DOW[st.best.i]+"那天挣了 "+st.best.p+" 分，是这周最猛的一天。那天的你，下周可以再请回来一次。";
+  if(st.active>=6)return "七天里有 "+st.active+" 天打开了这里。就算有几天没做好，你也一次都没有彻底放下。";
+  if(st.active<=2)return st.ongoing?"这周才刚开始，先从一个最小的勾打起。":"这周打开的次数不多。下周别想着一口气补回来，一天打一个勾就够了。";
+  if(topTask)return "这周你做得最多的是「"+wrTaskName(topTask)+"」，一共 "+st.taskCnt[topTask]+" 次。重复做的事，最后都会变成你身上的东西。";
+  return "新的一周，从第一个勾开始。";
+}
+function wrCardHtml(mon){
+  var st=wrStats(mon),h='<div class="wr-card">';
+  var thisMon=wrMonday(todayStr());
+  h+='<div class="wr-nav"><button onclick="wrOpen(\''+wrShift(mon,-7)+'\')">‹</button><div><div class="wr-title">'+(st.ongoing?'本周战报':'周日战报')+'</div><div class="wr-range">'+wrFmt(st.days[0])+' – '+wrFmt(st.days[6])+(st.ongoing?' · 进行中':'')+'</div></div><button onclick="wrOpen(\''+wrShift(mon,7)+'\')"'+(mon>=thisMon?' disabled':'')+'>›</button></div>';
+  var diff=st.pts-st.prevPts;
+  h+='<div class="wr-hero"><div class="wr-hero-num">'+st.pts+'</div><div class="wr-hero-lbl">本周挣到的积分</div>';
+  if(st.prevPts>0||st.pts>0)h+='<div class="wr-diff '+(diff>=0?'up':'down')+'">'+(diff>=0?'比上周多 '+diff:'比上周少 '+(-diff))+' 分</div>';
+  h+='</div>';
+  h+='<div class="wr-grid"><div><b>'+st.active+'<i>/7</i></b><span>打开的天数</span></div><div><b>'+st.tasks+'</b><span>完成任务</span></div><div><b>'+st.pens+'</b><span>被扣分</span></div><div><b>'+(st.best?WR_DOW[st.best.i]:'--')+'</b><span>最好的一天'+(st.best?' '+st.best.p+'分':'')+'</span></div></div>';
+  /* 属性 */
+  var at=Object.keys(st.attrs).sort(function(a,b){return st.attrs[b]-st.attrs[a];}).slice(0,3);
+  if(at.length){
+    var mx=st.attrs[at[0]]||1;
+    h+='<div class="wr-sec"><div class="wr-h">涨得最多的属性</div>';
+    at.forEach(function(k){var A=ATTRS.find(function(x){return x.id===k;})||{name:k,em:""};h+='<div class="wr-bar"><span>'+A.em+' '+A.name+'</span><div><i style="width:'+Math.round(st.attrs[k]/mx*100)+'%"></i></div><em>+'+(Math.round(st.attrs[k]*10)/10)+'</em></div>';});
+    h+='</div>';
+  }
+  /* 最常做 */
+  var tt=Object.keys(st.taskCnt).sort(function(a,b){return st.taskCnt[b]-st.taskCnt[a];}).slice(0,3);
+  if(tt.length){h+='<div class="wr-sec"><div class="wr-h">做得最多的事</div>';tt.forEach(function(id,i){h+='<div class="wr-row"><span>'+(i+1)+'</span><span>'+wrTaskName(id)+'</span><em>'+st.taskCnt[id]+' 次</em></div>';});h+='</div>';}
+  /* 蜕变 */
+  if(S.rank){
+    h+='<div class="wr-sec"><div class="wr-h">🌸 蜕变</div>';
+    h+='<div class="wr-row"><span></span><span>完整打卡日</span><em>'+st.full+' / 7</em></div>';
+    h+='<div class="wr-row"><span></span><span>运动天数</span><em>'+st.ex+' 天</em></div>';
+    st.rankUp.forEach(function(e){h+='<div class="wr-row up"><span>▲</span><span>'+wrFmt(e.d)+' 升到「'+rkName(e.to)+'」</span><em></em></div>';});
+    st.rankDown.forEach(function(e){h+='<div class="wr-row down"><span>▼</span><span>'+wrFmt(e.d)+' 掉到「'+rkName(e.to)+'」</span><em></em></div>';});
+    if(st.meas.length){var m=st.meas[st.meas.length-1];h+='<div class="wr-row"><span></span><span>本周测量</span><em>'+(m.w?m.w+'kg ':'')+(m.waist?'腰 '+m.waist:'')+'</em></div>';}
+    if(!st.ongoing||mon===thisMon)h+='<div class="wr-row"><span></span><span>现在的品级</span><em>'+rkName(S.rank.idx)+'</em></div>';
+    h+='</div>';
+  }
+  if(st.ach.length){h+='<div class="wr-sec"><div class="wr-h">🏆 本周解锁</div><div class="wr-achs">';st.ach.forEach(function(a){h+='<span>「'+a.name+'」</span>';});h+='</div></div>';}
+  h+='<div class="wr-line">'+wrLine(st)+'<div>—— 小克</div></div>';
+  h+='<button class="wr-close" onclick="wrClose()">收好</button></div>';
+  return h;
+}
+function wrOpen(mon){
+  var thisMon=wrMonday(todayStr());if(mon>thisMon)return;
+  _wrWeek=mon;var ov=document.getElementById("wrOverlay");if(!ov)return;
+  ov.innerHTML=wrCardHtml(mon);ov.style.display="flex";ov.scrollTop=0;
+  S.wr=S.wr||{seen:{}};S.wr.seen=S.wr.seen||{};
+  var st=wrStats(mon);if(!st.ongoing||new Date((todayStr())+"T12:00:00").getDay()===0){S.wr.seen[mon]=true;saveState();}
+}
+function wrClose(){var ov=document.getElementById("wrOverlay");if(ov){ov.style.display="none";ov.innerHTML="";}}
+function wrHistoryHtml(){
+  var thisMon=wrMonday(todayStr()),h='<div class="wr-entry"><div class="wr-entry-h">📜 周日战报</div><div class="wr-chips">';
+  for(var i=0;i<8;i++){var m=wrShift(thisMon,-7*i),has=false;for(var j=0;j<7;j++)if((S.dailyTasks[wrShift(m,j)]||[]).length)has=true;if(i>0&&!has)continue;
+    h+='<button onclick="wrOpen(\''+m+'\')">'+(i===0?'本周':i===1?'上周':wrFmt(m)+'起')+'</button>';}
+  return h+'</div></div>';
+}
+function wrAuto(){
+  var td=todayStr(),thisMon=wrMonday(td),dow=new Date(td+"T12:00:00").getDay();
+  S.wr=S.wr||{seen:{}};S.wr.seen=S.wr.seen||{};
+  if(dow===0&&!S.wr.seen[thisMon]){wrOpen(thisMon);return;}
+  var last=wrShift(thisMon,-7);
+  if(!S.wr.seen[last]){var has=false;for(var j=0;j<7;j++)if((S.dailyTasks[wrShift(last,j)]||[]).length)has=true;if(has)wrOpen(last);}
+}
+try{setTimeout(function(){try{var o=document.getElementById("bdOverlay");if(o&&o.style.display==="flex")return;wrAuto();}catch(e){console.error(e);}},2200);}catch(e){}
 </script>
 
 <div id="bdOverlay"></div>
+<div id="wrOverlay" onclick="if(event.target===this)wrClose()"></div>
 <div id="rkOverlay" onclick="if(event.target===this)rkCloseOverlay()"></div>
 <div class="pl-overlay" id="plOverlay" onclick="plClosePanel()"></div>
 <div class="pl-panel" id="plPanel">
