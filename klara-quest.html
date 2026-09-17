@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<script>if(!location.search.includes('_v=0917b')){location.replace(location.pathname+'?_v=0917b');}</script>
+<script>if(!location.search.includes('_v=0917c')){location.replace(location.pathname+'?_v=0917c');}</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="克拉拉养成">
@@ -1394,7 +1394,7 @@ var RK_REBOUND=1.0;         /* 体重比晋升时反弹超过这么多就掉一�
 var RK_MIN_STAY=7;          /* 每一品至少停留天数 */
 var RK_DIET_MISS=3;         /* 连续几天没打卡「吃减脂餐」掉一品 */
 var RK_CHEAT_PER_WEEK=1;    /* 每周放纵日次数，放纵日不触发掉品 */
-var RK_DIET_PER_DAY=3;      /* 一天打满几次「吃减脂餐」才算完整打卡日 */
+var RK_DIET_PER_DAY=2;      /* 一天打满几次「吃减脂餐」才算完整打卡日 */
 var RK_EX_DAYS=4;           /* 身体区每一品：7 天里至少几天有运动 */
 var RK_EX_FULL=["exercise","badminton"];  /* 算一整天运动的任务 */
 var RK_EX_HALF=["dance_t"];                /* 只跳舞的日子算半天 */
@@ -1495,7 +1495,7 @@ function rkReqs(){
   if(i<8){
     out.push({n:"本品停留满 "+RK_MIN_STAY+" 天（"+Math.min(stay,RK_MIN_STAY)+"/"+RK_MIN_STAY+"）",ok:stay>=RK_MIN_STAY});
     var fd=rkFullDays();
-    out.push({n:"本品完整打卡 7 天：三顿减脂餐+没吃外卖+没吃零食（"+Math.min(fd,7)+"/7）",ok:fd>=7});
+    out.push({n:"本品完整打卡 7 天："+RK_DIET_PER_DAY+" 顿减脂餐+没吃外卖+没吃零食（"+Math.min(fd,7)+"/7）",ok:fd>=7});
     var ex=rkExDays();
     out.push({n:"本品运动满 "+RK_EX_DAYS+" 天：运动/羽毛球算 1 天，只跳舞算半天（"+Math.min(ex,RK_EX_DAYS)+"/"+RK_EX_DAYS+"）",ok:ex>=RK_EX_DAYS});
     var base=rkMeasByTs(R.baseTs),lt=rkLatest(),ok=false,txt;
