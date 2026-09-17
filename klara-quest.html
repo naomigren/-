@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<script>if(!location.search.includes('_v=0917a')){location.replace(location.pathname+'?_v=0917a');}</script>
+<script>if(!location.search.includes('_v=0917b')){location.replace(location.pathname+'?_v=0917b');}</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="克拉拉养成">
@@ -816,7 +816,7 @@ function renderAchieve(){
   const total=ACHS.length,unlocked=Object.keys(S.ach).length;
   let h=`<div style="text-align:center;margin-bottom:20px;"><div style="font-family:'Outfit';font-size:13px;color:#a08888;margin-bottom:8px;">成就进度</div><div style="font-family:'Outfit';font-size:32px;font-weight:800;color:#5a4a4a;">${unlocked}<span style="font-size:16px;color:#b09898;">/${total}</span></div><div style="height:6px;border-radius:3px;background:rgba(219,147,158,0.15);overflow:hidden;margin:12px 20px 0;"><div style="height:100%;border-radius:3px;width:${unlocked/total*100}%;background:linear-gradient(90deg,#a3b0c4,#c4868e,#d4a840);transition:width 0.5s ease;"></div></div></div>`;
   h+=renderCardCarousel();
-  const cats=["生活","学业","德语","身心","恶女","成长","彩蛋"];const ro=["legend","epic","rare","normal"];
+  const cats=["生活","学业","德语","身心","恶女","成长","才艺","彩蛋"];const ro=["legend","epic","rare","normal"];
   cats.forEach(cat=>{const ca=ACHS.filter(a=>a.cat===cat);if(!ca.length)return;const cu=ca.filter(a=>S.ach[a.id]).length;
   h+=`<div style="margin-bottom:20px;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><div class="section-title" style="color:#8a6a6e;">${cat}</div><div style="font-size:12px;color:#b09898;font-family:'Outfit';">${cu}/${ca.length}</div></div>`;
   const sorted=[...ca].sort((a,b)=>{const aU=S.ach[a.id]?1:0,bU=S.ach[b.id]?1:0;if(aU!==bU)return bU-aU;return ro.indexOf(a.r)-ro.indexOf(b.r);});
