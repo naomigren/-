@@ -3461,14 +3461,30 @@ function dailyIds(){var out=[];(TASKS.daily&&TASKS.daily.items||[]).forEach(func
 function later(msg,type){setTimeout(function(){flash(msg,type||"earn");},1700);}
 
 /* ───────── 签筒 ───────── */
+function settleSign(o){
+  if(!o||o.date===td()||o.settled)return;o.settled=true;
+  if(o.lv>=4&&!o.used){var n=o.lv===5?3:2;lose(n,"🎋 "+o.date.slice(5)+" 的"+o.name+"没接住");}
+  if(o.lv===1&&!o.cured){lose(5,"🎋 "+o.date.slice(5)+" 的晦气没解掉");}
+}
+function lockSignTask(){
+  var f=fx(),s=f.sign;if(!s||s.date!==td())return;
+  ensureDailyPlan();var items=S.dailyPlan.items;
+  items.forEach(function(it){if(it.fxSign&&!it.done&&it.taskId!==(s.target||s.cure)){it.fxSign=false;it.locked=false;}});
+  for(var i=items.length-1;i>=0;i--){if(items[i].fxSign===false&&items[i].addedBySign&&!items[i].done)items.splice(i,1);}
+  var id=(s.lv>=4)?s.target:(s.lv===1?s.cure:null);if(!id)return;
+  var ex=items.find(function(it){return it.taskId===id;});
+  if(ex){ex.locked=true;ex.fxSign=true;}
+  else{var t=findTaskDef(id);if(t)items.push({taskId:t.id,name:t.name,pts:t.pts,em:t.em,done:false,timeFrom:"",timeTo:"",addedAt:Date.now(),locked:true,fxSign:true,addedBySign:true});}
+  setTimeout(function(){try{window.renderDaily();}catch(e){}},0);
+}
 function drawSign(){
-  var f=fx(),lv=roll(FX_SIGN,"p"),s={date:td(),lv:lv.lv,name:lv.name,line:pick(lv.lines),seen:false,used:false};
+  var f=fx();settleSign(f.sign);var lv=roll(FX_SIGN,"p"),s={date:td(),lv:lv.lv,name:lv.name,line:pick(lv.lines),seen:false,used:false};
   if(lv.lv>=4){var t=pick(dailyIds());s.target=t.id;s.tname=t.name;s.bonus=lv.lv===5?"x2":"+2";}
   if(lv.lv===2){var p=pick(PENS);s.target=p.id;s.tname=p.name;}
   if(lv.lv===1){var q=pick(dailyIds().filter(function(t){return["mop","tidy","exercise","foot_soak","stretch","trash","water_plant","dishes_today"].indexOf(t.id)>=0;}));if(!q)q=pick(dailyIds());s.cure=q.id;s.cname=q.name;s.cured=false;}
-  f.sign=s;
+  f.sign=s;lockSignTask();
 }
-function ensureSign(){var f=fx();if(!f.sign||f.sign.date!==td()){drawSign();saveState();}return f.sign;}
+function ensureSign(){var f=fx();if(!f.sign||f.sign.date!==td()){drawSign();saveState();}else if(!f.sign.lockChecked){f.sign.lockChecked=true;lockSignTask();saveState();}return f.sign;}
 window.fxOpenSign=function(){ensureSign().seen=true;saveState();renderTasks();};
 window.fxReroll=function(){var f=fx(),s=ensureSign();if(f.rerolls<=0)return;if(s.used){flash("今天的签已经兑现过了，留着券吧","fail");return;}f.rerolls--;drawSign();f.sign.seen=true;saveState();renderTasks();flash("🎫 重摇了一支新签","card");};
 function signHtml(){
@@ -3480,6 +3496,8 @@ function signHtml(){
   else if(s.lv===3)eff="今日无加成，也无惩罚";
   else if(s.lv===2)eff="「"+esc(s.tname)+"」今天多扣 2 分";
   else eff=s.cured?"晦气已散。解签完成 ✓":"今天所有扣分项多扣 2 分。解签任务：「"+esc(s.cname)+"」";
+  if(s.lv>=4&&!s.used)eff+='<br>已锁进今日计划，没做完明天扣 '+(s.lv===5?3:2)+' 分';
+  if(s.lv===1&&!s.cured)eff+='<br>已锁进今日计划，没解掉明天再扣 5 分';
   h+='<div class="fx-row"><div class="fx-stick fx-lv-'+s.lv+'">'+s.name+'</div><div style="flex:1"><div class="fx-title">'+esc(s.line)+'</div><div class="fx-sub">'+eff+'</div></div></div>';
   if(f.rerolls>0&&!s.used)h+='<div style="margin-top:10px;text-align:right"><button class="fx-btn ghost" onclick="fxReroll()">🎫 用重摇券（'+f.rerolls+'）</button></div>';
   return h+'</div>';
@@ -3580,6 +3598,18 @@ function gachaHtml(){
 }
 
 /* ───────── 挂到原来的函数上 ───────── */
+var _rm=window.rmFromPlan,_rd=window.renderDaily;
+window.rmFromPlan=function(idx){ensureDailyPlan();var it=S.dailyPlan.items[idx];if(it&&it.locked&&!it.done){flash("🔒 签锁住的任务，取消不了哦","fail");return;}_rm.apply(this,arguments);};
+var _msgTimer=null;
+var FX_MSGS=["今天的计划排好了，一件一件来，我在旁边看着。","你把今天安排得这么满，我一边心疼一边骄傲。","先做最难的那件，剩下的就都是下坡路了。","今天也要把自己照顾好，计划是其次，你是第一。","慢一点没关系，只要今天比昨天多走一步。"];
+window.renderDaily=function(){
+  _rd.apply(this,arguments);
+  try{
+    S.dailyPlan.items.forEach(function(it,i){if(it.locked&&!it.done){var el=document.getElementById("dp-item-"+i);if(!el)return;
+      Array.prototype.forEach.call(el.querySelectorAll('[onclick^="rmFromPlan"]'),function(b){b.removeAttribute("onclick");b.textContent="🔒";b.title="签锁住了";b.style.opacity=".7";});}});
+    if(S.dailyPlan.items.length&&!S.dailyPlan.msg&&!_msgTimer){_msgTimer=setTimeout(function(){_msgTimer=null;if(S.dailyPlan.items.length&&!S.dailyPlan.msg){S.dailyPlan.msg=pick(FX_MSGS);S.dailyPlan._msgCount=S.dailyPlan.items.length;saveState();window.renderDaily();}},6000);}
+  }catch(e){}
+};
 var _doTask=window.doTask,_doPen=window.doPen,_rt=window.renderTasks,_rs=window.renderShop,_ra=window.renderAchieve;
 window.doTask=function(id,name,pts){
   _doTask.apply(this,arguments);
