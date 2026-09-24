@@ -4019,20 +4019,20 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
 (function(){
 var TT=[
  {id:"k",name:"厨房线",c:"#cbb592",nodes:[
-   {k:"k1",n:"灶台熟手",d:"自己做饭永久 +1",cost:100},
-   {k:"k2",n:"洗碗不拖",d:"当天洗碗永久 +1",cost:200},
+   {k:"k1",n:"灶台熟手",d:"以后每次自己做饭，多拿 1 分",cost:100},
+   {k:"k2",n:"洗碗不拖",d:"以后每次当天洗碗，多拿 1 分",cost:200},
    {k:"k3",n:"秘传菜谱",d:"厨房里藏着的某个组合技，奖励翻倍",cost:400}]},
  {id:"n",name:"夜晚线",c:"#9aa7b4",nodes:[
-   {k:"n1",n:"早睡体质",d:"12 点前睡永久 +1",cost:100},
-   {k:"n2",n:"闹钟克星",d:"按时起床永久 +1",cost:200},
+   {k:"n1",n:"早睡体质",d:"以后每次 12 点前睡，多拿 1 分",cost:100},
+   {k:"n2",n:"闹钟克星",d:"以后每次按时起床，多拿 1 分",cost:200},
    {k:"n3",n:"夜猫护符",d:"熬夜过 1 点少扣 2 分",cost:400}]},
  {id:"g",name:"德语线",c:"#c4868e",nodes:[
-   {k:"g1",n:"单词吞噬者",d:"背单词永久 +1",cost:100},
-   {k:"g2",n:"语法骨架",d:"学语法点永久 +1",cost:200},
+   {k:"g1",n:"单词吞噬者",d:"以后每次背单词打卡，多拿 1 分",cost:100},
+   {k:"g2",n:"语法骨架",d:"以后每次学语法点，多拿 1 分",cost:200},
    {k:"g3",n:"考场体质",d:"每周第一套模拟题双倍",cost:400}]},
  {id:"b",name:"身体线",c:"#a9b39a",nodes:[
-   {k:"b1",n:"动起来",d:"运动 30 分钟永久 +1",cost:100},
-   {k:"b2",n:"减脂餐吃得下",d:"每顿减脂餐永久 +1",cost:200},
+   {k:"b1",n:"动起来",d:"以后每次运动打卡，多拿 1 分",cost:100},
+   {k:"b2",n:"减脂餐吃得下",d:"以后每顿减脂餐，多拿 1 分",cost:200},
    {k:"b3",n:"重拳",d:"打 Boss 的暴击从 2 倍变 2.5 倍",cost:400}]},
  {id:"l",name:"运气线",c:"#b3a6c9",nodes:[
    {k:"l1",n:"手气",d:"扭蛋每天多一次",cost:100},
@@ -4116,7 +4116,7 @@ function drawTree(){
     else if(can)card+='<button class="fx-btn" style="margin-top:12px;width:100%;background:'+br.c+'" onclick="ttLight(\''+sel+'\')">花 '+node.cost+' 分点亮</button>';
     else card+='<div style="margin-top:12px;font-size:12.5px;color:#b09898">先点亮「'+br.nodes[i0-1].n+'」 · 需要 '+node.cost+' 分</div>';
     card+='</div>';}
-  else card='<div class="tt-sheet" style="text-align:center;color:#a08888;font-size:13px">点一朵花苞，看看它是什么</div>';
+  else card='<div class="tt-sheet" style="text-align:center;color:#a08888;font-size:13px;line-height:1.7">点一朵花苞，看看它是什么<br><span style="font-size:12px">花积分点亮，马上生效，之后一直有效</span></div>';
   o.innerHTML='<div class="tt-top"><div><div class="tt-h">克拉拉的天赋树</div><div class="tt-s">'+stage+'<br>已点亮 '+own+' / 15 · 可用积分 '+S.cp+'</div></div><span class="tt-x" onclick="ttClose()">×</span></div>'+
     '<div class="tt-stage"><svg viewBox="0 0 360 640" preserveAspectRatio="xMidYMax meet">'+defs+'<g>'+leaves+'</g>'+svg+branches+nodes+labels+'</svg></div>'+card;
   if(justLit)spawnConfetti(50,["#cbb592","#9aa7b4","#c4868e","#a9b39a","#b3a6c9","#f6ecd8"]);
