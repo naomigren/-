@@ -3308,16 +3308,17 @@ setTimeout(function(){
 
 <style>
 #tabBarMain .tab-btn{flex:1 1 0 !important;min-width:0 !important;padding:7px 1px 6px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;line-height:1.1;white-space:nowrap}
-#tabBarMain .tab-ico{font-size:17px;line-height:1}
-#tabBarMore{margin:-12px 20px 20px;background:rgba(255,255,255,0.5);border-radius:12px;padding:3px;display:none;gap:2px}
-#tabBarMore.open{display:flex}
-#tabBarMore .tab-btn{flex:1 1 0 !important;min-width:0 !important;font-size:12.5px;padding:9px 4px}
+#tabBarMain .tab-ico,#tabBarMore .tab-ico{font-size:19px;line-height:1}
+#tabBarMain .tab-btn{padding:9px 2px 8px;font-size:12px;gap:4px}
+#tabBarMore{margin:-12px 20px 20px;background:rgba(255,255,255,0.5);border-radius:12px;padding:4px;display:none;grid-template-columns:repeat(3,1fr);gap:4px}
+#tabBarMore.open{display:grid}
+#tabBarMore .tab-btn{min-width:0 !important;font-size:12px;padding:10px 2px 9px;display:flex;flex-direction:column;align-items:center;gap:4px;line-height:1.1}
 #tabBarMain .tab-active,#tabBarMore .tab-active{color:#8a5a60}
 </style>
 <script>
 /* ═══════ 标签栏整理：常用七个 + 更多 ═══════ */
 (function(){
-  var RARE=["savings","pyq","sleep30"];
+  var RARE=["wishes","shop","history","savings","pyq","sleep30"];
   var tries=0;
   function splitLabel(b){
     if(b.querySelector(".tab-ico"))return;
@@ -3342,6 +3343,7 @@ setTimeout(function(){
     more.onclick=function(){row.classList.toggle("open");};
     bar.appendChild(more);
     Array.prototype.forEach.call(bar.querySelectorAll(".tab-btn"),splitLabel);
+    Array.prototype.forEach.call(row.querySelectorAll(".tab-btn"),splitLabel);
     /* 主栏点任何一个，更多那排就收起 */
     Array.prototype.forEach.call(bar.querySelectorAll(".tab-btn"),function(b){
       if(b!==more)b.addEventListener("click",function(){row.classList.remove("open");});
@@ -3351,9 +3353,8 @@ setTimeout(function(){
       var act=null;
       RARE.forEach(function(k){var b=document.getElementById("tab-"+k);if(b&&b.className.indexOf("tab-active")>=0)act=b;});
       if(act){
-        var t=(act.textContent||"").trim(),i=t.indexOf(" ");
         more.className="tab-btn tab-active";
-        more.innerHTML='<span class="tab-ico">'+(i>0?t.slice(0,i):"⋯")+'</span><span>'+(i>0?t.slice(i+1):"更多")+'</span>';
+        more.innerHTML=act.innerHTML;
       }else{
         more.className="tab-btn tab-inactive";
         more.innerHTML='<span class="tab-ico">⋯</span><span>更多</span>';
