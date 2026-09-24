@@ -3558,7 +3558,7 @@ function bossState(b){
 }
 function checkBoss(){
   var b=ensureBoss(),st=bossState(b);
-  if(!b.killed&&st.left<=0){b.killed=true;var f=fx();f.coins++;earn(30,"⚔️ 击败"+FX_BOSSES[b.idx].name);saveState();
+  if(!b.killed&&st.left<=0){b.killed=true;var f=fx();f.coins++;f.bossKills=(f.bossKills||0)+1;earn(30,"⚔️ 击败"+FX_BOSSES[b.idx].name);saveState();
     setTimeout(function(){spawnConfetti(80,["#c4868e","#d4a0a0","#c9b8a8","#9a7f8a","#e0bfc2"]);flash("⚔️ "+FX_BOSSES[b.idx].name+"倒下了！+30分，掉落一枚扭蛋币","big");},1700);}
 }
 window.fxDismissTaunt=function(){var f=fx();f.lastBoss=null;saveState();renderTasks();};
@@ -3604,15 +3604,15 @@ window.fxSpin=function(){
   if(f.gacha.count>=2){flash("今天的两次扭完了，明天再来","fail");return;}
   var useCoin=f.coins>0;
   if(!useCoin&&S.cp<20){flash("积分不够 20 啦","fail");return;}
-  if(useCoin)f.coins--;else{S.h.unshift({t:"r",n:"🎰 扭蛋一次",p:-20,d:new Date().toISOString()});S.cp-=20;}
+  f.gstat=f.gstat||{spent:0,won:0,spins:0};f.gstat.spins++;if(useCoin)f.coins--;else{S.h.unshift({t:"r",n:"🎰 扭蛋一次",p:-20,d:new Date().toISOString()});S.cp-=20;f.gstat.spent+=20;}
   f.gacha.count++;
   var r=roll(FX_GACHA,"p"),msg="";
   if(r.k==="joke")msg=pick(FX_JOKES);
-  else if(r.k==="b10"){earn(10,"🎰 扭蛋：返还 10 分");msg="一颗粉色的蛋，里面是 10 分。";}
-  else if(r.k==="b20"){earn(20,"🎰 扭蛋：返还 20 分");msg="一颗奶白色的蛋，里面是 20 分。";}
-  else if(r.k==="quest"){var q=pick(FX_QUESTS);if(f.quests.length>=3){earn(5,"🎰 扭蛋：任务卡换 5 分");msg="掉出一张任务卡，可你手里已经有三张了，折成 5 分。";}else{f.quests.push({n:q.n,a:q.a});msg="掉出一张隐藏任务卡：「"+q.n+"」";}}
+  else if(r.k==="b10"){earn(10,"🎰 扭蛋：返还 10 分");f.gstat.won+=10;msg="一颗粉色的蛋，里面是 10 分。";}
+  else if(r.k==="b20"){earn(20,"🎰 扭蛋：返还 20 分");f.gstat.won+=20;msg="一颗奶白色的蛋，里面是 20 分。";}
+  else if(r.k==="quest"){var q=pick(FX_QUESTS);if(f.quests.length>=3){earn(5,"🎰 扭蛋：任务卡换 5 分");f.gstat.won+=5;msg="掉出一张任务卡，可你手里已经有三张了，折成 5 分。";}else{f.quests.push({n:q.n,a:q.a});msg="掉出一张隐藏任务卡：「"+q.n+"」";}}
   else if(r.k==="reroll"){f.rerolls++;msg="掉出一张签筒重摇券。抽到下下签的时候，它会救你一命。";}
-  else{earn(60,"🎰 扭蛋：大奖 60 分");msg="金色的蛋！！60 分！今天的运气全用在这了。";}
+  else{earn(60,"🎰 扭蛋：大奖 60 分");f.gstat.won+=60;msg="金色的蛋！！60 分！今天的运气全用在这了。";}
   fxLast=msg;saveState();fxShow(r.k,msg);
 };
 /* ── 扭蛋大动静：全屏机器 + 声音 ── */
@@ -3731,6 +3731,151 @@ function season(){
 
 function boot(){if(typeof S==="undefined"||!S){setTimeout(boot,300);return;}fx();ensureSign();ensureBoss();checkBoss();checkCombos();season();try{render();}catch(e){}}
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",function(){setTimeout(boot,500);});else setTimeout(boot,500);
+})();
+</script>
+
+<style>
+.mw-row{display:flex;align-items:center;gap:8px;margin-top:10px}
+.mw-lab{font-size:12px;color:#a08888;flex-shrink:0}
+.mw-dot{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;border:2px solid transparent;transition:transform .2s,border-color .2s;flex-shrink:0}
+.mw-dot.on{border-color:#fff;box-shadow:0 0 0 2px #8a5a60;transform:scale(1.15)}
+.mw-wall{margin-top:10px}
+.mw-m{display:flex;align-items:center;gap:6px;margin-bottom:3px}
+.mw-m b{width:26px;font-size:10.5px;font-weight:500;color:#b09898;text-align:right;flex-shrink:0}
+.mw-cells{display:grid;grid-template-columns:repeat(31,1fr);gap:2px;flex:1}
+.mw-cells i{aspect-ratio:1;border-radius:2px;background:rgba(196,134,142,0.05);border:1px solid rgba(196,134,142,0.08);box-sizing:border-box;cursor:pointer}
+.mw-cells i.today{outline:1.5px solid #8a5a60;outline-offset:0}
+.mw-cells i.none{visibility:hidden}
+.mw-leg{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;font-size:11px;color:#a08888}
+.mw-leg span{display:inline-flex;align-items:center;gap:4px}
+.mw-leg em{width:10px;height:10px;border-radius:2px;display:inline-block}
+.yr-ov{position:fixed;inset:0;z-index:9100;display:flex;align-items:center;justify-content:center;background:rgba(90,74,74,.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.yr-card{width:min(86vw,360px);min-height:440px;border-radius:24px;padding:34px 26px 24px;box-sizing:border-box;display:flex;flex-direction:column;position:relative;box-shadow:0 20px 50px rgba(90,74,74,.3);animation:yrIn .45s cubic-bezier(.3,1.3,.5,1)}
+@keyframes yrIn{from{transform:translateY(20px) scale(.94);opacity:0}to{transform:none;opacity:1}}
+.yr-k{font-size:12px;letter-spacing:3px;opacity:.7}
+.yr-big{font-family:'Outfit',sans-serif;font-size:64px;font-weight:800;line-height:1;margin:22px 0 6px}
+.yr-t{font-size:20px;font-weight:600;line-height:1.5;margin-top:16px}
+.yr-p{font-size:14.5px;line-height:1.9;margin-top:14px;opacity:.9}
+.yr-foot{margin-top:auto;padding-top:22px;display:flex;justify-content:space-between;align-items:center;font-size:12px;opacity:.75}
+.yr-dots{display:flex;gap:5px}.yr-dots i{width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.25}.yr-dots i.on{opacity:.9}
+.yr-x{position:absolute;right:16px;top:12px;font-size:20px;opacity:.5;cursor:pointer}
+@media (prefers-reduced-motion:reduce){.yr-card{animation:none}}
+</style>
+<script>
+(function(){
+var MOODS=[{e:"🥰",n:"超开心",c:"#d6a6aa"},{e:"😊",n:"不错",c:"#cbb592"},{e:"😐",n:"一般",c:"#bdb5b8"},{e:"😫",n:"好累",c:"#9aa7b4"},{e:"😤",n:"生气",c:"#b88a7e"}];
+var PL_START="2026-04-15";
+function fmt(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function addD(ds,n){var d=new Date(ds+"T12:00:00");d.setDate(d.getDate()+n);return fmt(d);}
+function M(){S.fx=S.fx||{};S.fx.moods=S.fx.moods||{};return S.fx.moods;}
+function moodOf(ds){var m=M()[ds];if(m)return m;var pl=S.pl&&S.pl.days;if(!pl)return null;var n=Math.round((new Date(ds+"T12:00:00")-new Date(PL_START+"T12:00:00"))/864e5)+1;return pl[n]&&pl[n].mood||null;}
+function mInfo(e){return MOODS.find(function(x){return x.e===e;});}
+
+/* 今日计划里的心情小圆点 */
+window.mwSet=function(e){var m=M(),d=todayStr();m[d]=(m[d]===e)?undefined:e;if(!m[d])delete m[d];saveState();renderDaily();if(currentTab==="history")renderHistory();};
+var _rd=window.renderDaily;
+window.renderDaily=function(){_rd.apply(this,arguments);try{
+  var box=document.getElementById("content-daily");if(!box)return;var card=box.querySelector('div[style*="border-radius:16px"]');if(!card||card.querySelector(".mw-row"))return;
+  var cur=M()[todayStr()],h='<div class="mw-row"><span class="mw-lab">今天心情</span>';
+  MOODS.forEach(function(x){h+='<span class="mw-dot'+(cur===x.e?' on':'')+'" style="background:'+(cur===x.e?x.c:x.c+'33')+'" title="'+x.n+'" onclick="mwSet(\''+x.e+'\')">'+x.e+'</span>';});
+  card.children[0].insertAdjacentHTML("afterend",h+'</div>');
+}catch(e){}};
+/* 蜕变那边选心情，同步到当天 */
+var _psm=window.plSetMood;
+if(_psm)window.plSetMood=function(m){_psm.apply(this,arguments);try{var ds=addD(PL_START,(plCurrentDay||1)-1);M()[ds]=m;saveState();}catch(e){}};
+
+/* 格子墙 */
+function firstDay(){var ks=Object.keys(S.dailyTasks||{}).concat(Object.keys(S.dailyPts||{}),Object.keys(M())).filter(function(k){return /^\d{4}-\d\d-\d\d$/.test(k);}).sort();var f=ks[0]||todayStr();var fd=firstDate();if(fd&&fd.slice(0,10)<f)f=fd.slice(0,10);return f;}
+window.mwTap=function(ds){var e=moodOf(ds),p=S.dailyPts[ds]||0,mi=e&&mInfo(e);flash(ds.slice(5).replace("-","/")+(mi?" · "+e+" "+mi.n:"")+" · "+p+" 分","card");};
+function wallHtml(){
+  var td=todayStr(),start=firstDay(),y=parseInt(td.slice(0,4)),m=parseInt(td.slice(5,7)),sy=parseInt(start.slice(0,4)),sm=parseInt(start.slice(5,7)),rows="",n=0;
+  while((y>sy||(y===sy&&m>=sm))&&n<24){
+    var days=new Date(y,m,0).getDate(),cells="";
+    for(var d=1;d<=31;d++){
+      if(d>days){cells+='<i class="none"></i>';continue;}
+      var ds=y+"-"+String(m).padStart(2,"0")+"-"+String(d).padStart(2,"0");
+      if(ds>td){cells+='<i style="opacity:.35"></i>';continue;}
+      var e=moodOf(ds),mi=e&&mInfo(e),p=S.dailyPts[ds]||0,st="";
+      if(mi)st="background:"+mi.c+";border-color:"+mi.c;
+      else if(p>0)st="background:rgba(196,134,142,"+(0.12+Math.min(p,80)/80*0.45).toFixed(2)+");border-color:transparent";
+      cells+='<i'+(ds===td?' class="today"':'')+' style="'+st+'" onclick="mwTap(\''+ds+'\')"></i>';
+    }
+    rows+='<div class="mw-m"><b>'+(y!==parseInt(td.slice(0,4))?(y%100)+"/":"")+m+'月</b><div class="mw-cells">'+cells+'</div></div>';
+    m--;if(m===0){m=12;y--;}n++;
+  }
+  var leg='';MOODS.forEach(function(x){leg+='<span><em style="background:'+x.c+'"></em>'+x.n+'</span>';});
+  leg+='<span><em style="background:rgba(196,134,142,.4)"></em>没选心情，按积分深浅</span>';
+  return '<div class="fx-card"><div class="fx-title">🎨 心情格子墙</div><div class="fx-sub">一天一格。点一格，看那天的心情和积分。</div><div class="mw-wall">'+rows+'</div><div class="mw-leg">'+leg+'</div></div>';
+}
+
+/* 年报 */
+function bdOf(y){return (typeof bdDate==="function")?bdDate(y):(y+"-10-02");}
+function born(){return (typeof BD_BORN!=="undefined")?BD_BORN:2001;}
+function build(y){
+  var end=addD(bdOf(y),-1),start=addD(bdOf(y-1),0),fd=firstDay();if(fd>start)start=fd;
+  var inR=function(ds){return ds>=start&&ds<=end;},cnt={},days=0,pts=0,pens={},moodC={};
+  Object.keys(S.dailyTasks||{}).forEach(function(ds){if(!inR(ds))return;var l=S.dailyTasks[ds]||[];if(l.length)days++;l.forEach(function(id){cnt[id]=(cnt[id]||0)+1;});});
+  Object.keys(S.dailyPts||{}).forEach(function(ds){if(inR(ds))pts+=S.dailyPts[ds]||0;});
+  Object.keys(S.dailyPens||{}).forEach(function(ds){if(!inR(ds))return;(S.dailyPens[ds]||[]).forEach(function(id){pens[id]=(pens[id]||0)+1;});});
+  for(var ds=start;ds<=end;ds=addD(ds,1)){var e=moodOf(ds);if(e)moodC[e]=(moodC[e]||0)+1;}
+  var de=0;Object.keys(cnt).forEach(function(id){if(typeof DE_TASKS!=="undefined"&&DE_TASKS.has(id))de+=cnt[id];});
+  var hours={},latest=null;
+  (S.h||[]).forEach(function(h){if(h.t!=="e"||!h.d)return;var d=new Date(h.d),ds=fmt(d);if(!inR(ds))return;var hr=d.getHours();hours[hr]=(hours[hr]||0)+1;var lateKey=(hr<5?hr+24:hr)*60+d.getMinutes();if(!latest||lateKey>latest.k)latest={k:lateKey,t:String(hr).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")};});
+  var topH=Object.keys(hours).sort(function(a,b){return hours[b]-hours[a];})[0];
+  var top=Object.keys(cnt).filter(function(id){return findTaskDef(id);}).sort(function(a,b){return cnt[b]-cnt[a];}).slice(0,3).map(function(id){var t=findTaskDef(id);return {n:t.name,em:t.em||"",c:cnt[id]};});
+  var topMood=Object.keys(moodC).sort(function(a,b){return moodC[b]-moodC[a];})[0]||null;
+  var f=S.fx||{},g=f.gstat||{spent:0,won:0,spins:0};
+  return {y:y,age:y-born(),start:start,end:end,days:days,pts:pts,cook:cnt.cook||0,takeout:pens.pn_takeout||0,de:de,vocab:cnt.de_vocab||0,early:cnt.early_sleep||0,late:pens.pn_late_sleep||0,
+    topH:topH==null?null:+topH,latest:latest&&latest.t,top:top,topMood:topMood,moodDays:Object.keys(moodC).reduce(function(s,k){return s+moodC[k];},0),
+    ach:Object.keys(S.ach||{}).filter(function(k){var d=S.ach[k]&&S.ach[k].d;return d&&inR(d.slice(0,10));}).length,
+    gSpent:g.spent,gWon:g.won,gSpins:g.spins,boss:f.bossKills||0,combos:Object.keys(f.combos||{}).length};
+}
+var PAL=[["#f6e9ea","#6a4a50"],["#efe6da","#6a5540"],["#e6e9ee","#4a5260"],["#ece6f0","#5a4a66"],["#e9ede6","#4a5a48"],["#f3e4e0","#6a4a44"]];
+function slides(R){
+  var a=R.age,prev=a-1,S_=[];
+  S_.push({k:"YEAR IN REVIEW",big:prev+" 岁",t:"克拉拉 · 穆热迪拉的这一岁",p:R.start.replace(/-/g,".")+" — "+R.end.replace(/-/g,".")+"<br>翻过这一页，就是 "+a+" 岁了。"});
+  S_.push({k:"在这里",big:R.days,t:"天，你打开这里，给自己打了卡",p:"一共挣了 "+R.pts+" 分。每一分都是一件真的做过的事。"});
+  S_.push({k:"厨房",big:R.cook,t:"顿饭，是你自己做给自己吃的",p:R.takeout?"也被外卖抓到过 "+R.takeout+" 次。没关系，灶台记得的比外卖多。":"一次外卖都没被抓到。灶台都要认识你了。"});
+  S_.push({k:"DEUTSCH",big:R.de,t:"次德语打卡",p:(R.vocab?"光背单词就打了 "+R.vocab+" 次卡，少说 "+(R.vocab*20)+" 个词进了脑子。<br>":"")+"这些词以后会从你嘴里说出来，在手术室，在莱比锡。"});
+  S_.push({k:"夜里",big:R.early,t:"次，你在十二点前睡着了",p:(R.late?"熬过 "+R.late+" 次夜。":"")+(R.latest?"最晚的一次打卡在 "+R.latest+"，那会儿你在想什么？":"")});
+  if(R.top.length)S_.push({k:"最常做的事",big:R.top[0].em||"✦",t:R.top.map(function(x,i){return (i+1)+". "+x.n+" · "+x.c+" 次";}).join("<br>"),p:R.topH!=null?"你最常在 "+R.topH+" 点前后打卡。":""});
+  var mi=R.topMood&&MOODS.find(function(x){return x.e===R.topMood;});
+  S_.push({k:"心情",big:mi?R.topMood:"🎨",t:mi?"这一岁，最常出现的心情是「"+mi.n+"」":"心情格子墙刚刚开始记",p:mi?"一共记了 "+R.moodDays+" 天的心情。颜色攒多了，一年就有了自己的样子。":"从今天起，每天点一下，明年这一页就会有颜色。"});
+  S_.push({k:"不务正业",big:R.gSpins?("−"+Math.max(0,R.gSpent-R.gWon)):"0",t:R.gSpins?"分，是扭蛋机从你这里赢走的":"分，扭蛋机一分都没赢走",p:"扭了 "+R.gSpins+" 次，打倒 "+R.boss+" 只 Boss，撞出 "+R.combos+" 个组合技，解锁 "+R.ach+" 个成就。"});
+  S_.push({k:"给 "+a+" 岁的你",big:"🎂",t:a+" 岁生日快乐",p:"这一岁你做了一个很难的决定：从会计转到医学，从新疆去莱比锡，从一句德语都不会，到每天跟动词变位较劲。<br><br>上面这些数字，是你一天一天、一个勾一个勾攒出来的，没有一个是别人替你挣的。新的一岁，继续往前走。<br><br>—— 小克"});
+  return S_;
+}
+var yr={i:0,s:null};
+window.yrOpen=function(y){var f=S.fx||{};var R=(f.reports||{})[y];if(!R)return;yr={i:0,s:slides(R)};yrDraw();};
+window.yrClose=function(){var o=document.getElementById("yrOv");if(o)o.remove();};
+window.yrNext=function(ev){if(ev)ev.stopPropagation();if(yr.i<yr.s.length-1){yr.i++;yrDraw();}else yrClose();};
+function yrDraw(){
+  var o=document.getElementById("yrOv");if(!o){o=document.createElement("div");o.id="yrOv";o.className="yr-ov";o.onclick=function(e){if(e.target===o)yrNext();};document.body.appendChild(o);}
+  var sd=yr.s[yr.i],c=PAL[yr.i%PAL.length],dots="";for(var i=0;i<yr.s.length;i++)dots+='<i class="'+(i===yr.i?'on':'')+'"></i>';
+  o.innerHTML='<div class="yr-card" style="background:'+c[0]+';color:'+c[1]+'" onclick="yrNext(event)"><span class="yr-x" onclick="event.stopPropagation();yrClose()">×</span><div class="yr-k">'+sd.k+'</div><div class="yr-big">'+sd.big+'</div><div class="yr-t">'+sd.t+'</div><div class="yr-p">'+sd.p+'</div><div class="yr-foot"><div class="yr-dots">'+dots+'</div><span>'+(yr.i<yr.s.length-1?'点一下，下一页 ›':'收好')+'</span></div></div>';
+  if(yr.i===yr.s.length-1&&typeof spawnConfetti==="function")spawnConfetti(80,["#d6a6aa","#cbb592","#e0bfc2","#c9b8a8","#dcd3e6"]);
+}
+function reportHtml(){
+  var td=todayStr(),y=parseInt(td.slice(0,4)),f=S.fx||{},reps=f.reports||{},h='<div class="fx-card"><div class="fx-row"><div style="flex:1"><div class="fx-title">🎂 生日年报</div>';
+  var ys=Object.keys(reps).sort().reverse();
+  if(!reps[y]){var b=bdOf(y);if(td<b){var n=Math.round((new Date(b+"T12:00:00")-new Date(td+"T12:00:00"))/864e5);h+='<div class="fx-sub">'+(y-born())+' 岁生日那天解锁，还有 '+n+' 天。</div>';}}
+  h+='</div></div>';
+  ys.forEach(function(k){h+='<div style="margin-top:10px"><button class="fx-btn" onclick="yrOpen('+k+')">翻开 '+(reps[k].age-1)+' 岁这一年</button></div>';});
+  return h+'</div>';
+}
+function autoReport(){
+  try{var td=todayStr(),y=parseInt(td.slice(0,4)),b=bdOf(y);S.fx=S.fx||{};S.fx.reports=S.fx.reports||{};
+    if(td<b||S.fx.reports[y])return;
+    S.fx.reports[y]=build(y);saveState();
+    var go=function(){var o=document.getElementById("bdOverlay");if(o&&o.style.display==="flex"){setTimeout(go,800);return;}yrOpen(y);};
+    setTimeout(go,1500);
+  }catch(e){}
+}
+var _rh=window.renderHistory;
+window.renderHistory=function(){_rh.apply(this,arguments);try{document.getElementById("content-history").insertAdjacentHTML("afterbegin",reportHtml()+wallHtml());}catch(e){}};
+window._yrBuildTest=function(y){return build(y);};
+function boot(){if(typeof S==="undefined"||!S){setTimeout(boot,300);return;}try{renderDaily();}catch(e){}autoReport();}
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",function(){setTimeout(boot,700);});else setTimeout(boot,700);
 })();
 </script>
 </body></html>
