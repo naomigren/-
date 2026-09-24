@@ -3999,8 +3999,8 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
 .tt-sheet-bar{position:absolute;left:0;top:0;bottom:0;width:4px}
 .tt-glow{animation:ttPulse 2.2s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
 @keyframes ttPulse{0%,100%{opacity:.15;transform:scale(.8)}50%{opacity:.4;transform:scale(1.25)}}
-.tt-bloom{animation:ttBloom .7s cubic-bezier(.3,1.6,.5,1)}
-@keyframes ttBloom{from{transform:scale(0) rotate(-60deg)}to{transform:scale(1) rotate(0)}}
+.tt-bloom{animation:ttBloom 1.6s cubic-bezier(.25,1.3,.4,1)}
+@keyframes ttBloom{0%{transform:scale(0) rotate(-120deg);opacity:0}25%{transform:scale(.35) rotate(-80deg);opacity:1}70%{transform:scale(1.5) rotate(8deg)}100%{transform:scale(1) rotate(0)}}
 @media (prefers-reduced-motion:reduce){.tt-glow,.tt-bloom,.tt-ov{animation:none}}
 .tt-head{display:flex;justify-content:space-between;align-items:center;cursor:pointer}
 .tt-br{margin-top:14px}
@@ -4066,7 +4066,7 @@ function rnd(i){var x=Math.sin(i*99.13)*43758.5;return x-Math.floor(x);}
 var sel=null,justLit=null;
 window.ttOpen=function(){sel=null;drawTree();};
 window.ttClose=function(){var o=document.getElementById("ttOv");if(o)o.remove();render();};
-window.ttPick=function(k){sel=k;drawTree();};
+window.ttPick=function(k){sel=k;if(has(k)){justLit=k;drawTree();setTimeout(function(){justLit=null;},1800);}else drawTree();};
 window.ttLight=function(k){var before=has(k);ttBuy(k);if(!before&&has(k)){justLit=k;sel=k;drawTree();setTimeout(function(){justLit=null;},1200);}};
 function flower(x,y,col,big,anim){
   var r=big?8:7,h='<g transform="translate('+x.toFixed(1)+','+y.toFixed(1)+')"><g class="'+(anim?'tt-bloom':'')+'">';
@@ -4119,7 +4119,7 @@ function drawTree(){
   else card='<div class="tt-sheet" style="text-align:center;color:#a08888;font-size:13px;line-height:1.7">点一朵花苞，看看它是什么<br><span style="font-size:12px">花积分点亮，马上生效，之后一直有效</span></div>';
   o.innerHTML='<div class="tt-top"><div><div class="tt-h">克拉拉的天赋树</div><div class="tt-s">'+stage+'<br>已点亮 '+own+' / 15 · 可用积分 '+S.cp+'</div></div><span class="tt-x" onclick="ttClose()">×</span></div>'+
     '<div class="tt-stage"><svg viewBox="0 0 360 640" preserveAspectRatio="xMidYMax meet">'+defs+'<g>'+leaves+'</g>'+svg+branches+nodes+labels+'</svg></div>'+card;
-  if(justLit)spawnConfetti(50,["#cbb592","#9aa7b4","#c4868e","#a9b39a","#b3a6c9","#f6ecd8"]);
+  if(justLit)setTimeout(function(){spawnConfetti(50,["#cbb592","#9aa7b4","#c4868e","#a9b39a","#b3a6c9","#f6ecd8"]);},900);
 }
 /* 加分类天赋：直接改这次打卡的分数，一条记录搞定 */
 var _dt=window.doTask;
