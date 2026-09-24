@@ -3987,6 +3987,21 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
 </script>
 
 <style>
+.tt-ov{position:fixed;inset:0;z-index:9050;display:flex;flex-direction:column;background:linear-gradient(#f8f2f1,#f1e8e4 60%,#ebe4dc);animation:ttIn .35s ease}
+@keyframes ttIn{from{opacity:0}to{opacity:1}}
+.tt-top{display:flex;justify-content:space-between;align-items:flex-start;padding:max(18px,env(safe-area-inset-top)) 22px 4px}
+.tt-h{font-size:19px;font-weight:700;color:#6a5555;letter-spacing:1px}
+.tt-s{font-size:12px;color:#a08888;margin-top:3px}
+.tt-x{font-size:26px;color:#b09898;cursor:pointer;line-height:1;padding:2px 4px}
+.tt-stage{flex:1;min-height:0;display:flex;justify-content:center;padding:0 6px}
+.tt-stage svg{height:100%;width:100%;max-width:520px}
+.tt-sheet{margin:0 16px max(16px,env(safe-area-inset-bottom));padding:16px 18px;border-radius:18px;background:rgba(255,255,255,.75);box-shadow:0 6px 24px rgba(106,85,85,.12);position:relative;overflow:hidden}
+.tt-sheet-bar{position:absolute;left:0;top:0;bottom:0;width:4px}
+.tt-glow{animation:ttPulse 2.2s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes ttPulse{0%,100%{opacity:.15;transform:scale(.8)}50%{opacity:.4;transform:scale(1.25)}}
+.tt-bloom{animation:ttBloom .7s cubic-bezier(.3,1.6,.5,1)}
+@keyframes ttBloom{from{transform:scale(0) rotate(-60deg)}to{transform:scale(1) rotate(0)}}
+@media (prefers-reduced-motion:reduce){.tt-glow,.tt-bloom,.tt-ov{animation:none}}
 .tt-head{display:flex;justify-content:space-between;align-items:center;cursor:pointer}
 .tt-br{margin-top:14px}
 .tt-bn{font-size:12.5px;font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:6px}
@@ -4040,20 +4055,71 @@ window.ttBuy=function(k){
   spawnConfetti(60,["#cbb592","#9aa7b4","#c4868e","#a9b39a","#b3a6c9"]);flash("🌳 天赋点亮：「"+node.n+"」","big");
 };
 function html(){
-  var t=T(),own=Object.keys(t).filter(function(k){return k[0]!=='_';}).length,h='<div class="fx-card"><div class="tt-head" onclick="ttToggle()"><div><div class="fx-title">🌳 天赋树</div><div class="fx-sub">已点亮 '+own+' / 15 · 可用积分 '+S.cp+'</div></div><span style="color:#c4868e;font-size:12px;display:inline-block;transform:rotate('+(open?180:0)+'deg)">▼</span></div>';
-  if(!open)return h+'</div>';
-  h+='<div class="fx-sub" style="margin-top:8px">每条路要从第一格点起。点了就是永久的，不能退。</div>';
-  TT.forEach(function(b){
-    h+='<div class="tt-br"><div class="tt-bn" style="color:#6a5555"><i style="background:'+b.c+'"></i>'+b.name+'</div><div class="tt-row">';
-    b.nodes.forEach(function(n,i){
-      var ow=has(n.k),can=!ow&&(i===0||has(b.nodes[i-1].k));
-      if(ow)h+='<div class="tt-n own" style="background:'+b.c+'"><b>'+n.n+'</b>'+n.d+'</div>';
-      else if(can)h+='<div class="tt-n can" style="border-color:'+b.c+';color:#6a5555" onclick="ttBuy(\''+n.k+'\')"><b>'+n.n+'</b>'+n.d+'<div class="tt-cost" style="color:'+b.c+'">'+n.cost+' 分点亮</div></div>';
-      else h+='<div class="tt-n lock"><b>'+n.n+'</b>'+n.d+'<div class="tt-cost">'+n.cost+' 分</div></div>';
+  var own=Object.keys(T()).filter(function(k){return k[0]!=='_';}).length;
+  return '<div class="fx-card" style="cursor:pointer" onclick="ttOpen()"><div class="fx-row"><div style="font-size:30px">🌳</div><div style="flex:1"><div class="fx-title">天赋树</div><div class="fx-sub">已点亮 '+own+' / 15 · 可用积分 '+S.cp+'</div></div><span style="color:#c4868e;font-size:13px">进去看看 ›</span></div></div>';
+}
+/* ───── 全屏的树 ───── */
+var BR={k:{s:[176,505],c:[110,478],e:[38,430],lab:"厨房"},n:{s:[184,440],c:[252,410],e:[324,362],lab:"夜晚"},g:{s:[176,360],c:[104,330],e:[36,276],lab:"德语"},b:{s:[184,290],c:[256,258],e:[326,204],lab:"身体"},l:{s:[180,190],c:[150,120],e:[190,52],lab:"运气"}};
+var TS=[0.46,0.73,1];
+function qp(b,t){var u=1-t;return[u*u*b.s[0]+2*u*t*b.c[0]+t*t*b.e[0],u*u*b.s[1]+2*u*t*b.c[1]+t*t*b.e[1]];}
+function rnd(i){var x=Math.sin(i*99.13)*43758.5;return x-Math.floor(x);}
+var sel=null,justLit=null;
+window.ttOpen=function(){sel=null;drawTree();};
+window.ttClose=function(){var o=document.getElementById("ttOv");if(o)o.remove();render();};
+window.ttPick=function(k){sel=k;drawTree();};
+window.ttLight=function(k){var before=has(k);ttBuy(k);if(!before&&has(k)){justLit=k;sel=k;drawTree();setTimeout(function(){justLit=null;},1200);}};
+function flower(x,y,col,big,anim){
+  var r=big?8:7,h='<g transform="translate('+x.toFixed(1)+','+y.toFixed(1)+')"><g class="'+(anim?'tt-bloom':'')+'">';
+  for(var i=0;i<5;i++){h+='<ellipse cx="0" cy="'+(-r)+'" rx="'+(r*0.62).toFixed(1)+'" ry="'+r+'" fill="'+col+'" opacity=".92" transform="rotate('+(i*72)+')"/>';}
+  return h+'<circle r="'+(r*0.45).toFixed(1)+'" fill="#f6ecd8"/><circle r="'+(r*0.18).toFixed(1)+'" fill="#c9a98a"/></g></g>';
+}
+function drawTree(){
+  var o=document.getElementById("ttOv");
+  if(!o){o=document.createElement("div");o.id="ttOv";o.className="tt-ov";document.body.appendChild(o);}
+  var own=Object.keys(T()).filter(function(k){return k[0]!=='_';}).length,full=own===15,svg="",leaves="",nodes="",labels="",branches="";
+  /* 地面 */
+  svg+='<ellipse cx="180" cy="618" rx="170" ry="26" fill="#dfe3d4"/><ellipse cx="180" cy="612" rx="120" ry="14" fill="#cfd6c2" opacity=".8"/>';
+  for(var gi=0;gi<9;gi++){var gx=40+gi*35+rnd(gi)*14;svg+='<path d="M'+gx+',612 q2,-9 5,-12 M'+(gx+4)+',613 q1,-6 -2,-10" stroke="#b8c2a8" stroke-width="1.4" fill="none" stroke-linecap="round"/>';}
+  /* 树冠：按点亮的数量越长越密 */
+  var idx=0;
+  TT.forEach(function(b){var g=BR[b.id];
+    b.nodes.forEach(function(n,i){var p=qp(g,TS[i]),lit=has(n.k),cnt=lit?4:0;
+      for(var j=0;j<cnt;j++){idx++;var rx=p[0]+(rnd(idx)-.5)*54,ry=p[1]+(rnd(idx+7)-.5)*40-6,rr=16+rnd(idx+3)*16,cols=["#c7ceb8","#b8c2a8","#d9d6c4","#aeb89f","#e2d3d0"];
+        leaves+='<circle cx="'+rx.toFixed(1)+'" cy="'+ry.toFixed(1)+'" r="'+rr.toFixed(1)+'" fill="'+cols[idx%5]+'" opacity="'+(lit?.55:.22)+'"/>';}
     });
-    h+='</div></div>';
   });
-  return h+'</div>';
+  if(full)leaves='<circle cx="180" cy="250" r="190" fill="url(#ttGlow)"/>'+leaves;
+  /* 树干 */
+  svg+='<path d="M168,616 C173,540 170,450 174,360 C177,280 175,220 178,150 L183,150 C185,220 185,280 186,360 C188,450 187,540 194,616 Z" fill="#a8928a"/><path d="M180,600 C179,500 178,400 180,300 C181,240 180,200 180,160" stroke="#c2ada4" stroke-width="1.6" fill="none" opacity=".8"/>';
+  svg+='<path d="M169,614 q-12,5 -26,3 M193,614 q12,5 26,2 M176,616 q-2,6 -8,9" stroke="#a8928a" stroke-width="4" fill="none" stroke-linecap="round"/>';
+  TT.forEach(function(b){var g=BR[b.id];
+    branches+='<path d="M'+g.s+' Q'+g.c+' '+g.e+'" stroke="#a8928a" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M'+g.s+' Q'+g.c+' '+qp(g,.55).map(function(v){return v.toFixed(1);})+'" stroke="#a8928a" stroke-width="7" fill="none" stroke-linecap="round"/>';
+    [0.3,0.6,0.86].forEach(function(t,li){var p=qp(g,t),side=li%2?1:-1,ang=(g.e[0]<180?-40:40)+side*50;branches+='<ellipse cx="'+(p[0]).toFixed(1)+'" cy="'+(p[1]+side*7).toFixed(1)+'" rx="3.2" ry="7" fill="#b8c2a8" opacity=".85" transform="rotate('+ang+' '+p[0].toFixed(1)+' '+(p[1]+side*7).toFixed(1)+')"/>';});
+    var lp=qp(g,1);labels+='<text x="'+lp[0].toFixed(1)+'" y="'+(lp[1]-20).toFixed(1)+'" font-size="11.5" fill="'+b.c+'" text-anchor="middle" font-weight="700" letter-spacing="1" style="paint-order:stroke;stroke:#f7f1ef;stroke-width:3px">'+g.lab+'</text>';
+    b.nodes.forEach(function(n,i){var p=qp(g,TS[i]),lit=has(n.k),can=!lit&&(i===0||has(b.nodes[i-1].k)),isSel=sel===n.k;
+      nodes+='<g onclick="ttPick(\''+n.k+'\')" style="cursor:pointer">';
+      nodes+='<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="20" fill="transparent"/>';
+      if(isSel)nodes+='<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="17" fill="none" stroke="'+b.c+'" stroke-width="1.5" stroke-dasharray="3 3"/>';
+      if(lit)nodes+=flower(p[0],p[1],b.c,i===2,justLit===n.k);
+      else if(can)nodes+='<circle class="tt-glow" cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="11" fill="'+b.c+'" opacity=".25"/><ellipse cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" rx="6" ry="8" fill="#f2e8e6" stroke="'+b.c+'" stroke-width="1.6"/>';
+      else nodes+='<ellipse cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" rx="5" ry="7" fill="#e8dfdd" stroke="#cdbfbc" stroke-width="1.2"/>';
+      nodes+='</g>';
+    });
+  });
+  var defs='<defs><radialGradient id="ttGlow"><stop offset="0" stop-color="#f6ecd8" stop-opacity=".9"/><stop offset="1" stop-color="#f6ecd8" stop-opacity="0"/></radialGradient></defs>';
+  var stage=own===0?"一棵光秃秃的小树，等你点亮第一朵花":own<5?"开始冒芽了":own<10?"枝叶慢慢密起来了":own<15?"快要开满了":"满树开花";
+  var card="";
+  if(sel){var node=null,br=null,i0=0;TT.forEach(function(b){b.nodes.forEach(function(n,i){if(n.k===sel){node=n;br=b;i0=i;}});});
+    var lit=has(sel),can=!lit&&(i0===0||has(br.nodes[i0-1].k));
+    card='<div class="tt-sheet"><div class="tt-sheet-bar" style="background:'+br.c+'"></div><div style="font-size:11.5px;color:'+br.c+';font-weight:600;letter-spacing:1px">'+br.name+' · 第 '+(i0+1)+' 格</div><div style="font-size:18px;font-weight:700;color:#5a4a4a;margin-top:4px">'+node.n+'</div><div style="font-size:13.5px;color:#8a7a7a;margin-top:6px;line-height:1.7">'+node.d+'</div>';
+    if(lit)card+='<div style="margin-top:12px;font-size:12.5px;color:'+br.c+'">已点亮 · '+(T()[sel]||"").slice(5).replace("-","/")+'</div>';
+    else if(can)card+='<button class="fx-btn" style="margin-top:12px;width:100%;background:'+br.c+'" onclick="ttLight(\''+sel+'\')">花 '+node.cost+' 分点亮</button>';
+    else card+='<div style="margin-top:12px;font-size:12.5px;color:#b09898">先点亮「'+br.nodes[i0-1].n+'」 · 需要 '+node.cost+' 分</div>';
+    card+='</div>';}
+  else card='<div class="tt-sheet" style="text-align:center;color:#a08888;font-size:13px">点一朵花苞，看看它是什么</div>';
+  o.innerHTML='<div class="tt-top"><div><div class="tt-h">克拉拉的天赋树</div><div class="tt-s">'+stage+'<br>已点亮 '+own+' / 15 · 可用积分 '+S.cp+'</div></div><span class="tt-x" onclick="ttClose()">×</span></div>'+
+    '<div class="tt-stage"><svg viewBox="0 0 360 640" preserveAspectRatio="xMidYMax meet">'+defs+'<g>'+leaves+'</g>'+svg+branches+nodes+labels+'</svg></div>'+card;
+  if(justLit)spawnConfetti(50,["#cbb592","#9aa7b4","#c4868e","#a9b39a","#b3a6c9","#f6ecd8"]);
 }
 /* 加分类天赋：直接改这次打卡的分数，一条记录搞定 */
 var _dt=window.doTask;
