@@ -3737,9 +3737,9 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
 </script>
 
 <style>
-.mw-row{display:flex;align-items:center;gap:8px;margin-top:10px}
+.mw-row{display:flex;align-items:center;gap:6px;margin-top:10px}
 .mw-lab{font-size:12px;color:#a08888;flex-shrink:0}
-.mw-dot{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;border:2px solid transparent;transition:transform .2s,border-color .2s;flex-shrink:0}
+.mw-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;border:2px solid transparent;transition:transform .2s,border-color .2s;flex-shrink:0}
 .mw-dot.on{border-color:#fff;box-shadow:0 0 0 2px #8a5a60;transform:scale(1.15)}
 .mw-wall{margin-top:10px}
 .mw-m{display:flex;align-items:center;gap:6px;margin-bottom:3px}
@@ -3765,7 +3765,7 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
 </style>
 <script>
 (function(){
-var MOODS=[{e:"🥰",n:"超开心",c:"#d6a6aa"},{e:"😊",n:"不错",c:"#cbb592"},{e:"😐",n:"一般",c:"#bdb5b8"},{e:"😫",n:"好累",c:"#9aa7b4"},{e:"😤",n:"生气",c:"#b88a7e"}];
+var MOODS=[{e:"🥰",n:"超开心",c:"#f2c4cc"},{e:"😊",n:"不错",c:"#c3dcbc"},{e:"😐",n:"一般",c:"#d8cce8"},{e:"😢",n:"不开心",c:"#b9d2e8"},{e:"😫",n:"好累",c:"#c9c3c3"},{e:"😤",n:"生气",c:"#d88a84"}];
 var PL_START="2026-04-15";
 function fmt(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
 function addD(ds,n){var d=new Date(ds+"T12:00:00");d.setDate(d.getDate()+n);return fmt(d);}
@@ -3783,7 +3783,7 @@ var _rd=window.renderDaily;
 window.renderDaily=function(){_rd.apply(this,arguments);try{
   var box=document.getElementById("content-daily");if(!box)return;var card=box.querySelector('div[style*="border-radius:16px"]');if(!card||card.querySelector(".mw-row"))return;
   var cur=M()[todayStr()],h='<div class="mw-row"><span class="mw-lab">今天心情</span>';
-  MOODS.forEach(function(x){h+='<span class="mw-dot'+(cur===x.e?' on':'')+'" style="background:'+(cur===x.e?x.c:x.c+'33')+'" title="'+x.n+'" onclick="mwSet(\''+x.e+'\')">'+x.e+'</span>';});
+  MOODS.forEach(function(x){h+='<span class="mw-dot'+(cur===x.e?' on':'')+'" style="background:'+(cur===x.e?x.c:x.c+'80')+'" title="'+x.n+'" onclick="mwSet(\''+x.e+'\')">'+x.e+'</span>';});
   card.children[0].insertAdjacentHTML("afterend",h+'</div>');
 }catch(e){}};
 /* 蜕变那边选心情，同步到当天 */
@@ -3803,14 +3803,14 @@ function wallHtml(){
       if(ds>td){cells+='<i style="opacity:.35"></i>';continue;}
       var e=moodOf(ds),mi=e&&mInfo(e),p=S.dailyPts[ds]||0,st="";
       if(mi)st="background:"+mi.c+";border-color:"+mi.c;
-      else if(p>0)st="background:rgba(196,134,142,"+(0.12+Math.min(p,80)/80*0.45).toFixed(2)+");border-color:transparent";
+      else if(p>0)st="background:rgba(196,178,150,"+(0.12+Math.min(p,80)/80*0.4).toFixed(2)+");border-color:transparent";
       cells+='<i'+(ds===td?' class="today"':'')+' style="'+st+'" onclick="mwTap(\''+ds+'\')"></i>';
     }
     rows+='<div class="mw-m"><b>'+(y!==parseInt(td.slice(0,4))?(y%100)+"/":"")+m+'月</b><div class="mw-cells">'+cells+'</div></div>';
     m--;if(m===0){m=12;y--;}n++;
   }
   var leg='';MOODS.forEach(function(x){leg+='<span><em style="background:'+x.c+'"></em>'+x.n+'</span>';});
-  leg+='<span><em style="background:rgba(196,134,142,.4)"></em>没选心情，按积分深浅</span>';
+  leg+='<span><em style="background:rgba(196,178,150,.45)"></em>没选心情，按积分深浅</span>';
   return '<div class="fx-card"><div class="fx-title">🎨 心情格子墙</div><div class="fx-sub">一天一格。点一格，看那天的心情和积分。</div><div class="mw-wall">'+rows+'</div><div class="mw-leg">'+leg+'</div></div>';
 }
 
@@ -3935,8 +3935,8 @@ function echoHtml(){
     var ds=picks[i][0],l=(S.dailyTasks[ds]||[]).filter(function(id,ix,a){return a.indexOf(id)===ix;}),p=S.dailyPts[ds]||0,mood=(F().moods||{})[ds];
     if(!l.length&&!p)continue;
     var names=l.map(function(id){var t=findTaskDef(id);return t?t.name:null;}).filter(Boolean);
-    var what=names.length?names.slice(0,3).join("、")+(names.length>3?" 等 "+names.length+" 件事":""):"打了卡";
-    return '<div class="echo"><b>'+picks[i][1]+'</b> · '+ds.slice(5).replace("-","/")+'<br>你做了'+what+'，挣了 '+p+' 分'+(mood?'，心情 '+mood:'')+'。</div>';
+    var what=names.length?"做了"+names.slice(0,3).join("、")+(names.length>3?" 等 "+names.length+" 件事":""):"打了卡";
+    return '<div class="echo"><b>'+picks[i][1]+'</b> · '+ds.slice(5).replace("-","/")+'<br>你'+what+'，挣了 '+p+' 分'+(mood?'，心情 '+mood:'')+'。</div>';
   }
   return "";
 }
