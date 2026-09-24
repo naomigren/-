@@ -587,11 +587,28 @@ function loadState(){
   if(!S.cards)S.cards=initCards(); else{const ic=initCards();Object.keys(ic).forEach(k=>{if(!S.cards[k])S.cards[k]=ic[k];});}S.pl=S.pl||{days:{},rewards:{r30:"",r60:"",r90:""},visionItems:[]};if(S.attrs.mood!==undefined){delete S.attrs.mood;}if(!S.attrs.beauty||S.attrs.beauty===0){var _bm={skincare:3,outfit:3,posture:3,exercise:2,run:2,badminton:1,dance_t:2,bath:2,no_sugar:2,no_snack:2,diet_meal:2,water:2,stretch:1,early_sleep:2,brush:1,foot_soak:1,vitamin:1};var _bt=0;var tc=S.taskCounts||{};Object.keys(_bm).forEach(function(k){_bt+=(_bm[k]||0)*(tc[k]||0);});S.attrs.beauty=_bt;saveState();}if(typeof loadImagesFromLS==="function")loadImagesFromLS();return;}}catch(e){}
   S={cp:0,tp:0,h:[],rd:[],bc:false,ct:[],cs:[],cpn:[],attrs:initAttrs(),de:0,ach:{},taskCounts:{},dailyTasks:{},dailyPens:{},dailyPts:{},cards:initCards(),dailyPlan:{date:"",items:[]},wishes:{},pl:{days:{},rewards:{r30:"",r60:"",r90:""},visionItems:[]}};
 }
-function saveState(){try{localStorage.setItem("lila-quest-v3",JSON.stringify(S));}catch(e){}try{if(typeof saveImagesToLS==="function")saveImagesToLS();}catch(e){}}
+var _qsWarned={};
+function _qsWarn(key,msg){if(_qsWarned[key])return;_qsWarned[key]=true;try{flash(msg,"fail");}catch(e){}}
+function saveState(){
+  /* 先存照片：照片单独一格，存成功了主存档才能放心去掉照片 */
+  var imgOk=false;
+  try{imgOk=(typeof saveImagesToLS==="function")?saveImagesToLS()!==false:false;}catch(e){imgOk=false;}
+  var main;
+  try{main=JSON.stringify(imgOk?stripImages(S):S);}catch(e){main=JSON.stringify(S);}
+  try{localStorage.setItem("lila-quest-v3",main);}
+  catch(e){
+    /* 照片和进度一起放不下时，进度优先：去掉照片再存一次 */
+    try{localStorage.setItem("lila-quest-v3",JSON.stringify(stripImages(S)));}
+    catch(e2){_qsWarn("main","⚠️ 进度没存上！存储空间满了，请马上点「📦 导出完整备份」");return;}
+  }
+  if(!imgOk)_qsWarn("img","⚠️ 照片存储空间快满了，新照片可能丢，记得导出完整备份");
+  try{var used=0;for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);used+=k.length+(localStorage.getItem(k)||"").length;}
+    if(used>4200000)_qsWarn("space","📦 存储空间用了八成多，建议导出一次完整备份");}catch(e){}
+}
 function fmtDate(d){const x=new Date(d);return `${x.getMonth()+1}/${x.getDate()} ${x.getHours().toString().padStart(2,"0")}:${x.getMinutes().toString().padStart(2,"0")}`;}
-function stripImages(obj){var c=JSON.parse(JSON.stringify(obj));if(c.wishes){Object.keys(c.wishes).forEach(function(k){if(c.wishes[k].evidence)c.wishes[k].evidence="__IMG__";});}if(c.pyqPosts){c.pyqPosts.forEach(function(p){if(p.photos&&p.photos.length>0)p.photos=p.photos.map(function(){return"__IMG__";});});}if(c.pl&&c.pl.visionItems){c.pl.visionItems.forEach(function(v){if(v.img)v.img="__IMG__";});}return c;}
-function saveImagesToLS(){var imgs={};if(S.wishes){Object.keys(S.wishes).forEach(function(k){if(S.wishes[k].evidence&&S.wishes[k].evidence!=="__IMG__")imgs["wish_"+k]=S.wishes[k].evidence;});}if(S.pyqPosts){S.pyqPosts.forEach(function(p,i){if(p.photos){p.photos.forEach(function(src,j){if(src&&src!=="__IMG__")imgs["pyq_"+i+"_"+j]=src;});}});}if(S.pl&&S.pl.visionItems){S.pl.visionItems.forEach(function(v,i){if(v.img&&v.img!=="__IMG__")imgs["vision_"+i]=v.img;});}try{localStorage.setItem("klara-quest-imgs",JSON.stringify(imgs));}catch(e){}}
-function loadImagesFromLS(){try{var imgs=JSON.parse(localStorage.getItem("klara-quest-imgs")||"{}");if(S.wishes){Object.keys(S.wishes).forEach(function(k){if(S.wishes[k].evidence==="__IMG__"&&imgs["wish_"+k])S.wishes[k].evidence=imgs["wish_"+k];});}if(S.pyqPosts){S.pyqPosts.forEach(function(p,i){if(p.photos){p.photos=p.photos.map(function(src,j){return src==="__IMG__"&&imgs["pyq_"+i+"_"+j]?imgs["pyq_"+i+"_"+j]:src;});}});}if(S.pl&&S.pl.visionItems){S.pl.visionItems.forEach(function(v,i){if(v.img==="__IMG__"&&imgs["vision_"+i])v.img=imgs["vision_"+i];});}}catch(e){}}
+function stripImages(obj){var c=JSON.parse(JSON.stringify(obj));if(c.wishes){Object.keys(c.wishes).forEach(function(k){if(c.wishes[k].evidence)c.wishes[k].evidence="__IMG__";});}if(c.pyqPosts){c.pyqPosts.forEach(function(p){if(p.photos&&p.photos.length>0)p.photos=p.photos.map(function(){return"__IMG__";});});}if(c.pl&&c.pl.visionItems){c.pl.visionItems.forEach(function(v){if(v.img)v.img="__IMG__";});}if(c.rank&&c.rank.art){Object.keys(c.rank.art).forEach(function(k){if(c.rank.art[k])c.rank.art[k]="__IMG__";});}return c;}
+function saveImagesToLS(){var imgs={};if(S.wishes){Object.keys(S.wishes).forEach(function(k){if(S.wishes[k].evidence&&S.wishes[k].evidence!=="__IMG__")imgs["wish_"+k]=S.wishes[k].evidence;});}if(S.pyqPosts){S.pyqPosts.forEach(function(p,i){if(p.photos){p.photos.forEach(function(src,j){if(src&&src!=="__IMG__")imgs["pyq_"+i+"_"+j]=src;});}});}if(S.pl&&S.pl.visionItems){S.pl.visionItems.forEach(function(v,i){if(v.img&&v.img!=="__IMG__")imgs["vision_"+i]=v.img;});}if(S.rank&&S.rank.art){Object.keys(S.rank.art).forEach(function(k){var v=S.rank.art[k];if(v&&v!=="__IMG__")imgs["rkart_"+k]=v;});}try{localStorage.setItem("klara-quest-imgs",JSON.stringify(imgs));return true;}catch(e){return false;}}
+function loadImagesFromLS(){try{var imgs=JSON.parse(localStorage.getItem("klara-quest-imgs")||"{}");if(S.wishes){Object.keys(S.wishes).forEach(function(k){if(S.wishes[k].evidence==="__IMG__"&&imgs["wish_"+k])S.wishes[k].evidence=imgs["wish_"+k];});}if(S.pyqPosts){S.pyqPosts.forEach(function(p,i){if(p.photos){p.photos=p.photos.map(function(src,j){return src==="__IMG__"&&imgs["pyq_"+i+"_"+j]?imgs["pyq_"+i+"_"+j]:src;});}});}if(S.pl&&S.pl.visionItems){S.pl.visionItems.forEach(function(v,i){if(v.img==="__IMG__"&&imgs["vision_"+i])v.img=imgs["vision_"+i];});}if(S.rank&&S.rank.art){Object.keys(S.rank.art).forEach(function(k){if(S.rank.art[k]==="__IMG__"){if(imgs["rkart_"+k])S.rank.art[k]=imgs["rkart_"+k];else delete S.rank.art[k];}});}}catch(e){}}
 function encode(s){return btoa(unescape(encodeURIComponent(JSON.stringify(stripImages(s)))));}
 function decode(s){try{return JSON.parse(decodeURIComponent(escape(atob(s.trim()))));}catch{return null;}}
 function exportFullBackup(){var blob=new Blob([JSON.stringify(S)],{type:"application/json"});var url=URL.createObjectURL(blob);var a=document.createElement("a");a.href=url;a.download="klara-quest-backup-"+new Date().toISOString().slice(0,10)+".json";document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);flash("📦 完整备份已下载！","earn");}
