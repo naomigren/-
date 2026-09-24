@@ -3305,4 +3305,66 @@ setTimeout(function(){
 
 </script>
 <!-- ════════════ 30天早睡早起模块结束 ════════════ -->
+
+<style>
+#tabBarMain .tab-btn{flex:1 1 0 !important;min-width:0 !important;padding:7px 1px 6px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;line-height:1.1;white-space:nowrap}
+#tabBarMain .tab-ico{font-size:17px;line-height:1}
+#tabBarMore{margin:-12px 20px 20px;background:rgba(255,255,255,0.5);border-radius:12px;padding:3px;display:none;gap:2px}
+#tabBarMore.open{display:flex}
+#tabBarMore .tab-btn{flex:1 1 0 !important;min-width:0 !important;font-size:12.5px;padding:9px 4px}
+#tabBarMain .tab-active,#tabBarMore .tab-active{color:#8a5a60}
+</style>
+<script>
+/* ═══════ 标签栏整理：常用七个 + 更多 ═══════ */
+(function(){
+  var RARE=["savings","pyq","sleep30"];
+  var tries=0;
+  function splitLabel(b){
+    if(b.querySelector(".tab-ico"))return;
+    var t=(b.textContent||"").trim(),i=t.indexOf(" ");
+    if(i<0)return;
+    b.innerHTML='<span class="tab-ico">'+t.slice(0,i)+'</span><span>'+t.slice(i+1)+'</span>';
+  }
+  function organize(){
+    var first=document.getElementById("tab-tasks");
+    var ready=RARE.every(function(k){return document.getElementById("tab-"+k);});
+    if(!first||(!ready&&tries++<20)){setTimeout(organize,250);return;}
+    var bar=first.parentElement;
+    if(document.getElementById("tab-more"))return;
+    bar.id="tabBarMain";
+    bar.style.overflowX="visible";
+    var row=document.createElement("div");row.id="tabBarMore";
+    bar.parentNode.insertBefore(row,bar.nextSibling);
+    RARE.forEach(function(k){var b=document.getElementById("tab-"+k);if(b)row.appendChild(b);});
+    var more=document.createElement("button");
+    more.id="tab-more";more.className="tab-btn tab-inactive";more.type="button";
+    more.innerHTML='<span class="tab-ico">⋯</span><span>更多</span>';
+    more.onclick=function(){row.classList.toggle("open");};
+    bar.appendChild(more);
+    Array.prototype.forEach.call(bar.querySelectorAll(".tab-btn"),splitLabel);
+    /* 主栏点任何一个，更多那排就收起 */
+    Array.prototype.forEach.call(bar.querySelectorAll(".tab-btn"),function(b){
+      if(b!==more)b.addEventListener("click",function(){row.classList.remove("open");});
+    });
+    /* 冷门标签被选中时，「更多」也亮起来，并显示是哪一个 */
+    function sync(){
+      var act=null;
+      RARE.forEach(function(k){var b=document.getElementById("tab-"+k);if(b&&b.className.indexOf("tab-active")>=0)act=b;});
+      if(act){
+        var t=(act.textContent||"").trim(),i=t.indexOf(" ");
+        more.className="tab-btn tab-active";
+        more.innerHTML='<span class="tab-ico">'+(i>0?t.slice(0,i):"⋯")+'</span><span>'+(i>0?t.slice(i+1):"更多")+'</span>';
+      }else{
+        more.className="tab-btn tab-inactive";
+        more.innerHTML='<span class="tab-ico">⋯</span><span>更多</span>';
+      }
+    }
+    var ob=new MutationObserver(sync);
+    RARE.forEach(function(k){var b=document.getElementById("tab-"+k);if(b)ob.observe(b,{attributes:true,attributeFilter:["class"]});});
+    sync();
+  }
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",function(){setTimeout(organize,400);});
+  else setTimeout(organize,400);
+})();
+</script>
 </body></html>
