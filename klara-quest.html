@@ -3884,4 +3884,103 @@ function boot(){if(typeof S==="undefined"||!S){setTimeout(boot,300);return;}try{
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",function(){setTimeout(boot,700);});else setTimeout(boot,700);
 })();
 </script>
+<style>
+.tw-card{margin:0 20px 16px;display:flex;align-items:stretch;background:rgba(255,255,255,0.5);border:1px solid rgba(196,134,142,0.15);border-radius:16px;overflow:hidden}
+.tw-city{flex:1;padding:12px 14px;text-align:center}
+.tw-city+.tw-mid+.tw-city{background:rgba(169,179,154,0.08)}
+.tw-city:first-child{background:rgba(203,181,146,0.08)}
+.tw-name{font-size:11.5px;color:#a08888;letter-spacing:1px}
+.tw-time{font-family:'Outfit',sans-serif;font-size:26px;font-weight:700;color:#6a5555;line-height:1.2;margin-top:2px}
+.tw-wx{font-size:11.5px;color:#a08888;margin-top:2px;min-height:15px}
+.tw-mid{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 4px;font-size:11px;color:#b09898;gap:2px}
+.tw-mid b{font-family:'Outfit',sans-serif;font-weight:600;color:#9a7f8a;font-size:12px}
+.echo{margin-top:10px;padding:9px 12px;border-radius:10px;background:rgba(155,138,184,0.07);border-left:3px solid #c9bede;font-size:12px;color:#8a7a88;line-height:1.7}
+.echo b{color:#6a5a70;font-weight:600}
+.de-lbl{font-size:11px !important;letter-spacing:0}
+</style>
+<script>
+(function(){
+function fmt(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function addD(ds,n){var d=new Date(ds+"T12:00:00");d.setDate(d.getDate()+n);return fmt(d);}
+function addM(ds,n){var d=new Date(ds+"T12:00:00"),day=d.getDate();d.setDate(1);d.setMonth(d.getMonth()+n);var last=new Date(d.getFullYear(),d.getMonth()+1,0).getDate();d.setDate(Math.min(day,last));return fmt(d);}
+function F(){S.fx=S.fx||{};return S.fx;}
+
+/* ───── 两地时钟 ───── */
+var WX={0:"晴",1:"晴间多云",2:"多云",3:"阴",45:"雾",48:"雾",51:"毛毛雨",53:"毛毛雨",55:"毛毛雨",56:"冻雨",57:"冻雨",61:"小雨",63:"雨",65:"大雨",66:"冻雨",67:"冻雨",71:"小雪",73:"雪",75:"大雪",77:"雪粒",80:"阵雨",81:"阵雨",82:"暴雨",85:"阵雪",86:"阵雪",95:"雷雨",96:"雷雨",99:"雷雨"};
+function lzParts(){var f=new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/Berlin",hour:"2-digit",minute:"2-digit",hour12:false});return f.format(new Date());}
+function diffH(){var n=new Date(),b=new Date(n.toLocaleString("en-US",{timeZone:"Europe/Berlin"})),l=new Date(n.toLocaleString("en-US"));return Math.round((l-b)/36e5);}
+function hm(d){return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");}
+function wxTxt(k){var w=(F().wx||{}).d;if(!w||!w[k])return "";var x=w[k];return (WX[x.c]||"")+" · "+Math.round(x.t)+"°";}
+function fetchWx(){
+  var f=F(),now=Date.now();if(f.wx&&now-f.wx.at<30*60e3)return;
+  var u="https://api.open-meteo.com/v1/forecast?latitude=43.83,51.34&longitude=87.62,12.37&current=temperature_2m,weather_code";
+  fetch(u).then(function(r){return r.json();}).then(function(j){var a=Array.isArray(j)?j:[j];if(a.length<2)return;
+    f.wx={at:Date.now(),d:{u:{t:a[0].current.temperature_2m,c:a[0].current.weather_code},l:{t:a[1].current.temperature_2m,c:a[1].current.weather_code}}};saveState();drawClock();}).catch(function(){});
+}
+function drawClock(){
+  var el=document.getElementById("twCard");
+  if(!el){var anchor=document.getElementById("bdBanner");if(!anchor)return;el=document.createElement("div");el.id="twCard";el.className="tw-card";anchor.parentNode.insertBefore(el,anchor);}
+  var dh=diffH();
+  el.innerHTML='<div class="tw-city"><div class="tw-name">乌鲁木齐</div><div class="tw-time">'+hm(new Date())+'</div><div class="tw-wx">'+wxTxt("u")+'</div></div>'+
+    '<div class="tw-mid"><span>相差</span><b>'+dh+'h</b></div>'+
+    '<div class="tw-city"><div class="tw-name">Leipzig</div><div class="tw-time">'+lzParts()+'</div><div class="tw-wx">'+wxTxt("l")+'</div></div>';
+}
+
+/* ───── 一个月前的今天 ───── */
+function echoHtml(){
+  var td=todayStr(),picks=[[addM(td,-12),"一年前的今天"],[addM(td,-1),"一个月前的今天"]];
+  for(var i=0;i<picks.length;i++){
+    var ds=picks[i][0],l=(S.dailyTasks[ds]||[]).filter(function(id,ix,a){return a.indexOf(id)===ix;}),p=S.dailyPts[ds]||0,mood=(F().moods||{})[ds];
+    if(!l.length&&!p)continue;
+    var names=l.map(function(id){var t=findTaskDef(id);return t?t.name:null;}).filter(Boolean);
+    var what=names.length?names.slice(0,3).join("、")+(names.length>3?" 等 "+names.length+" 件事":""):"打了卡";
+    return '<div class="echo"><b>'+picks[i][1]+'</b> · '+ds.slice(5).replace("-","/")+'<br>你做了'+what+'，挣了 '+p+' 分'+(mood?'，心情 '+mood:'')+'。</div>';
+  }
+  return "";
+}
+
+/* ───── 页面慢慢变德语 ───── */
+var DE=[
+ [1,"任务","Aufgaben"],[1,"属性","Attribute"],
+ [2,"成就","Erfolge"],[2,"更多","Mehr"],[2,"今天心情","Stimmung"],
+ [3,"商城","Laden"],[3,"记录","Verlauf"],[3,"今日计划","Tagesplan"],
+ [4,"愿望","Wünsche"],[4,"蜕变","Verwandlung"],[4,"日常习惯","Alltag"],[4,"语言主线","Sprache"],
+ [5,"攒钱","Sparen"],[5,"早睡","Schlaf"],[5,"圈子","Freunde"],[5,"身体管理","Körper"],[5,"自我成长","Wachstum"],[5,"才艺","Talente"],
+ [6,"可用积分","Punkte"],[6,"累计总分","Gesamtpunkte"],[6,"隐藏任务","Geheimmission"],[6,"直面恐惧","Mut"],[6,"驾照主线","Führerschein"],[6,"兼职支线","Nebenjob"]
+];
+function deLv(){try{return getLv((S.attrs&&S.attrs.lang)||0);}catch(e){return 0;}}
+function strip(t){return t.replace(/[\s\u00a0]|\p{Extended_Pictographic}|\uFE0F|\u200D/gu,"");}
+var deBusy=false;
+function deApply(){
+  if(deBusy)return;deBusy=true;
+  try{
+    var lv=deLv(),map={};DE.forEach(function(x){if(x[0]<=lv)map[x[1]]=x[2];});
+    if(Object.keys(map).length){
+      var w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT,null),n,list=[];
+      while((n=w.nextNode()))list.push(n);
+      list.forEach(function(n){var p=n.parentNode;if(!p||/^(SCRIPT|STYLE|TEXTAREA|INPUT)$/.test(p.nodeName))return;if(p.closest&&p.closest(".yr-ov,.fxg-ov,#toast"))return;
+        var t=n.nodeValue;if(!t||t.length>14)return;var k=strip(t);if(!map[k])return;
+        n.nodeValue=t.replace(k,map[k]);if(p.title!==undefined&&!p.title)p.title=k;if(p.closest&&p.closest(".tab-btn"))p.classList.add("de-lbl");});
+    }
+    var f=F();if(f.deLv===undefined){f.deLv=lv;saveState();if(lv>0)setTimeout(function(){flash("🇩🇪 页面开始说德语了，已经换掉 "+Object.keys(map).length+" 个词","card");},2600);}
+    else if(lv>f.deLv){var nw=DE.filter(function(x){return x[0]>f.deLv&&x[0]<=lv;});f.deLv=lv;saveState();
+      var ex=nw.slice(0,2).map(function(x){return x[1]+"→"+x[2];}).join("，");setTimeout(function(){flash("🇩🇪 语言升级！换上 "+nw.length+" 个新词："+ex+(nw.length>2?"……":""),"big");},1800);}
+  }catch(e){}
+  deBusy=false;
+}
+function later(){setTimeout(deApply,30);}
+
+/* ───── 挂载 ───── */
+var _r=window.render,_rd=window.renderDaily,_sw=window.switchTab;
+window.render=function(){_r.apply(this,arguments);try{if(document.getElementById('twCard'))drawClock();}catch(e){}later();};
+window.renderDaily=function(){_rd.apply(this,arguments);try{
+  var box=document.getElementById("content-daily"),card=box&&box.querySelector('div[style*="border-radius:16px"]');
+  if(card&&!card.querySelector(".echo")){var h=echoHtml();if(h){var mw=card.querySelector(".mw-row");(mw||card.children[0]).insertAdjacentHTML("afterend",h);}}
+}catch(e){}later();};
+if(_sw)window.switchTab=function(){_sw.apply(this,arguments);later();};
+document.addEventListener("click",function(){setTimeout(deApply,60);},true);
+function boot(){if(typeof S==="undefined"||!S){setTimeout(boot,300);return;}drawClock();fetchWx();setInterval(drawClock,20e3);setInterval(fetchWx,30*60e3);try{renderDaily();}catch(e){}setTimeout(deApply,1200);}
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",function(){setTimeout(boot,800);});else setTimeout(boot,800);
+})();
+</script>
 </body></html>
