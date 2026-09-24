@@ -3395,6 +3395,40 @@ setTimeout(function(){
 .fx-dex div{padding:10px;border-radius:10px;font-size:12.5px;text-align:center;line-height:1.5}
 .fx-dex .on{background:#f9f0f1;color:#6a5555;border:1px solid rgba(196,134,142,0.3)}
 .fx-dex .off{background:rgba(160,136,136,0.06);color:#c9b8b8;border:1px dashed rgba(160,136,136,0.25)}
+.fxg-ov{position:fixed;inset:0;z-index:9000;background:rgba(90,74,74,0);display:flex;align-items:center;justify-content:center;transition:background .3s}
+.fxg-ov.open{background:rgba(90,74,74,.6);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+.fxg-ov.out{opacity:0;transition:opacity .3s}
+.fxg-box{position:relative;width:260px;text-align:center;transform:scale(.6);opacity:0;transition:transform .35s cubic-bezier(.3,1.5,.5,1),opacity .3s}
+.fxg-ov.open .fxg-box{transform:scale(1);opacity:1}
+.fxg-globe{width:180px;height:180px;margin:0 auto;border-radius:50%;position:relative;overflow:hidden;background:radial-gradient(circle at 35% 28%,#fff,#f6ecee 55%,#e6d1d5);border:2px solid rgba(255,255,255,.8);box-shadow:0 8px 30px rgba(90,74,74,.25),inset 0 -10px 20px rgba(196,134,142,.15)}
+.fxg-globe i{position:absolute;width:30px;height:30px;border-radius:50%;box-shadow:inset -3px -4px 6px rgba(0,0,0,.08)}
+.fxg-ov.crank .fxg-globe{animation:fxgShake .14s linear 10}
+.fxg-ov.crank .fxg-globe i{animation:fxgBounce .28s ease-in-out infinite alternate}
+.fxg-ov.drop .fxg-globe i{animation:none}
+@keyframes fxgShake{0%,100%{transform:rotate(0)}25%{transform:rotate(-7deg) translateX(-4px)}75%{transform:rotate(7deg) translateX(4px)}}
+@keyframes fxgBounce{from{transform:translateY(0)}to{transform:translateY(-22px) translateX(6px)}}
+.fxg-base{width:150px;height:62px;margin:-8px auto 0;border-radius:14px 14px 20px 20px;background:linear-gradient(#d6a6aa,#c4868e);position:relative;box-shadow:0 6px 16px rgba(90,74,74,.25)}
+.fxg-knob{position:absolute;left:22px;top:14px;width:34px;height:34px;border-radius:50%;background:#f9f0f1;border:4px solid #8a5a60;box-sizing:border-box}
+.fxg-knob::after{content:"";position:absolute;left:11px;top:-2px;width:5px;height:30px;border-radius:3px;background:#8a5a60}
+.fxg-ov.crank .fxg-knob{animation:fxgTurn 1.4s linear}
+@keyframes fxgTurn{to{transform:rotate(720deg)}}
+.fxg-slot{position:absolute;right:24px;top:20px;width:40px;height:26px;border-radius:6px;background:#8a5a60}
+.fxg-cap{position:absolute;left:50%;top:190px;width:56px;height:56px;margin-left:-28px;opacity:0;transform:translateY(-10px) scale(.4)}
+.fxg-cap>div{position:absolute;left:0;width:56px;height:28px;box-shadow:inset -4px -4px 8px rgba(0,0,0,.08)}
+.fxg-top{top:0;border-radius:28px 28px 0 0;transition:transform .45s cubic-bezier(.3,1.4,.5,1)}
+.fxg-bot{top:28px;border-radius:0 0 28px 28px;transition:transform .45s cubic-bezier(.3,1.4,.5,1)}
+.fxg-ov.drop .fxg-cap{animation:fxgDrop .5s cubic-bezier(.5,0,.6,1.6) forwards}
+@keyframes fxgDrop{0%{opacity:1;transform:translateY(-10px) scale(.4)}100%{opacity:1;transform:translateY(78px) scale(1.25)}}
+.fxg-ov.wobble .fxg-cap{animation:fxgWob .75s ease forwards}
+@keyframes fxgWob{0%{opacity:1;transform:translateY(78px) scale(1.25) rotate(0)}20%{transform:translateY(78px) scale(1.25) rotate(-16deg)}45%{transform:translateY(78px) scale(1.25) rotate(14deg)}70%{transform:translateY(78px) scale(1.25) rotate(-8deg)}100%{opacity:1;transform:translateY(78px) scale(1.25) rotate(0)}}
+.fxg-ov.pop .fxg-top{transform:translate(-26px,-30px) rotate(-35deg)}
+.fxg-ov.pop .fxg-bot{transform:translate(26px,18px) rotate(25deg)}
+.fxg-msg{margin-top:120px;min-height:48px;padding:14px 16px;border-radius:14px;background:#fffafa;color:#5a4a4a;font-size:14px;line-height:1.7;opacity:0;transform:translateY(10px);transition:all .4s ease .15s}
+.fxg-msg.big{background:linear-gradient(135deg,#fff8e8,#f6e6c4);color:#8a6a3a;font-weight:600;box-shadow:0 0 30px rgba(214,181,110,.6)}
+.fxg-ok{margin-top:14px;opacity:0;transition:opacity .3s ease .5s}
+.fxg-ov.shown .fxg-msg{opacity:1;transform:none}
+.fxg-ov.shown .fxg-ok{opacity:1}
+.fxg-ov.shown.pop .fxg-cap,.fxg-ov.shown:not(.drop) .fxg-cap{opacity:1;transform:translateY(78px) scale(1.25)}
 #fxSeason{position:fixed;inset:0;pointer-events:none;z-index:1;overflow:hidden}
 #fxSeason span{position:absolute;top:-30px;display:block;animation:fxFall linear infinite;opacity:.45}
 @keyframes fxFall{0%{transform:translate3d(0,-30px,0) rotate(0)}100%{transform:translate3d(var(--dx,40px),105vh,0) rotate(var(--rot,280deg))}}
@@ -3578,17 +3612,55 @@ window.fxSpin=function(){
   else if(r.k==="b20"){earn(20,"🎰 扭蛋：返还 20 分");msg="一颗奶白色的蛋，里面是 20 分。";}
   else if(r.k==="quest"){var q=pick(FX_QUESTS);if(f.quests.length>=3){earn(5,"🎰 扭蛋：任务卡换 5 分");msg="掉出一张任务卡，可你手里已经有三张了，折成 5 分。";}else{f.quests.push({n:q.n,a:q.a});msg="掉出一张隐藏任务卡：「"+q.n+"」";}}
   else if(r.k==="reroll"){f.rerolls++;msg="掉出一张签筒重摇券。抽到下下签的时候，它会救你一命。";}
-  else{earn(60,"🎰 扭蛋：大奖 60 分");msg="金色的蛋！！60 分！今天的运气全用在这了。";setTimeout(function(){spawnConfetti(120,["#c9b8a8","#d4a0a0","#e0bfc2","#b08a6e"]);},900);}
-  fxLast=msg;saveState();
-  var g=document.getElementById("fxGlobe");if(g){g.classList.remove("spin");void g.offsetWidth;g.classList.add("spin");}
-  setTimeout(function(){render();},850);
+  else{earn(60,"🎰 扭蛋：大奖 60 分");msg="金色的蛋！！60 分！今天的运气全用在这了。";}
+  fxLast=msg;saveState();fxShow(r.k,msg);
 };
+/* ── 扭蛋大动静：全屏机器 + 声音 ── */
+var _ac=null;
+function tone(f1,f2,dur,type,vol,at){
+  if(fx().mute)return;
+  try{_ac=_ac||new (window.AudioContext||window.webkitAudioContext)();if(_ac.state==="suspended")_ac.resume();
+    var t=_ac.currentTime+(at||0),o=_ac.createOscillator(),g=_ac.createGain();
+    o.type=type||"sine";o.frequency.setValueAtTime(f1,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+dur);
+    g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol||0.2,t+0.01);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.connect(g);g.connect(_ac.destination);o.start(t);o.stop(t+dur+0.02);}catch(e){}
+}
+var CAP={joke:["#c9c1c4","#b3aaae"],b10:["#ecd4d6","#d6a6aa"],b20:["#f0e6d4","#d8c7a6"],quest:["#dcd3e6","#b3a6c9"],reroll:["#d3dbe0","#a9b6bf"],big:["#ecd9a8","#c9a55e"]};
+window.fxMute=function(){var f=fx();f.mute=!f.mute;saveState();render();};
+function fxShow(k,msg){
+  var reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches;
+  var c=CAP[k]||CAP.joke,ov=document.createElement("div");ov.className="fxg-ov";
+  var balls="",bc=["#e0bfc2","#c9b8a8","#b8c2c9","#d6c7da","#e6d9a8","#c4d0c0","#ecd4d6","#dcd3e6"];
+  for(var i=0;i<12;i++)balls+='<i style="background:'+bc[i%bc.length]+';left:'+(18+(i*37)%130)+'px;top:'+(26+(i*53)%120)+'px;animation-delay:'+(-i*0.13)+'s"></i>';
+  ov.innerHTML='<div class="fxg-box"><div class="fxg-globe">'+balls+'</div><div class="fxg-base"><div class="fxg-knob"></div><div class="fxg-slot"></div></div>'+
+    '<div class="fxg-cap"><div class="fxg-top" style="background:'+c[0]+'"></div><div class="fxg-bot" style="background:'+c[1]+'"></div></div>'+
+    '<div class="fxg-msg'+(k==="big"?' big':'')+'">'+esc(msg)+'</div><button class="fx-btn fxg-ok">收下</button></div>';
+  document.body.appendChild(ov);
+  var closed=false;function close(){if(closed)return;closed=true;ov.classList.add("out");setTimeout(function(){ov.remove();},300);render();}
+  ov.querySelector(".fxg-ok").onclick=close;
+  if(reduce){ov.classList.add("open","shown");return;}
+  requestAnimationFrame(function(){ov.classList.add("open");});
+  /* 摇：咔哒咔哒 */
+  setTimeout(function(){ov.classList.add("crank");for(var i=0;i<10;i++)tone(900+Math.random()*500,0,0.03,"square",0.08,i*0.14);},250);
+  /* 掉：咚 */
+  setTimeout(function(){ov.classList.add("drop");tone(520,140,0.35,"triangle",0.28);},1750);
+  /* 晃三下 */
+  setTimeout(function(){ov.classList.add("wobble");tone(300,0,0.06,"sine",0.12);tone(300,0,0.06,"sine",0.12,0.25);tone(300,0,0.06,"sine",0.12,0.5);},2250);
+  /* 开：啵 + 结果音 */
+  setTimeout(function(){
+    ov.classList.add("pop","shown");tone(700,1500,0.12,"sine",0.25);
+    if(k==="joke"){tone(392,370,0.25,"triangle",0.2,0.2);tone(330,294,0.5,"triangle",0.2,0.5);}
+    else if(k==="big"){[523,659,784,1047,1319,1568].forEach(function(f,i){tone(f,0,0.35,"sine",0.22,0.15+i*0.1);});
+      spawnConfetti(150,["#ecd9a8","#c9a55e","#e0bfc2","#d4a0a0","#c9b8a8"]);setTimeout(function(){spawnConfetti(90,["#ecd9a8","#c9a55e","#f0e6d4"]);},600);}
+    else{[523,659,784].forEach(function(f,i){tone(f,0,0.3,"sine",0.2,0.15+i*0.1);});spawnConfetti(40,[c[0],c[1],"#f9f0f1"]);}
+  },3150);
+}
 window.fxDoQuest=function(i){var f=fx(),q=f.quests[i];if(!q)return;f.quests.splice(i,1);earn(5,"🎯 任务卡 · "+q.n,q.a);saveState();render();flash("🎯 任务卡完成 +5","earn");};
 function gachaHtml(){
   var f=fx(),d=td(),used=f.gacha.date===d?f.gacha.count:0,left=2-used;
   var cols=["#e0bfc2","#c9b8a8","#b8c2c9","#d6c7da","#e6d9a8","#c4d0c0"],balls="";
   for(var i=0;i<7;i++)balls+='<i style="background:'+cols[i%cols.length]+';left:'+(8+(i*23)%64)+'px;top:'+(18+(i*31)%56)+'px"></i>';
-  var h='<div class="fx-card fx-machine"><div class="fx-title">🎰 扭蛋机</div><div class="fx-sub">20 分一次，扭蛋币免费。每天最多两次，今天还剩 '+left+' 次。</div>';
+  var h='<div class="fx-card fx-machine" style="position:relative"><span onclick="fxMute()" style="position:absolute;right:14px;top:12px;font-size:16px;cursor:pointer;opacity:.7">'+(f.mute?'🔇':'🔊')+'</span><div class="fx-title">🎰 扭蛋机</div><div class="fx-sub">20 分一次，扭蛋币免费。每天最多两次，今天还剩 '+left+' 次。</div>';
   h+='<div class="fx-globe" id="fxGlobe">'+balls+'</div>';
   h+='<button class="fx-btn" onclick="fxSpin()" '+(left<=0?'disabled':'')+'>'+(f.coins>0?'用扭蛋币扭（'+f.coins+'）':'扭一次 · 20 分')+'</button>';
   if(f.rerolls>0)h+='<div class="fx-sub" style="margin-top:8px">手里有 '+f.rerolls+' 张重摇券</div>';
@@ -3598,6 +3670,8 @@ function gachaHtml(){
 }
 
 /* ───────── 挂到原来的函数上 ───────── */
+var _undo=window.undoLast;
+window.undoLast=function(){var l=S.h&&S.h[0];if(l&&typeof l.n==="string"&&l.n.indexOf("🎰")===0){flash("🎰 扭蛋没有后悔药","fail");return;}_undo.apply(this,arguments);};
 var _rm=window.rmFromPlan,_rd=window.renderDaily;
 window.rmFromPlan=function(idx){ensureDailyPlan();var it=S.dailyPlan.items[idx];if(it&&it.locked&&!it.done){flash("🔒 签锁住的任务，取消不了哦","fail");return;}_rm.apply(this,arguments);};
 var _msgTimer=null;
