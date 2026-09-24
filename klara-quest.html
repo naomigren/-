@@ -3767,6 +3767,10 @@ var MOODS=[{e:"🥰",n:"超开心",c:"#d6a6aa"},{e:"😊",n:"不错",c:"#cbb592"
 var PL_START="2026-04-15";
 function fmt(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
 function addD(ds,n){var d=new Date(ds+"T12:00:00");d.setDate(d.getDate()+n);return fmt(d);}
+function todayStrOf(d){var x=new Date(d);if(x.getHours()>=23)x.setDate(x.getDate()+1);return fmt(x);}
+/* 每次打卡另记一个时间点，按天存（分钟数），年报用 */
+var _dt=window.doTask;
+window.doTask=function(){_dt.apply(this,arguments);try{S.fx=S.fx||{};var T=S.fx.times=S.fx.times||{},n=new Date(),k=todayStr();(T[k]=T[k]||[]).push(n.getHours()*60+n.getMinutes());saveState();}catch(e){}};
 function M(){S.fx=S.fx||{};S.fx.moods=S.fx.moods||{};return S.fx.moods;}
 function moodOf(ds){var m=M()[ds];if(m)return m;var pl=S.pl&&S.pl.days;if(!pl)return null;var n=Math.round((new Date(ds+"T12:00:00")-new Date(PL_START+"T12:00:00"))/864e5)+1;return pl[n]&&pl[n].mood||null;}
 function mInfo(e){return MOODS.find(function(x){return x.e===e;});}
@@ -3819,8 +3823,10 @@ function build(y){
   Object.keys(S.dailyPens||{}).forEach(function(ds){if(!inR(ds))return;(S.dailyPens[ds]||[]).forEach(function(id){pens[id]=(pens[id]||0)+1;});});
   for(var ds=start;ds<=end;ds=addD(ds,1)){var e=moodOf(ds);if(e)moodC[e]=(moodC[e]||0)+1;}
   var de=0;Object.keys(cnt).forEach(function(id){if(typeof DE_TASKS!=="undefined"&&DE_TASKS.has(id))de+=cnt[id];});
-  var hours={},latest=null;
-  (S.h||[]).forEach(function(h){if(h.t!=="e"||!h.d)return;var d=new Date(h.d),ds=fmt(d);if(!inR(ds))return;var hr=d.getHours();hours[hr]=(hours[hr]||0)+1;var lateKey=(hr<5?hr+24:hr)*60+d.getMinutes();if(!latest||lateKey>latest.k)latest={k:lateKey,t:String(hr).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")};});
+  var hours={},latest=null,TL=(S.fx&&S.fx.times)||{};
+  function addT(hr,mi){hours[hr]=(hours[hr]||0)+1;var k=(hr<5?hr+24:hr)*60+mi;if(!latest||k>latest.k)latest={k:k,t:String(hr).padStart(2,"0")+":"+String(mi).padStart(2,"0")};}
+  Object.keys(TL).forEach(function(ds){if(inR(ds))(TL[ds]||[]).forEach(function(m){addT(Math.floor(m/60),m%60);});});
+  (S.h||[]).forEach(function(h){if(h.t!=="e"||!h.d||!h._id)return;var d=new Date(h.d),ds=fmt(d);if(!inR(ds)||TL[ds]||TL[todayStrOf(d)])return;addT(d.getHours(),d.getMinutes());});
   var topH=Object.keys(hours).sort(function(a,b){return hours[b]-hours[a];})[0];
   var top=Object.keys(cnt).filter(function(id){return findTaskDef(id);}).sort(function(a,b){return cnt[b]-cnt[a];}).slice(0,3).map(function(id){var t=findTaskDef(id);return {n:t.name,em:t.em||"",c:cnt[id]};});
   var topMood=Object.keys(moodC).sort(function(a,b){return moodC[b]-moodC[a];})[0]||null;
