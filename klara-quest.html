@@ -3368,4 +3368,265 @@ setTimeout(function(){
   else setTimeout(organize,400);
 })();
 </script>
+<style>
+/* ═══════ 趣味层：签筒 · Boss · 扭蛋 · 组合技 · 季节 ═══════ */
+.fx-card{background:rgba(255,255,255,0.6);border:1px solid rgba(196,134,142,0.18);border-radius:14px;padding:14px 16px;margin-bottom:14px}
+.fx-row{display:flex;align-items:center;gap:12px}
+.fx-title{font-size:14px;font-weight:600;color:#6a5555}
+.fx-sub{font-size:12px;color:#a08888;line-height:1.6}
+.fx-btn{padding:8px 14px;border-radius:10px;font-size:13px;font-weight:600;color:#fff;background:#c4868e;border:none;cursor:pointer}
+.fx-btn.ghost{background:transparent;color:#8a5a60;border:1px solid rgba(196,134,142,0.4)}
+.fx-btn:disabled{opacity:.45;cursor:default}
+.fx-stick{width:44px;height:56px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#fff;flex-shrink:0;writing-mode:vertical-rl;letter-spacing:2px}
+.fx-lv-5{background:#b08a6e}.fx-lv-4{background:#c49a8e}.fx-lv-3{background:#a9a3a8}.fx-lv-2{background:#8e98a8}.fx-lv-1{background:#6e6878}
+.fx-hp{height:8px;border-radius:4px;background:rgba(154,127,138,0.15);overflow:hidden;margin-top:8px}
+.fx-hp>div{height:100%;border-radius:4px;background:linear-gradient(90deg,#9a7f8a,#c4868e);transition:width .6s ease}
+.fx-boss-face{font-size:34px;line-height:1;flex-shrink:0}
+.fx-hit{animation:fxHit .45s ease}
+@keyframes fxHit{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px) rotate(-6deg)}50%{transform:translateX(5px) rotate(4deg)}75%{transform:translateX(-3px)}}
+.fx-machine{text-align:center;padding:18px 16px}
+.fx-globe{width:96px;height:96px;margin:4px auto 10px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#f3e6e8 60%,#e6d1d5);border:1px solid rgba(196,134,142,0.3);position:relative;overflow:hidden}
+.fx-globe i{position:absolute;width:22px;height:22px;border-radius:50%;opacity:.85}
+.fx-globe.spin{animation:fxShake .8s ease}
+@keyframes fxShake{0%,100%{transform:rotate(0)}20%{transform:rotate(-12deg)}40%{transform:rotate(10deg)}60%{transform:rotate(-8deg)}80%{transform:rotate(5deg)}}
+.fx-result{margin-top:12px;padding:12px;border-radius:12px;background:#f9f0f1;font-size:13px;color:#6a5555;line-height:1.7}
+.fx-quest{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:rgba(155,138,184,0.08);border-left:3px solid #9b8ab8;margin-top:8px;font-size:13px;color:#5a4a4a}
+.fx-dex{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px}
+.fx-dex div{padding:10px;border-radius:10px;font-size:12.5px;text-align:center;line-height:1.5}
+.fx-dex .on{background:#f9f0f1;color:#6a5555;border:1px solid rgba(196,134,142,0.3)}
+.fx-dex .off{background:rgba(160,136,136,0.06);color:#c9b8b8;border:1px dashed rgba(160,136,136,0.25)}
+#fxSeason{position:fixed;inset:0;pointer-events:none;z-index:1;overflow:hidden}
+#fxSeason span{position:absolute;top:-30px;display:block;animation:fxFall linear infinite;opacity:.45}
+@keyframes fxFall{0%{transform:translate3d(0,-30px,0) rotate(0)}100%{transform:translate3d(var(--dx,40px),105vh,0) rotate(var(--rot,280deg))}}
+#fxSeason span.fly{animation:fxFly ease-in-out infinite alternate;top:auto}
+@keyframes fxFly{0%{transform:translate(0,0);opacity:.15}50%{opacity:.7}100%{transform:translate(var(--dx,40px),-60px);opacity:.2}}
+@media (prefers-reduced-motion:reduce){#fxSeason{display:none}.fx-globe.spin,.fx-hit{animation:none}}
+</style>
+<div id="fxSeason" aria-hidden="true"></div>
+<script>
+(function(){
+/* ───────── 数据 ───────── */
+var FX_SIGN=[
+ {lv:5,name:"上上签",p:10,lines:["今日宜：做什么都顺。","天时地利，就差你动一动手指。","好运已经在门口换鞋了。"]},
+ {lv:4,name:"上签",p:25,lines:["小有收获，别嫌少。","今天的你比昨天好说话一点。","一件小事会意外地顺利。"]},
+ {lv:3,name:"中签",p:30,lines:["平平无奇的一天，平平无奇也很好。","今日无事，宜发呆三分钟。","风不大，云不多，刚刚好。"]},
+ {lv:2,name:"下签",p:20,lines:["小心脚下，也小心手机。","今天的坏习惯会格外贵。","有个小坑，绕着走。"]},
+ {lv:1,name:"下下签",p:15,lines:["晦气缠身！速速解签！","今日诸事不宜，除了解签。","大凶。但凶的是签，不是你。"]}
+];
+var FX_BOSSES=[
+ {id:"proc",name:"拖延魔王",face:"👹",crit:["face_fear","submit_overdue","deal_academic","contact_teacher","check_grad","tidy","mop","trash","parcel","fix_home"],heal:["pn_lazy","pn_plan_fail","pn_skip"],taunt:"「明天再说嘛，明天我还在。」"},
+ {id:"takeout",name:"外卖妖精",face:"🍱",crit:["cook","no_takeout","diet_meal","dishes_today"],heal:["pn_takeout"],taunt:"「满减券还在你手机里发光呢。」"},
+ {id:"bat",name:"熬夜蝙蝠",face:"🦇",crit:["early_sleep","wake","foot_soak","bath"],heal:["pn_late_sleep","pn_phone"],taunt:"「再刷一个视频，就一个。」"},
+ {id:"snack",name:"零食精",face:"🍬",crit:["no_snack","diet_meal","water","exercise"],heal:["pn_sugar"],taunt:"「柜子第二层，你知道的。」"},
+ {id:"phone",name:"手机魅魔",face:"📱",crit:["reading","journal","writing","drawing","piano","de_vocab","de_read","de_listen"],heal:["pn_phone"],taunt:"「你已经三分钟没看我了。」"}
+];
+var FX_COMBOS=[
+ {id:"c1",name:"灶王爷附体",need:["cook","dishes_today","trash"]},
+ {id:"c2",name:"出浴美人",need:["bath","skincare","outfit"]},
+ {id:"c3",name:"睡前仪式感",need:["foot_soak","reading","journal"]},
+ {id:"c4",name:"人形叉车",need:["carry_water","parcel"]},
+ {id:"c5",name:"花仙子下凡",need:["water_plant","tidy"]},
+ {id:"c6",name:"勇者斗恶龙",need:["fix_home","face_fear"]},
+ {id:"c7",name:"钢铁胃",need:["no_takeout","no_snack","diet_meal"]},
+ {id:"c8",name:"文艺复兴",need:["drawing","piano"]},
+ {id:"c9",name:"社牛上线",need:["social_out","praise_self"]},
+ {id:"c10",name:"洗衣机成精",need:["socks_today","undies_today","trash"]}
+];
+var FX_QUESTS=[
+ {n:"用非惯用手刷一次牙",a:{life:1}},
+ {n:"给窗外一棵树或一朵花拍照，并给它起个名字",a:{creative:1}},
+ {n:"平板支撑到撑不住，记下秒数",a:{sport:1}},
+ {n:"用家里现有的食材，发明一道从没做过的菜",a:{cook_a:1}},
+ {n:"把衣柜里很久没穿的一件衣服穿出门",a:{beauty:1}},
+ {n:"背一首古诗，念给镜子听",a:{lit:1}},
+ {n:"不带手机散步二十分钟，回来写下看到的三样东西",a:{health:1}},
+ {n:"清理手机相册，删掉五十张废图",a:{anti_proc:1}},
+ {n:"对着镜子摆一个恶女 pose，拍下来",a:{villain:1}},
+ {n:"哼一首小时候的歌，从头到尾",a:{sing:1}}
+];
+var FX_JOKES=["空蛋。里面有一张纸条：「谢谢惠顾，下次一定。」","空蛋。为什么海是蓝的？因为鱼在里面吐泡泡：blue blue blue。","空蛋。它说它只是出来透透气。","空蛋。蛋壳上写着：你的运气正在充电，电量 12%。","空蛋。里面装着一口新疆的空气，据说很甜。","空蛋。企鹅为什么不怕冷？因为它有企鹅绒。","空蛋。这颗蛋觉得自己已经很努力了。","空蛋。小克偷偷在里面放了一句：再扭就要破产了。"];
+
+/* ───────── 工具 ───────── */
+function td(){return todayStr();}
+function fmt(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function monday(ds){var d=new Date(ds+"T12:00:00");d.setDate(d.getDate()-((d.getDay()+6)%7));return fmt(d);}
+function addDays(ds,n){var d=new Date(ds+"T12:00:00");d.setDate(d.getDate()+n);return fmt(d);}
+function pick(a){return a[Math.floor(Math.random()*a.length)];}
+function roll(list,key){var r=Math.random()*100,acc=0;for(var i=0;i<list.length;i++){acc+=list[i][key];if(r<acc)return list[i];}return list[list.length-1];}
+function esc(t){return String(t).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+function fx(){S.fx=S.fx||{};var f=S.fx;f.coins=f.coins||0;f.rerolls=f.rerolls||0;f.quests=f.quests||[];f.combos=f.combos||{};f.comboDay=f.comboDay||{};f.gacha=f.gacha||{date:"",count:0};return f;}
+function earn(n,label,attrs){var e={t:"e",n:label,p:n,d:new Date().toISOString()};if(attrs){e._attrs=attrs;applyAttrs(attrs);}S.h.unshift(e);if(S.h.length>200)S.h.length=200;S.cp+=n;S.tp+=n;var d=td();S.dailyPts[d]=(S.dailyPts[d]||0)+n;}
+function lose(n,label){S.h.unshift({t:"p",n:label,p:-n,d:new Date().toISOString()});if(S.h.length>200)S.h.length=200;S.cp=Math.max(0,S.cp-n);S.tp=Math.max(0,S.tp-n);}
+function dailyIds(){var out=[];(TASKS.daily&&TASKS.daily.items||[]).forEach(function(t){if(t.pts>0&&!/_late$/.test(t.id))out.push(t);});return out;}
+function later(msg,type){setTimeout(function(){flash(msg,type||"earn");},1700);}
+
+/* ───────── 签筒 ───────── */
+function drawSign(){
+  var f=fx(),lv=roll(FX_SIGN,"p"),s={date:td(),lv:lv.lv,name:lv.name,line:pick(lv.lines),seen:false,used:false};
+  if(lv.lv>=4){var t=pick(dailyIds());s.target=t.id;s.tname=t.name;s.bonus=lv.lv===5?"x2":"+2";}
+  if(lv.lv===2){var p=pick(PENS);s.target=p.id;s.tname=p.name;}
+  if(lv.lv===1){var q=pick(dailyIds().filter(function(t){return["mop","tidy","exercise","foot_soak","stretch","trash","water_plant","dishes_today"].indexOf(t.id)>=0;}));if(!q)q=pick(dailyIds());s.cure=q.id;s.cname=q.name;s.cured=false;}
+  f.sign=s;
+}
+function ensureSign(){var f=fx();if(!f.sign||f.sign.date!==td()){drawSign();saveState();}return f.sign;}
+window.fxOpenSign=function(){ensureSign().seen=true;saveState();renderTasks();};
+window.fxReroll=function(){var f=fx(),s=ensureSign();if(f.rerolls<=0)return;if(s.used){flash("今天的签已经兑现过了，留着券吧","fail");return;}f.rerolls--;drawSign();f.sign.seen=true;saveState();renderTasks();flash("🎫 重摇了一支新签","card");};
+function signHtml(){
+  var s=ensureSign(),f=fx(),h='<div class="fx-card">';
+  if(!s.seen){return h+'<div class="fx-row"><div class="fx-stick fx-lv-3">今日</div><div style="flex:1"><div class="fx-title">签筒晃了一下，掉出一支签</div><div class="fx-sub">已经生效了，逃不掉的。</div></div><button class="fx-btn" onclick="fxOpenSign()">看签</button></div></div>';}
+  var eff="";
+  if(s.lv===5)eff="「"+esc(s.tname)+"」今天积分 ×2"+(s.used?"（已兑现）":"");
+  else if(s.lv===4)eff="「"+esc(s.tname)+"」今天额外 +2"+(s.used?"（已兑现）":"");
+  else if(s.lv===3)eff="今日无加成，也无惩罚";
+  else if(s.lv===2)eff="「"+esc(s.tname)+"」今天多扣 2 分";
+  else eff=s.cured?"晦气已散。解签完成 ✓":"今天所有扣分项多扣 2 分。解签任务：「"+esc(s.cname)+"」";
+  h+='<div class="fx-row"><div class="fx-stick fx-lv-'+s.lv+'">'+s.name+'</div><div style="flex:1"><div class="fx-title">'+esc(s.line)+'</div><div class="fx-sub">'+eff+'</div></div></div>';
+  if(f.rerolls>0&&!s.used)h+='<div style="margin-top:10px;text-align:right"><button class="fx-btn ghost" onclick="fxReroll()">🎫 用重摇券（'+f.rerolls+'）</button></div>';
+  return h+'</div>';
+}
+
+/* ───────── Boss ───────── */
+function bossHP(wk){var sum=0;for(var i=1;i<=14;i++){sum+=S.dailyPts[addDays(wk,-i)]||0;}var hp=Math.round(sum/2*0.85/10)*10;return Math.max(120,Math.min(1500,hp||200));}
+function ensureBoss(){
+  var f=fx(),wk=monday(td());
+  if(!f.boss||f.boss.wk!==wk){
+    if(f.boss){var st=bossState(f.boss);f.lastBoss={name:FX_BOSSES[f.boss.idx].name,taunt:FX_BOSSES[f.boss.idx].taunt,killed:!!f.boss.killed,left:st.left};}
+    var idx=f.boss?(f.boss.idx+1)%FX_BOSSES.length:Math.floor(Math.random()*FX_BOSSES.length);
+    f.boss={wk:wk,idx:idx,hp:bossHP(wk),killed:false};saveState();
+  }
+  return f.boss;
+}
+function bossState(b){
+  var B=FX_BOSSES[b.idx],dmg=0,heal=0,crits=0;
+  for(var i=0;i<7;i++){var d=addDays(b.wk,i);
+    (S.dailyTasks[d]||[]).forEach(function(id){var t=findTaskDef(id);var p=t?Math.max(0,t.pts):0;if(p>=100)p=30;if(B.crit.indexOf(id)>=0){p*=2;crits++;}dmg+=p;});
+    (S.dailyPens[d]||[]).forEach(function(id){if(B.heal.indexOf(id)>=0){var pn=PENS.find(function(x){return x.id===id;});heal+=pn?Math.abs(pn.pts)*2:10;}});
+  }
+  var left=Math.max(0,b.hp-dmg+heal);return{dmg:dmg,heal:heal,left:left,crits:crits};
+}
+function checkBoss(){
+  var b=ensureBoss(),st=bossState(b);
+  if(!b.killed&&st.left<=0){b.killed=true;var f=fx();f.coins++;earn(30,"⚔️ 击败"+FX_BOSSES[b.idx].name);saveState();
+    setTimeout(function(){spawnConfetti(80,["#c4868e","#d4a0a0","#c9b8a8","#9a7f8a","#e0bfc2"]);flash("⚔️ "+FX_BOSSES[b.idx].name+"倒下了！+30分，掉落一枚扭蛋币","big");},1700);}
+}
+window.fxDismissTaunt=function(){var f=fx();f.lastBoss=null;saveState();renderTasks();};
+function bossHtml(){
+  var f=fx(),b=ensureBoss(),B=FX_BOSSES[b.idx],st=bossState(b),pct=Math.round(st.left/b.hp*100),h="";
+  if(f.lastBoss&&!f.lastBoss.killed){h+='<div class="fx-card" style="background:rgba(154,127,138,0.08)"><div class="fx-row"><div style="flex:1"><div class="fx-title">上周的'+esc(f.lastBoss.name)+'带着 '+f.lastBoss.left+' 点血跑了</div><div class="fx-sub">'+esc(f.lastBoss.taunt)+'</div></div><button class="fx-btn ghost" onclick="fxDismissTaunt()">哼</button></div></div>';}
+  h+='<div class="fx-card"><div class="fx-row"><div class="fx-boss-face'+(st.dmg>0&&!b.killed?' fx-hit':'')+'">'+(b.killed?'💫':B.face)+'</div><div style="flex:1">';
+  h+='<div class="fx-title">本周 Boss：'+B.name+(b.killed?'（已击败）':'')+'</div>';
+  var names=B.crit.map(function(id){var t=findTaskDef(id);return t?t.name:null;}).filter(Boolean).slice(0,3).join("、");
+  h+='<div class="fx-sub">'+(b.killed?'战利品已到账：30 分 + 一枚扭蛋币':'暴击：'+esc(names)+(B.crit.length>3?' 等':''))+'</div>';
+  h+='<div class="fx-hp"><div style="width:'+pct+'%"></div></div>';
+  h+='<div class="fx-sub" style="margin-top:4px;display:flex;justify-content:space-between"><span>'+st.left+' / '+b.hp+'</span><span>'+(st.heal>0?'被回血 '+st.heal:'')+(st.crits?'　暴击 '+st.crits+' 次':'')+'</span></div>';
+  return h+'</div></div></div>';
+}
+
+/* ───────── 组合技 ───────── */
+function checkCombos(){
+  var f=fx(),d=td(),t=S.dailyTasks[d]||[];f.comboDay[d]=f.comboDay[d]||{};
+  Object.keys(f.comboDay).forEach(function(k){if(k<addDays(d,-7))delete f.comboDay[k];});
+  FX_COMBOS.forEach(function(c){
+    if(f.comboDay[d][c.id])return;
+    if(!c.need.every(function(id){return t.indexOf(id)>=0;}))return;
+    f.comboDay[d][c.id]=true;
+    var first=!f.combos[c.id];if(first)f.combos[c.id]=d;
+    earn(first?10:2,"⚡ 组合技 · "+c.name);saveState();
+    later((first?"⚡ 新组合技！「"+c.name+"」+10":"⚡ 「"+c.name+"」+2"),"big");
+    if(first)setTimeout(function(){spawnConfetti(50,["#9b8ab8","#c4868e","#e0bfc2","#c9b8a8"]);},1700);
+  });
+}
+function dexHtml(){
+  var f=fx(),n=Object.keys(f.combos).length,h='<div style="margin-top:24px"><div class="section-title" style="color:#8a6a6e;">⚡ 组合技图鉴 <span style="font-weight:400;color:#b09898;font-size:13px">'+n+'/'+FX_COMBOS.length+'</span></div><div class="fx-sub">某几件事在同一天做完，会触发组合。是哪几件，自己撞。</div><div class="fx-dex">';
+  FX_COMBOS.forEach(function(c){h+=f.combos[c.id]?'<div class="on">⚡ '+c.name+'<br><span style="font-size:11px;color:#a08888">'+c.need.map(function(id){var t=findTaskDef(id);return t?t.name:id;}).join(" + ")+'</span></div>':'<div class="off">？？？</div>';});
+  return h+'</div></div>';
+}
+
+/* ───────── 扭蛋机 ───────── */
+var FX_GACHA=[
+ {k:"joke",p:40},{k:"b10",p:25},{k:"b20",p:15},{k:"quest",p:10},{k:"reroll",p:7},{k:"big",p:3}
+];
+var fxLast="";
+window.fxSpin=function(){
+  var f=fx(),d=td();if(f.gacha.date!==d)f.gacha={date:d,count:0};
+  if(f.gacha.count>=2){flash("今天的两次扭完了，明天再来","fail");return;}
+  var useCoin=f.coins>0;
+  if(!useCoin&&S.cp<20){flash("积分不够 20 啦","fail");return;}
+  if(useCoin)f.coins--;else{S.h.unshift({t:"r",n:"🎰 扭蛋一次",p:-20,d:new Date().toISOString()});S.cp-=20;}
+  f.gacha.count++;
+  var r=roll(FX_GACHA,"p"),msg="";
+  if(r.k==="joke")msg=pick(FX_JOKES);
+  else if(r.k==="b10"){earn(10,"🎰 扭蛋：返还 10 分");msg="一颗粉色的蛋，里面是 10 分。";}
+  else if(r.k==="b20"){earn(20,"🎰 扭蛋：返还 20 分");msg="一颗奶白色的蛋，里面是 20 分。";}
+  else if(r.k==="quest"){var q=pick(FX_QUESTS);if(f.quests.length>=3){earn(5,"🎰 扭蛋：任务卡换 5 分");msg="掉出一张任务卡，可你手里已经有三张了，折成 5 分。";}else{f.quests.push({n:q.n,a:q.a});msg="掉出一张隐藏任务卡：「"+q.n+"」";}}
+  else if(r.k==="reroll"){f.rerolls++;msg="掉出一张签筒重摇券。抽到下下签的时候，它会救你一命。";}
+  else{earn(60,"🎰 扭蛋：大奖 60 分");msg="金色的蛋！！60 分！今天的运气全用在这了。";setTimeout(function(){spawnConfetti(120,["#c9b8a8","#d4a0a0","#e0bfc2","#b08a6e"]);},900);}
+  fxLast=msg;saveState();
+  var g=document.getElementById("fxGlobe");if(g){g.classList.remove("spin");void g.offsetWidth;g.classList.add("spin");}
+  setTimeout(function(){render();},850);
+};
+window.fxDoQuest=function(i){var f=fx(),q=f.quests[i];if(!q)return;f.quests.splice(i,1);earn(5,"🎯 任务卡 · "+q.n,q.a);saveState();render();flash("🎯 任务卡完成 +5","earn");};
+function gachaHtml(){
+  var f=fx(),d=td(),used=f.gacha.date===d?f.gacha.count:0,left=2-used;
+  var cols=["#e0bfc2","#c9b8a8","#b8c2c9","#d6c7da","#e6d9a8","#c4d0c0"],balls="";
+  for(var i=0;i<7;i++)balls+='<i style="background:'+cols[i%cols.length]+';left:'+(8+(i*23)%64)+'px;top:'+(18+(i*31)%56)+'px"></i>';
+  var h='<div class="fx-card fx-machine"><div class="fx-title">🎰 扭蛋机</div><div class="fx-sub">20 分一次，扭蛋币免费。每天最多两次，今天还剩 '+left+' 次。</div>';
+  h+='<div class="fx-globe" id="fxGlobe">'+balls+'</div>';
+  h+='<button class="fx-btn" onclick="fxSpin()" '+(left<=0?'disabled':'')+'>'+(f.coins>0?'用扭蛋币扭（'+f.coins+'）':'扭一次 · 20 分')+'</button>';
+  if(f.rerolls>0)h+='<div class="fx-sub" style="margin-top:8px">手里有 '+f.rerolls+' 张重摇券</div>';
+  if(fxLast)h+='<div class="fx-result">'+esc(fxLast)+'</div>';
+  f.quests.forEach(function(q,i){h+='<div class="fx-quest"><span style="flex:1;text-align:left">🎯 '+esc(q.n)+'</span><button class="fx-btn" style="background:#9b8ab8" onclick="fxDoQuest('+i+')">完成了</button></div>';});
+  return h+'</div>';
+}
+
+/* ───────── 挂到原来的函数上 ───────── */
+var _doTask=window.doTask,_doPen=window.doPen,_rt=window.renderTasks,_rs=window.renderShop,_ra=window.renderAchieve;
+window.doTask=function(id,name,pts){
+  _doTask.apply(this,arguments);
+  try{
+    var s=ensureSign(),changed=false;
+    if(s.target===id&&!s.used&&s.lv>=4){s.used=true;var b=s.lv===5?Math.max(0,pts):2;earn(b,"🎋 "+s.name+"加成 · "+name);changed=true;later("🎋 "+s.name+"应验了！额外 +"+b);}
+    if(s.lv===1&&!s.cured&&s.cure===id){s.cured=true;earn(3,"🎋 解签成功");changed=true;later("🎋 晦气散了！解签 +3");}
+    checkCombos();checkBoss();
+    if(changed){saveState();render();}else render();
+  }catch(e){}
+};
+window.doPen=function(id){
+  _doPen.apply(this,arguments);
+  try{
+    var s=ensureSign();
+    if((s.lv===2&&s.target===id)||(s.lv===1&&!s.cured)){lose(2,"🎋 "+s.name+"加罚");saveState();render();later("🎋 "+s.name+"应验，多扣 2 分","penalty");}
+  }catch(e){}
+};
+window.renderTasks=function(){_rt.apply(this,arguments);try{var c=document.getElementById("content-tasks");c.insertAdjacentHTML("afterbegin",signHtml()+bossHtml());}catch(e){}};
+window.renderShop=function(){_rs.apply(this,arguments);try{document.getElementById("content-shop").insertAdjacentHTML("afterbegin",gachaHtml());}catch(e){}};
+window.renderAchieve=function(){_ra.apply(this,arguments);try{document.getElementById("content-achieve").insertAdjacentHTML("beforeend",dexHtml());}catch(e){}};
+
+/* ───────── 季节换装 ───────── */
+function season(){
+  var host=document.getElementById("fxSeason");if(!host)return;
+  var now=new Date(),m=now.getMonth()+1,kind,cols,n=10;
+  var bd=(typeof bdIsWeek==="function"&&typeof BD_SHOP!=="undefined"&&BD_SHOP&&bdIsWeek());
+  if(bd){kind="cake";cols=["#e0bfc2","#ecd4d6","#d6c7b8"];n=9;}
+  else if(m>=9&&m<=11){kind="leaf";cols=["#c9a49a","#cbb592","#a9b39a","#c4868e"];}
+  else if(m===12||m<=2){kind="snow";cols=["#ffffff","#e8e4ea","#dfe3e8"];n=16;}
+  else if(m<=5){kind="petal";cols=["#ecd4d6","#e0bfc2","#dcc3cf"];}
+  else{kind="fly";cols=["#e6d9a8","#dcd3b0"];n=7;}
+  var h="";
+  for(var i=0;i<n;i++){
+    var c=cols[i%cols.length],left=Math.round(Math.random()*100),dur=(kind==="snow"?9:13)+Math.random()*8,delay=-Math.random()*dur,dx=Math.round(Math.random()*120-60),sz,st;
+    if(kind==="leaf"){sz=10+Math.random()*6;st="width:"+sz+"px;height:"+sz+"px;background:"+c+";border-radius:0 100% 0 100%;";}
+    else if(kind==="petal"){sz=8+Math.random()*5;st="width:"+sz+"px;height:"+(sz*0.7)+"px;background:"+c+";border-radius:100% 0 100% 0;";}
+    else if(kind==="snow"){sz=3+Math.random()*4;st="width:"+sz+"px;height:"+sz+"px;background:"+c+";border-radius:50%;box-shadow:0 0 4px rgba(200,205,215,.8);";}
+    else if(kind==="cake"){sz=16+Math.random()*6;st="width:"+sz+"px;height:"+sz+"px;background:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Crect x='3' y='9' width='14' height='8' rx='2' fill='%23e0bfc2'/%3E%3Crect x='3' y='9' width='14' height='3' rx='1.5' fill='%23f9f0f1'/%3E%3Crect x='9.3' y='4' width='1.4' height='5' fill='%23c9b8a8'/%3E%3Cellipse cx='10' cy='3.2' rx='1.2' ry='1.6' fill='%23d6a98a'/%3E%3C/svg%3E\") center/contain no-repeat;";}
+    else{sz=5;st="width:5px;height:5px;background:"+c+";border-radius:50%;box-shadow:0 0 8px 2px rgba(230,217,168,.7);bottom:"+Math.round(Math.random()*60+10)+"%;";}
+    h+='<span class="'+(kind==="fly"?"fly":"")+'" style="'+st+'left:'+left+'%;animation-duration:'+dur.toFixed(1)+'s;animation-delay:'+delay.toFixed(1)+'s;--dx:'+dx+'px;--rot:'+Math.round(180+Math.random()*300)+'deg"></span>';
+  }
+  host.innerHTML=h;
+}
+
+function boot(){if(typeof S==="undefined"||!S){setTimeout(boot,300);return;}fx();ensureSign();ensureBoss();checkBoss();checkCombos();season();try{render();}catch(e){}}
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",function(){setTimeout(boot,500);});else setTimeout(boot,500);
+})();
+</script>
 </body></html>
