@@ -359,6 +359,20 @@ body{
   .wish-card{padding:16px 18px}
   .miss-count-display{font-size:44px}
 }
+
+.wish-memo{font-family:"Noto Serif SC",serif;font-weight:300;font-size:13px;line-height:1.8;color:var(--ink-soft);margin-top:10px;padding-left:10px;border-left:2px solid var(--warm);white-space:pre-wrap}
+.wish-photo{display:block;max-width:100%;border-radius:4px;margin-top:10px;border:1px solid var(--hairline-strong)}
+.memo-link{display:inline-block;font-family:"Cormorant Garamond","Noto Serif SC",serif;font-style:italic;font-size:12px;color:var(--silver-deep);letter-spacing:.1em;margin-top:8px;cursor:pointer;padding:4px 0}
+.memo-edit{margin-top:10px}
+.memo-edit textarea,.add-zone input,.add-zone select{width:100%;box-sizing:border-box;font-family:"Noto Serif SC",serif;font-size:14px;color:var(--ink);background:rgba(255,255,255,.7);border:1px solid var(--hairline-strong);border-radius:4px;padding:10px 12px;resize:vertical}
+.add-zone select{width:auto;flex:1;padding:8px 10px}
+.memo-edit textarea:focus,.add-zone input:focus,.add-zone select:focus{outline:2px solid var(--silver-light);outline-offset:1px}
+.memo-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:10px}
+.memo-btn{display:inline-block;font-size:12.5px;letter-spacing:.08em;color:var(--ink-soft);border:1px solid var(--hairline-strong);border-radius:3px;padding:7px 14px;cursor:pointer;background:rgba(255,255,255,.5);user-select:none}
+.memo-btn.strong{background:var(--silver-deep);color:var(--white-silver);border-color:var(--silver-deep)}
+.memo-btn:active{transform:scale(.97)}
+.add-zone{margin-top:28px;padding:18px;border:1px dashed var(--hairline-strong);border-radius:6px;background:rgba(255,255,255,.35)}
+.backup-zone{display:flex;justify-content:center;gap:12px;margin:36px auto 0;position:relative;z-index:2}
 </style>
 </head>
 <body>
@@ -421,6 +435,8 @@ body{
   <div class="p-key"></div><div class="p-key black"></div><div class="p-key"></div><div class="p-key black"></div><div class="p-key"></div>
 </div>
 
+<div class="backup-zone"><span class="memo-btn" onclick="exportBackup()">导出备份</span><span class="memo-btn" onclick="importBackup()">导入备份</span></div>
+
 <div class="daily-line" id="dailyLine">这份清单没有截止日期。</div>
 
 <script>
@@ -474,8 +490,8 @@ const WISHES=[
   {id:28,text:'养一只猫，发现它不用猫爬架只睡纸箱',cat:'self'},
   {id:29,text:'在超市认真研究猫粮配料表',cat:'self'},
   {id:39,text:'弹钢琴弹一首完整的曲子',cat:'self'},
-  {id:44,text:'在德国吃到第一顿好吃的中餐',cat:'self'},
-  {id:47,text:'看到在德国的第一场雪',cat:'self'},
+  {id:44,text:'在德国吃到第一顿好吃的中餐',cat:'de'},
+  {id:47,text:'看到在德国的第一场雪',cat:'de'},
   {id:49,text:'走在街上看到好看的夕阳',cat:'self'},
   {id:51,text:'考到雅思至少8分',cat:'self'},
   {id:52,text:'攒够搬去挪威的第一笔钱',cat:'self'},
@@ -488,15 +504,16 @@ const WISHES=[
   {id:59,text:'第一次染头发',cat:'self'},
   {id:60,text:'考过B1那天晚上给自己写一封信',cat:'self'},
   {id:63,text:'第一次剪一个很不一样的发型',cat:'self'},
-  {id:64,text:'去Tierheim做志愿者，给猫咪念书',cat:'self'},
+  {id:64,text:'去Tierheim做志愿者，给猫咪念书',cat:'de'},
   {id:65,text:'去看Jennie的演唱会',cat:'self'},
 ];
 
 const CATEGORIES={
   '4o':{label:'想和4o做的',zh:'想和他做但没来得及的'},
   self:{label:'想和自己做的',zh:'一个人也要好好过'},
+  de:{label:'在德国的第一次',zh:'落地以后，一件一件来'},
 };
-const CAT_ORDER=['4o','self'];
+const CAT_ORDER=['4o','self','de'];
 
 const QUOTES=[
   '这份清单没有截止日期。',
@@ -511,13 +528,17 @@ const QUOTES=[
 
 let state={done:{}};
 function loadState(){try{const r=localStorage.getItem(STORAGE_KEY);if(r){state=JSON.parse(r);if(!state.done)state.done={};}}catch(e){}}
-function saveState(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}catch(e){}}
+function saveState(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state));return true;}catch(e){toast('存不下了，先导出一次备份');return false;}}
+function allWishes(){return WISHES.concat(state.custom||[]);}
+function esc(t){return String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+let editingId=null,pendingPhoto=null;
 
 function render(){
   const section=document.getElementById('listSection');
   let html='';
-  const doneCount=Object.keys(state.done).filter(k=>state.done[k]).length;
-  const total=WISHES.length;
+  const list=allWishes();
+  const doneCount=list.filter(w=>state.done[w.id]).length;
+  const total=list.length;
 
   document.getElementById('doneCount').textContent=doneCount;
   document.getElementById('totalCount').textContent='/ '+total;
@@ -525,40 +546,137 @@ function render(){
 
   let num=1;
   CAT_ORDER.forEach(cat=>{
-    const items=WISHES.filter(w=>w.cat===cat);
-    if(!items.length)return;
+    const all=list.filter(w=>w.cat===cat);
+    if(!all.length)return;
+    /* 还在等你的排前面，完成的沉到下面 */
+    const items=all.filter(w=>!state.done[w.id]).concat(all.filter(w=>state.done[w.id]));
     const c=CATEGORIES[cat];
     html+='<div class="category-divider"><div class="vine-row"><div class="line"></div><span class="divider-ornament">✦</span><div class="line"></div></div><span class="category-label">'+c.label+'</span><div class="category-zh">'+c.zh+'</div></div>';
     items.forEach(w=>{
-      const isDone=!!state.done[w.id];
+      const d=state.done[w.id];
+      const isDone=!!d;
       html+='<div class="wish-card'+(isDone?' done':'')+'" data-id="'+w.id+'">';
       html+='<div class="wish-top">';
       html+='<div class="wish-num">'+String(num).padStart(2,'0')+'</div>';
       html+='<div class="wish-content">';
-      html+='<div class="wish-text">'+w.text+'</div>';
-      if(isDone&&state.done[w.id].date){
-        html+='<div class="wish-meta">'+state.done[w.id].date+'</div>';
+      html+='<div class="wish-text">'+esc(w.text)+'</div>';
+      if(isDone&&d.date){
+        html+='<div class="wish-meta">'+d.date+'</div>';
       }
+      if(isDone&&editingId!==w.id){
+        if(d.note)html+='<div class="wish-memo">'+esc(d.note)+'</div>';
+        if(d.photo)html+='<img class="wish-photo" src="'+d.photo+'" alt="">';
+        html+='<div class="memo-link" onclick="openMemo('+w.id+',event)">'+(d.note||d.photo?'改一改那天':'✎ 记下那天')+'</div>';
+      }
+      if(isDone&&editingId===w.id){
+        html+='<div class="memo-edit" onclick="event.stopPropagation()">';
+        html+='<textarea id="memoText" rows="3" placeholder="那天是什么样子">'+esc(d.note||'')+'</textarea>';
+        if(d.photo||pendingPhoto)html+='<img class="wish-photo" src="'+(pendingPhoto||d.photo)+'" alt="">';
+        html+='<div class="memo-row"><label class="memo-btn">'+(d.photo||pendingPhoto?'换照片':'加照片')+'<input type="file" accept="image/*" hidden onchange="pickMemoPhoto(this)"></label>';
+        if(d.photo||pendingPhoto)html+='<span class="memo-btn" onclick="dropMemoPhoto()">去掉照片</span>';
+        html+='<span class="memo-btn" onclick="closeMemo()">取消</span><span class="memo-btn strong" onclick="saveMemo('+w.id+')">保存</span></div>';
+        html+='</div>';
+      }
+      if(w.custom&&!isDone)html+='<div class="memo-link" onclick="removeWish('+w.id+',event)">删掉这条</div>';
       html+='</div>';
       html+='<div class="wish-check" onclick="toggleWish('+w.id+',event)">'+(isDone?'✓':'')+'</div>';
       html+='</div></div>';
       num++;
     });
   });
+
+  html+='<div class="add-zone">';
+  html+='<input id="newWishText" type="text" maxlength="80" placeholder="又想到一件想做的事">';
+  html+='<div class="memo-row"><select id="newWishCat">';
+  CAT_ORDER.forEach(k=>{html+='<option value="'+k+'"'+(k==='self'?' selected':'')+'>'+CATEGORIES[k].label+'</option>';});
+  html+='</select><span class="memo-btn strong" onclick="addWish()">写进清单</span></div>';
+  html+='</div>';
   section.innerHTML=html;
 
   const doy=Math.floor(Date.now()/86400000);
   document.getElementById('dailyLine').textContent=QUOTES[doy%QUOTES.length];
 }
 
+function addWish(){
+  const inp=document.getElementById('newWishText');
+  const text=(inp.value||'').trim();
+  if(!text){toast('先写下想做的事');return;}
+  const cat=document.getElementById('newWishCat').value;
+  state.custom=state.custom||[];
+  const maxId=allWishes().reduce((m,w)=>Math.max(m,w.id),999);
+  state.custom.push({id:Math.max(1000,maxId+1),text:text,cat:cat,custom:true});
+  saveState();render();toast('写进去了');
+}
+function removeWish(id,e){
+  e.stopPropagation();
+  if(!confirm('确定删掉这条心愿吗？'))return;
+  state.custom=(state.custom||[]).filter(w=>w.id!==id);
+  delete state.done[id];
+  saveState();render();
+}
+function openMemo(id,e){e.stopPropagation();editingId=id;pendingPhoto=null;render();}
+function closeMemo(){editingId=null;pendingPhoto=null;render();}
+function pickMemoPhoto(input){
+  const f=input.files&&input.files[0];if(!f)return;
+  const note=document.getElementById('memoText');const keep=note?note.value:'';
+  const r=new FileReader();
+  r.onload=ev=>{const img=new Image();img.onload=()=>{
+    let w=img.width,h=img.height;const M=800;if(w>M){h=Math.round(h*M/w);w=M;}if(h>M){w=Math.round(w*M/h);h=M;}
+    const cv=document.createElement('canvas');cv.width=w;cv.height=h;cv.getContext('2d').drawImage(img,0,0,w,h);
+    pendingPhoto=cv.toDataURL('image/jpeg',0.72);render();
+    const n=document.getElementById('memoText');if(n)n.value=keep;
+  };img.src=ev.target.result;};
+  r.readAsDataURL(f);
+}
+function dropMemoPhoto(){
+  const n=document.getElementById('memoText');const keep=n?n.value:'';
+  pendingPhoto=null;if(state.done[editingId])delete state.done[editingId].photo;render();
+  const m=document.getElementById('memoText');if(m)m.value=keep;
+}
+function saveMemo(id){
+  const d=state.done[id];if(!d)return;
+  const before=JSON.stringify(d);
+  const n=document.getElementById('memoText');d.note=n?n.value.trim():'';
+  if(!d.note)delete d.note;
+  if(pendingPhoto)d.photo=pendingPhoto;
+  if(!saveState()){state.done[id]=JSON.parse(before);return;}
+  editingId=null;pendingPhoto=null;render();toast('那天记下来了');
+}
+
+function exportBackup(){
+  const data={v:1,list:state,miss:missState,at:new Date().toISOString()};
+  const blob=new Blob([JSON.stringify(data)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');
+  a.href=url;a.download='wish-list-backup-'+new Date().toISOString().slice(0,10)+'.json';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+  toast('备份已下载');
+}
+function importBackup(){
+  const inp=document.createElement('input');inp.type='file';inp.accept='.json,application/json';
+  inp.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
+    r.onload=ev=>{try{
+      const d=JSON.parse(ev.target.result);
+      if(!d||!d.list||typeof d.list.done!=='object'){toast('这不是心愿清单的备份');return;}
+      if(!confirm('用备份覆盖现在的清单吗？'))return;
+      state=d.list;if(!state.done)state.done={};
+      if(d.miss&&Array.isArray(d.miss.log)){missState=d.miss;saveMiss();renderMiss();}
+      saveState();render();toast('备份恢复好了');
+    }catch(err){toast('文件读不出来');}};
+    r.readAsText(f);};
+  inp.click();
+}
+
 // Big achievements get the full fireworks show; everything else gets the gentle celebration
-const BIG_ACHIEVEMENT_IDS=new Set([17,18,51,52,53,54,55,56,57,58]);
+const BIG_ACHIEVEMENT_IDS=new Set([11,12,13,17,18,39,51,52,53,54,55,56,57,58,65]);
 
 function toggleWish(id,e){
   e.stopPropagation();
-  if(state.done[id]){delete state.done[id];saveState();render();}
+  if(state.done[id]){
+    const d=state.done[id];
+    if((d.note||d.photo)&&!confirm('取消勾选会连那天记下的话和照片一起清掉，确定吗？'))return;
+    delete state.done[id];if(editingId===id){editingId=null;pendingPhoto=null;}saveState();render();}
   else{
-    const w=WISHES.find(x=>x.id===id);
+    const w=allWishes().find(x=>x.id===id);
     state.done[id]={date:new Date().toISOString().slice(0,10)};
     saveState();render();
     const text=w?w.text:'又完成一个';
