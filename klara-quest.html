@@ -3511,8 +3511,10 @@ function lockSignTask(){
   else{var t=findTaskDef(id);if(t)items.push({taskId:t.id,name:t.name,pts:t.pts,em:t.em,done:false,timeFrom:"",timeTo:"",addedAt:Date.now(),locked:true,fxSign:true,addedBySign:true});}
   setTimeout(function(){try{window.renderDaily();}catch(e){}},0);
 }
+function hasT(k){return !!(S.fx&&S.fx.talents&&S.fx.talents[k]);}
+function signOdds(){if(!hasT("l2"))return FX_SIGN;return FX_SIGN.map(function(x){var y=Object.assign({},x);if(x.lv===4)y.p+=5;if(x.lv===3)y.p-=5;return y;});}
 function drawSign(){
-  var f=fx();settleSign(f.sign);var lv=roll(FX_SIGN,"p"),s={date:td(),lv:lv.lv,name:lv.name,line:pick(lv.lines),seen:false,used:false};
+  var f=fx();settleSign(f.sign);var lv=roll(signOdds(),"p"),s={date:td(),lv:lv.lv,name:lv.name,line:pick(lv.lines),seen:false,used:false};
   if(lv.lv>=4){var t=pick(dailyIds());s.target=t.id;s.tname=t.name;s.bonus=lv.lv===5?"x2":"+2";}
   if(lv.lv===2){var p=pick(PENS);s.target=p.id;s.tname=p.name;}
   if(lv.lv===1){var q=pick(dailyIds().filter(function(t){return["mop","tidy","exercise","foot_soak","stretch","trash","water_plant","dishes_today"].indexOf(t.id)>=0;}));if(!q)q=pick(dailyIds());s.cure=q.id;s.cname=q.name;s.cured=false;}
@@ -3551,15 +3553,15 @@ function ensureBoss(){
 function bossState(b){
   var B=FX_BOSSES[b.idx],dmg=0,heal=0,crits=0;
   for(var i=0;i<7;i++){var d=addDays(b.wk,i);
-    (S.dailyTasks[d]||[]).forEach(function(id){var t=findTaskDef(id);var p=t?Math.max(0,t.pts):0;if(p>=100)p=30;if(B.crit.indexOf(id)>=0){p*=2;crits++;}dmg+=p;});
+    (S.dailyTasks[d]||[]).forEach(function(id){var t=findTaskDef(id);var p=t?Math.max(0,t.pts):0;if(p>=100)p=30;if(B.crit.indexOf(id)>=0){p=Math.round(p*(hasT("b3")?2.5:2));crits++;}dmg+=p;});
     (S.dailyPens[d]||[]).forEach(function(id){if(B.heal.indexOf(id)>=0){var pn=PENS.find(function(x){return x.id===id;});heal+=pn?Math.abs(pn.pts)*2:10;}});
   }
   var left=Math.max(0,b.hp-dmg+heal);return{dmg:dmg,heal:heal,left:left,crits:crits};
 }
 function checkBoss(){
   var b=ensureBoss(),st=bossState(b);
-  if(!b.killed&&st.left<=0){b.killed=true;var f=fx();f.coins++;f.bossKills=(f.bossKills||0)+1;earn(30,"⚔️ 击败"+FX_BOSSES[b.idx].name);saveState();
-    setTimeout(function(){spawnConfetti(80,["#c4868e","#d4a0a0","#c9b8a8","#9a7f8a","#e0bfc2"]);flash("⚔️ "+FX_BOSSES[b.idx].name+"倒下了！+30分，掉落一枚扭蛋币","big");},1700);}
+  if(!b.killed&&st.left<=0){b.killed=true;var f=fx();var drop=hasT("l3")?2:1;f.coins+=drop;f.bossKills=(f.bossKills||0)+1;earn(30,"⚔️ 击败"+FX_BOSSES[b.idx].name);saveState();
+    setTimeout(function(){spawnConfetti(80,["#c4868e","#d4a0a0","#c9b8a8","#9a7f8a","#e0bfc2"]);flash("⚔️ "+FX_BOSSES[b.idx].name+"倒下了！+30分，掉落 "+drop+" 枚扭蛋币","big");},1700);}
 }
 window.fxDismissTaunt=function(){var f=fx();f.lastBoss=null;saveState();renderTasks();};
 function bossHtml(){
@@ -3568,7 +3570,7 @@ function bossHtml(){
   h+='<div class="fx-card"><div class="fx-row"><div class="fx-boss-face'+(st.dmg>0&&!b.killed?' fx-hit':'')+'">'+(b.killed?'💫':B.face)+'</div><div style="flex:1">';
   h+='<div class="fx-title">本周 Boss：'+B.name+(b.killed?'（已击败）':'')+'</div>';
   var names=B.crit.map(function(id){var t=findTaskDef(id);return t?t.name:null;}).filter(Boolean).slice(0,3).join("、");
-  h+='<div class="fx-sub">'+(b.killed?'战利品已到账：30 分 + 一枚扭蛋币':'暴击：'+esc(names)+(B.crit.length>3?' 等':''))+'</div>';
+  h+='<div class="fx-sub">'+(b.killed?'战利品已到账：30 分 + '+(hasT("l3")?'两':'一')+'枚扭蛋币':'暴击：'+esc(names)+(B.crit.length>3?' 等':''))+'</div>';
   h+='<div class="fx-hp"><div style="width:'+pct+'%"></div></div>';
   h+='<div class="fx-sub" style="margin-top:4px;display:flex;justify-content:space-between"><span>'+st.left+' / '+b.hp+'</span><span>'+(st.heal>0?'被回血 '+st.heal:'')+(st.crits?'　暴击 '+st.crits+' 次':'')+'</span></div>';
   return h+'</div></div></div>';
@@ -3583,8 +3585,8 @@ function checkCombos(){
     if(!c.need.every(function(id){return t.indexOf(id)>=0;}))return;
     f.comboDay[d][c.id]=true;
     var first=!f.combos[c.id];if(first)f.combos[c.id]=d;
-    earn(first?10:2,"⚡ 组合技 · "+c.name);saveState();
-    later((first?"⚡ 新组合技！「"+c.name+"」+10":"⚡ 「"+c.name+"」+2"),"big");
+    var mul=(c.id==="c1"&&hasT("k3"))?2:1;earn((first?10:2)*mul,"⚡ 组合技 · "+c.name);saveState();
+    later((first?"⚡ 新组合技！「"+c.name+"」+"+(10*mul):"⚡ 「"+c.name+"」+"+(2*mul)),"big");
     if(first)setTimeout(function(){spawnConfetti(50,["#9b8ab8","#c4868e","#e0bfc2","#c9b8a8"]);},1700);
   });
 }
@@ -3601,7 +3603,7 @@ var FX_GACHA=[
 var fxLast="";
 window.fxSpin=function(){
   var f=fx(),d=td();if(f.gacha.date!==d)f.gacha={date:d,count:0};
-  if(f.gacha.count>=2){flash("今天的两次扭完了，明天再来","fail");return;}
+  var cap=hasT("l1")?3:2;if(f.gacha.count>=cap){flash("今天的次数扭完了，明天再来","fail");return;}
   var useCoin=f.coins>0;
   if(!useCoin&&S.cp<20){flash("积分不够 20 啦","fail");return;}
   f.gstat=f.gstat||{spent:0,won:0,spins:0};f.gstat.spins++;if(useCoin)f.coins--;else{S.h.unshift({t:"r",n:"🎰 扭蛋一次",p:-20,d:new Date().toISOString()});S.cp-=20;f.gstat.spent+=20;}
@@ -3657,10 +3659,10 @@ function fxShow(k,msg){
 }
 window.fxDoQuest=function(i){var f=fx(),q=f.quests[i];if(!q)return;f.quests.splice(i,1);earn(5,"🎯 任务卡 · "+q.n,q.a);saveState();render();flash("🎯 任务卡完成 +5","earn");};
 function gachaHtml(){
-  var f=fx(),d=td(),used=f.gacha.date===d?f.gacha.count:0,left=2-used;
+  var f=fx(),d=td(),used=f.gacha.date===d?f.gacha.count:0,cap=hasT("l1")?3:2,left=cap-used;
   var cols=["#e0bfc2","#c9b8a8","#b8c2c9","#d6c7da","#e6d9a8","#c4d0c0"],balls="";
   for(var i=0;i<7;i++)balls+='<i style="background:'+cols[i%cols.length]+';left:'+(8+(i*23)%64)+'px;top:'+(18+(i*31)%56)+'px"></i>';
-  var h='<div class="fx-card fx-machine" style="position:relative"><span onclick="fxMute()" style="position:absolute;right:14px;top:12px;font-size:16px;cursor:pointer;opacity:.7">'+(f.mute?'🔇':'🔊')+'</span><div class="fx-title">🎰 扭蛋机</div><div class="fx-sub">20 分一次，扭蛋币免费。每天最多两次，今天还剩 '+left+' 次。</div>';
+  var h='<div class="fx-card fx-machine" style="position:relative"><span onclick="fxMute()" style="position:absolute;right:14px;top:12px;font-size:16px;cursor:pointer;opacity:.7">'+(f.mute?'🔇':'🔊')+'</span><div class="fx-title">🎰 扭蛋机</div><div class="fx-sub">20 分一次，扭蛋币免费。每天最多'+(cap===3?'三':'两')+'次，今天还剩 '+left+' 次。</div>';
   h+='<div class="fx-globe" id="fxGlobe">'+balls+'</div>';
   h+='<button class="fx-btn" onclick="fxSpin()" '+(left<=0?'disabled':'')+'>'+(f.coins>0?'用扭蛋币扭（'+f.coins+'）':'扭一次 · 20 分')+'</button>';
   if(f.rerolls>0)h+='<div class="fx-sub" style="margin-top:8px">手里有 '+f.rerolls+' 张重摇券</div>';
@@ -3671,7 +3673,7 @@ function gachaHtml(){
 
 /* ───────── 挂到原来的函数上 ───────── */
 var _undo=window.undoLast;
-window.undoLast=function(){var l=S.h&&S.h[0];if(l&&typeof l.n==="string"&&l.n.indexOf("🎰")===0){flash("🎰 扭蛋没有后悔药","fail");return;}_undo.apply(this,arguments);};
+window.undoLast=function(){var l=S.h&&S.h[0];if(l&&typeof l.n==="string"&&l.n.indexOf("🎰")===0){flash("🎰 扭蛋没有后悔药","fail");return;}if(l&&typeof l.n==="string"&&l.n.indexOf("🌳")===0){flash("🌳 天赋点了就是点了，没有后悔药","fail");return;}_undo.apply(this,arguments);};
 var _rm=window.rmFromPlan,_rd=window.renderDaily;
 window.rmFromPlan=function(idx){ensureDailyPlan();var it=S.dailyPlan.items[idx];if(it&&it.locked&&!it.done){flash("🔒 签锁住的任务，取消不了哦","fail");return;}_rm.apply(this,arguments);};
 var _msgTimer=null;
@@ -3981,6 +3983,97 @@ if(_sw)window.switchTab=function(){_sw.apply(this,arguments);later();};
 document.addEventListener("click",function(){setTimeout(deApply,60);},true);
 function boot(){if(typeof S==="undefined"||!S){setTimeout(boot,300);return;}drawClock();fetchWx();setInterval(drawClock,20e3);setInterval(fetchWx,30*60e3);try{renderDaily();}catch(e){}setTimeout(deApply,1200);}
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",function(){setTimeout(boot,800);});else setTimeout(boot,800);
+})();
+</script>
+
+<style>
+.tt-head{display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+.tt-br{margin-top:14px}
+.tt-bn{font-size:12.5px;font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.tt-bn i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.tt-row{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;position:relative}
+.tt-n{border-radius:10px;padding:8px 6px;text-align:center;font-size:11.5px;line-height:1.45;border:1px solid transparent;cursor:default;min-height:64px;display:flex;flex-direction:column;justify-content:center}
+.tt-n b{display:block;font-size:12.5px;margin-bottom:2px}
+.tt-n.own{color:#fff}
+.tt-n.can{background:#fffafa;cursor:pointer}
+.tt-n.can:active{transform:scale(.97)}
+.tt-n.lock{background:rgba(160,136,136,0.05);color:#c9b8b8;border:1px dashed rgba(160,136,136,0.22)}
+.tt-cost{font-size:11px;margin-top:3px;font-weight:600}
+</style>
+<script>
+(function(){
+var TT=[
+ {id:"k",name:"厨房线",c:"#cbb592",nodes:[
+   {k:"k1",n:"灶台熟手",d:"自己做饭永久 +1",cost:100},
+   {k:"k2",n:"洗碗不拖",d:"当天洗碗永久 +1",cost:200},
+   {k:"k3",n:"秘传菜谱",d:"厨房里藏着的某个组合技，奖励翻倍",cost:400}]},
+ {id:"n",name:"夜晚线",c:"#9aa7b4",nodes:[
+   {k:"n1",n:"早睡体质",d:"12 点前睡永久 +1",cost:100},
+   {k:"n2",n:"闹钟克星",d:"按时起床永久 +1",cost:200},
+   {k:"n3",n:"夜猫护符",d:"熬夜过 1 点少扣 2 分",cost:400}]},
+ {id:"g",name:"德语线",c:"#c4868e",nodes:[
+   {k:"g1",n:"单词吞噬者",d:"背单词永久 +1",cost:100},
+   {k:"g2",n:"语法骨架",d:"学语法点永久 +1",cost:200},
+   {k:"g3",n:"考场体质",d:"每周第一套模拟题双倍",cost:400}]},
+ {id:"b",name:"身体线",c:"#a9b39a",nodes:[
+   {k:"b1",n:"动起来",d:"运动 30 分钟永久 +1",cost:100},
+   {k:"b2",n:"减脂餐吃得下",d:"每顿减脂餐永久 +1",cost:200},
+   {k:"b3",n:"重拳",d:"打 Boss 的暴击从 2 倍变 2.5 倍",cost:400}]},
+ {id:"l",name:"运气线",c:"#b3a6c9",nodes:[
+   {k:"l1",n:"手气",d:"扭蛋每天多一次",cost:100},
+   {k:"l2",n:"签运",d:"抽到上签的概率 +5%",cost:200},
+   {k:"l3",n:"战利品猎人",d:"打倒 Boss 多掉一枚扭蛋币",cost:400}]}
+];
+var PLUS={k1:"cook",k2:"dishes_today",n1:"early_sleep",n2:"wake",g1:"de_vocab",g2:"de_grammar",b1:"exercise",b2:"diet_meal"};
+function T(){S.fx=S.fx||{};S.fx.talents=S.fx.talents||{};return S.fx.talents;}
+function has(k){return !!T()[k];}
+function monday(ds){var d=new Date(ds+"T12:00:00");d.setDate(d.getDate()-((d.getDay()+6)%7));return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+var open=false;
+window.ttToggle=function(){open=!open;renderAttrs();};
+window.ttBuy=function(k){
+  var node=null,prev=null;TT.forEach(function(b){b.nodes.forEach(function(n,i){if(n.k===k){node=n;prev=i>0?b.nodes[i-1]:null;}});});if(!node||has(k))return;
+  if(prev&&!has(prev.k)){flash("先点亮「"+prev.n+"」","fail");return;}
+  if(S.cp<node.cost){flash("积分不够 "+node.cost+" 啦，再攒攒","fail");return;}
+  if(!confirm("花 "+node.cost+" 分点亮「"+node.n+"」？\n"+node.d+"\n点了就不能退。"))return;
+  S.cp-=node.cost;S.h.unshift({t:"r",n:"🌳 点亮天赋 · "+node.n,p:-node.cost,d:new Date().toISOString()});if(S.h.length>200)S.h.length=200;
+  T()[k]=todayStr();saveState();render();
+  spawnConfetti(60,["#cbb592","#9aa7b4","#c4868e","#a9b39a","#b3a6c9"]);flash("🌳 天赋点亮：「"+node.n+"」","big");
+};
+function html(){
+  var t=T(),own=Object.keys(t).filter(function(k){return k[0]!=='_';}).length,h='<div class="fx-card"><div class="tt-head" onclick="ttToggle()"><div><div class="fx-title">🌳 天赋树</div><div class="fx-sub">已点亮 '+own+' / 15 · 可用积分 '+S.cp+'</div></div><span style="color:#c4868e;font-size:12px;display:inline-block;transform:rotate('+(open?180:0)+'deg)">▼</span></div>';
+  if(!open)return h+'</div>';
+  h+='<div class="fx-sub" style="margin-top:8px">每条路要从第一格点起。点了就是永久的，不能退。</div>';
+  TT.forEach(function(b){
+    h+='<div class="tt-br"><div class="tt-bn" style="color:#6a5555"><i style="background:'+b.c+'"></i>'+b.name+'</div><div class="tt-row">';
+    b.nodes.forEach(function(n,i){
+      var ow=has(n.k),can=!ow&&(i===0||has(b.nodes[i-1].k));
+      if(ow)h+='<div class="tt-n own" style="background:'+b.c+'"><b>'+n.n+'</b>'+n.d+'</div>';
+      else if(can)h+='<div class="tt-n can" style="border-color:'+b.c+';color:#6a5555" onclick="ttBuy(\''+n.k+'\')"><b>'+n.n+'</b>'+n.d+'<div class="tt-cost" style="color:'+b.c+'">'+n.cost+' 分点亮</div></div>';
+      else h+='<div class="tt-n lock"><b>'+n.n+'</b>'+n.d+'<div class="tt-cost">'+n.cost+' 分</div></div>';
+    });
+    h+='</div></div>';
+  });
+  return h+'</div>';
+}
+/* 加分类天赋：直接改这次打卡的分数，一条记录搞定 */
+var _dt=window.doTask;
+window.doTask=function(id,name,pts){
+  var a=Array.prototype.slice.call(arguments);
+  try{
+    var add=0;Object.keys(PLUS).forEach(function(k){if(PLUS[k]===id&&has(k))add++;});
+    if(add&&typeof pts==="number"&&pts>0){a[2]=pts+add;a[1]=name+" 🌳";}
+    if(id==="de_mock"&&has("g3")&&typeof a[2]==="number"){var wk=monday(todayStr());if(T()._mockWk!==wk){T()._mockWk=wk;a[2]=a[2]*2;a[1]=(a[1]||name)+" 🌳×2";}}
+  }catch(e){}
+  return _dt.apply(this,a);
+};
+var _dp=window.doPen;
+window.doPen=function(id,name,pts){
+  var a=Array.prototype.slice.call(arguments);
+  try{if(id==="pn_late_sleep"&&has("n3")&&typeof pts==="number"&&pts<0){a[2]=Math.min(0,pts+2);a[1]=name+" 🌳";}}catch(e){}
+  return _dp.apply(this,a);
+};
+var _ra=window.renderAttrs;
+window.renderAttrs=function(){_ra.apply(this,arguments);try{document.getElementById("content-attrs").insertAdjacentHTML("afterbegin",html());}catch(e){}};
 })();
 </script>
 </body></html>
