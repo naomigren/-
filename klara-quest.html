@@ -729,17 +729,19 @@ function renderHistory(){
 }
 /* ═══════ ACHIEVEMENT HELPERS ═══════ */
 function todayStr(){var d=new Date();if(d.getHours()>=23){d.setDate(d.getDate()+1);}return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function _lk(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function _dk(iso){var d=new Date(iso);if(isNaN(d))return '';if(d.getHours()>=23)d.setDate(d.getDate()+1);return _lk(d);}
 function yesterdayStr(){var d=new Date();if(d.getHours()<23){d.setDate(d.getDate()-1);}return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function daysBetween(a,b){return Math.floor((new Date(b)-new Date(a))/86400000);}
 function tList(){return S.dailyTasks[todayStr()]||[];}
 function hasPenToday(id){return(S.dailyPens[todayStr()]||[]).includes(id);}
 function cnt(id){return S.taskCounts[id]||0;}
 function cntFear(){return["contact_teacher","deal_academic","check_grad","submit_overdue","face_fear"].reduce((s,id)=>s+cnt(id),0);}
-function taskStrk(id){let c=0,d=new Date();for(let i=0;i<200;i++){if((S.dailyTasks[d.toISOString().slice(0,10)]||[]).includes(id))c++;else break;d.setDate(d.getDate()-1);}return c;}
-function multiStrk(ids,max){let c=0,d=new Date();for(let i=0;i<max+5;i++){const t=S.dailyTasks[d.toISOString().slice(0,10)]||[];if(ids.every(id=>t.includes(id)))c++;else break;d.setDate(d.getDate()-1);}return c;}
-function grpStrk(ids,max){let c=0,d=new Date();for(let i=0;i<max+5;i++){const t=S.dailyTasks[d.toISOString().slice(0,10)]||[];if(ids.some(id=>t.includes(id)))c++;else break;d.setDate(d.getDate()-1);}return c;}
-function choreStrk(){const ch=["dishes_today","socks_today","tidy","mop","undies_today","trash"];let c=0,d=new Date();for(let i=0;i<200;i++){const t=S.dailyTasks[d.toISOString().slice(0,10)]||[];if(ch.filter(id=>t.includes(id)).length>=3)c++;else break;d.setDate(d.getDate()-1);}return c;}
-function penStrk(){let c=0,d=new Date();for(let i=0;i<100;i++){const p=S.dailyPens[d.toISOString().slice(0,10)];if(p&&p.length>0)c++;else break;d.setDate(d.getDate()-1);}return c;}
+function taskStrk(id){let c=0,d=new Date(todayStr()+"T12:00:00");for(let i=0;i<200;i++){if((S.dailyTasks[_lk(d)]||[]).includes(id))c++;else break;d.setDate(d.getDate()-1);}return c;}
+function multiStrk(ids,max){let c=0,d=new Date(todayStr()+"T12:00:00");for(let i=0;i<max+5;i++){const t=S.dailyTasks[_lk(d)]||[];if(ids.every(id=>t.includes(id)))c++;else break;d.setDate(d.getDate()-1);}return c;}
+function grpStrk(ids,max){let c=0,d=new Date(todayStr()+"T12:00:00");for(let i=0;i<max+5;i++){const t=S.dailyTasks[_lk(d)]||[];if(ids.some(id=>t.includes(id)))c++;else break;d.setDate(d.getDate()-1);}return c;}
+function choreStrk(){const ch=["dishes_today","socks_today","tidy","mop","undies_today","trash"];let c=0,d=new Date(todayStr()+"T12:00:00");for(let i=0;i<200;i++){const t=S.dailyTasks[_lk(d)]||[];if(ch.filter(id=>t.includes(id)).length>=3)c++;else break;d.setDate(d.getDate()-1);}return c;}
+function penStrk(){let c=0,d=new Date(todayStr()+"T12:00:00");for(let i=0;i<100;i++){const p=S.dailyPens[_lk(d)];if(p&&p.length>0)c++;else break;d.setDate(d.getDate()-1);}return c;}
 function firstDate(){return S.h.length?S.h[S.h.length-1].d:null;}
 const ACH_R={normal:{stars:"⭐",label:"普通",color:"#a3b0c4",cc:"achieve-card-normal",wc:"ach-unlocked-normal"},rare:{stars:"⭐⭐",label:"稀有",color:"#a8a8b8",cc:"achieve-card-rare",wc:"ach-unlocked-rare"},epic:{stars:"⭐⭐⭐",label:"史诗",color:"#d4a840",cc:"achieve-card-epic",wc:"ach-unlocked-epic"},legend:{stars:"⭐⭐⭐⭐",label:"传说",color:"#c4868e",cc:"achieve-card-legend",wc:"ach-unlocked-legend"}};
 const ACHS=[
@@ -919,7 +921,7 @@ function renderAchieve(){
 /* ═══════ INIT ═══════ */
 try{loadState();
 /* one-time cleanup: sync dailyPens with S.h */
-(function(){var penIds={};S.h.forEach(function(e){if(e.t==="p"&&e._id&&e.d){var td=e.d.slice(0,10);var eh=parseInt(e.d.slice(11,13))||0;var key=eh>=23?(function(){var dd=new Date(td);dd.setDate(dd.getDate()+1);return dd.toISOString().slice(0,10);}()):td;if(!penIds[key])penIds[key]={};penIds[key][e._id]=(penIds[key][e._id]||0)+1;}});Object.keys(S.dailyPens).forEach(function(d){if(!penIds[d]){S.dailyPens[d]=[];return;}var clean=[];S.dailyPens[d].forEach(function(pid){if(penIds[d][pid]&&penIds[d][pid]>0){clean.push(pid);penIds[d][pid]--;}});S.dailyPens[d]=clean;});saveState();})();
+(function(){var penIds={};S.h.forEach(function(e){if(e.t==="p"&&e._id&&e.d){var key=_dk(e.d);if(!penIds[key])penIds[key]={};penIds[key][e._id]=(penIds[key][e._id]||0)+1;}});var _oldest=S.h.length?_dk(S.h[S.h.length-1].d):"9999";Object.keys(S.dailyPens).forEach(function(d){if(d<=_oldest)return;if(!penIds[d]){S.dailyPens[d]=[];return;}var clean=[];S.dailyPens[d].forEach(function(pid){if(penIds[d][pid]&&penIds[d][pid]>0){clean.push(pid);penIds[d][pid]--;}});S.dailyPens[d]=clean;});saveState();})();
 render();setTimeout(checkCardFragments,500);ensureDailyPlan();setTimeout(function(){if(typeof renderDecayBanner==="function")renderDecayBanner();},300);(function(){function _sr(){var n=new Date(),t=new Date(n.getFullYear(),n.getMonth(),n.getDate(),23,0,0,0);if(n>=t)t.setDate(t.getDate()+1);setTimeout(function(){ensureDailyPlan();render();_sr();},t-n);}_sr();})();}catch(e){document.body.innerHTML+='<pre style="color:red;padding:20px;font-size:12px;">ERROR: '+e.message+'\n'+e.stack+'</pre>';}
 /* ═══════ DAILY PLAN ═══════ */
 function ensureDailyPlan(){
@@ -1170,7 +1172,7 @@ function renderDaily(){
       });
       var _tdStr=todayStr();
       var _todayPens=[];
-      S.h.forEach(function(e){if(e.t==="p"&&e.d){var ed=e.d.slice(0,10);var eh=parseInt(e.d.slice(11,13))||0;var realTd=eh>=23?(function(){var dd=new Date(ed);dd.setDate(dd.getDate()+1);return dd.toISOString().slice(0,10);}()):ed;if(realTd===_tdStr)_todayPens.push(e._id);}});
+      S.h.forEach(function(e){if(e.t==="p"&&e.d){var realTd=_dk(e.d);if(realTd===_tdStr)_todayPens.push(e._id);}});
       var _hasPen=_todayPens.length>0;
       var _paKeys=Object.keys(_planAttrs).filter(function(k){return _planAttrs[k]>0;});
       if(_paKeys.length>0||_hasPen){
@@ -2177,7 +2179,7 @@ window.openWishDetail = function(id){
     h+='<button class="wish-detail-btn" style="background:'+w.color+';margin-top:16px;" onclick="closeWishDetail()">关闭</button>';
   } else {
     h+='<button class="wish-detail-btn" style="background:linear-gradient(135deg,'+w.color+','+w.accent+');" onclick="document.getElementById(\'wishAchForm\').classList.toggle(\'hidden\')">✦ 标记为已实现</button>';
-    h+='<div id="wishAchForm" class="wish-detail-achieve-form hidden"><label>📅 达成日期</label><input type="date" id="wishAchDate" value="'+new Date().toISOString().slice(0,10)+'" style="color-scheme:dark;"><label>📝 说点什么</label><textarea id="wishAchNote" placeholder="记录这个瞬间..."></textarea><label>📷 上传达成证据</label><input type="file" id="wishAchEvidence" accept="image/*" onchange="wishPreviewEvidence(this)" style="margin-bottom:8px;"><img id="wishEvidencePreview" class="wish-evidence-preview hidden" src="" alt=""><button class="wish-detail-btn" style="background:linear-gradient(135deg,#6ab070,#4a9050);" onclick="confirmWishAchieve(\''+id+'\')">确认达成 🎉</button></div>';
+    h+='<div id="wishAchForm" class="wish-detail-achieve-form hidden"><label>📅 达成日期</label><input type="date" id="wishAchDate" value="'+_lk(new Date())+'" style="color-scheme:dark;"><label>📝 说点什么</label><textarea id="wishAchNote" placeholder="记录这个瞬间..."></textarea><label>📷 上传达成证据</label><input type="file" id="wishAchEvidence" accept="image/*" onchange="wishPreviewEvidence(this)" style="margin-bottom:8px;"><img id="wishEvidencePreview" class="wish-evidence-preview hidden" src="" alt=""><button class="wish-detail-btn" style="background:linear-gradient(135deg,#6ab070,#4a9050);" onclick="confirmWishAchieve(\''+id+'\')">确认达成 🎉</button></div>';
   }
   panel.innerHTML=h;
   ov.classList.add('on');
@@ -2200,7 +2202,7 @@ window.wishPreviewEvidence = function(input){
 };
 window.confirmWishAchieve = function(id){
   var w=WISHES.find(function(x){return x.id===id;});if(!w)return;
-  var date=document.getElementById('wishAchDate').value||new Date().toISOString().slice(0,10);
+  var date=document.getElementById('wishAchDate').value||_lk(new Date());
   var note=(document.getElementById('wishAchNote').value||'').trim();
   var prev=document.getElementById('wishEvidencePreview');
   var evidence=prev&&!prev.classList.contains('hidden')?prev.src:null;
@@ -3490,7 +3492,7 @@ function roll(list,key){var r=Math.random()*100,acc=0;for(var i=0;i<list.length;
 function esc(t){return String(t).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
 function fx(){S.fx=S.fx||{};var f=S.fx;f.coins=f.coins||0;f.rerolls=f.rerolls||0;f.quests=f.quests||[];f.combos=f.combos||{};f.comboDay=f.comboDay||{};f.gacha=f.gacha||{date:"",count:0};return f;}
 function earn(n,label,attrs){var e={t:"e",n:label,p:n,d:new Date().toISOString()};if(attrs){e._attrs=attrs;applyAttrs(attrs);}S.h.unshift(e);if(S.h.length>200)S.h.length=200;S.cp+=n;S.tp+=n;var d=td();S.dailyPts[d]=(S.dailyPts[d]||0)+n;}
-function lose(n,label){S.h.unshift({t:"p",n:label,p:-n,d:new Date().toISOString()});if(S.h.length>200)S.h.length=200;S.cp=Math.max(0,S.cp-n);S.tp=Math.max(0,S.tp-n);}
+function lose(n,label){S.h.unshift({t:"p",n:label,p:-n,d:new Date().toISOString()});if(S.h.length>200)S.h.length=200;S.cp=Math.max(0,S.cp-n);S.tp=Math.max(0,S.tp-n);var d0=td();S.dailyPts[d0]=(S.dailyPts[d0]||0)-n;}
 function dailyIds(){var out=[];(TASKS.daily&&TASKS.daily.items||[]).forEach(function(t){if(t.pts>0&&!/_late$/.test(t.id))out.push(t);});return out;}
 function later(msg,type){setTimeout(function(){flash(msg,type||"earn");},1700);}
 
