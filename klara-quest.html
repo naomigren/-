@@ -3325,7 +3325,7 @@ setTimeout(function(){
 <script>
 /* ═══════ 标签栏整理：常用七个 + 更多 ═══════ */
 (function(){
-  var RARE=["wishes","shop","history","savings","pyq","sleep30"];
+  var RARE=["wishes","shop","achieve","savings","pyq","sleep30"];
   var tries=0;
   function splitLabel(b){
     if(b.querySelector(".tab-ico"))return;
@@ -3343,7 +3343,9 @@ setTimeout(function(){
     bar.style.overflowX="visible";
     var row=document.createElement("div");row.id="tabBarMore";
     bar.parentNode.insertBefore(row,bar.nextSibling);
+    var _ach=document.getElementById("tab-achieve"),_slot=_ach?_ach.nextSibling:null,_his=document.getElementById("tab-history");
     RARE.forEach(function(k){var b=document.getElementById("tab-"+k);if(b)row.appendChild(b);});
+    if(_his&&_slot&&_slot.parentNode===bar)bar.insertBefore(_his,_slot);
     var more=document.createElement("button");
     more.id="tab-more";more.className="tab-btn tab-inactive";more.type="button";
     more.innerHTML='<span class="tab-ico">⋯</span><span>更多</span>';
