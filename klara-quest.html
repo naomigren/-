@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<script>if(!location.search.includes('_v=0917f')){location.replace(location.pathname+'?_v=0917f');}</script>
+<script>if(!location.search.includes('_v=0926a')){location.replace(location.pathname+'?_v=0926a');}</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="克拉拉养成">
@@ -611,8 +611,8 @@ function saveImagesToLS(){var imgs={};if(S.wishes){Object.keys(S.wishes).forEach
 function loadImagesFromLS(){try{var imgs=JSON.parse(localStorage.getItem("klara-quest-imgs")||"{}");if(S.wishes){Object.keys(S.wishes).forEach(function(k){if(S.wishes[k].evidence==="__IMG__"&&imgs["wish_"+k])S.wishes[k].evidence=imgs["wish_"+k];});}if(S.pyqPosts){S.pyqPosts.forEach(function(p,i){if(p.photos){p.photos=p.photos.map(function(src,j){return src==="__IMG__"&&imgs["pyq_"+i+"_"+j]?imgs["pyq_"+i+"_"+j]:src;});}});}if(S.pl&&S.pl.visionItems){S.pl.visionItems.forEach(function(v,i){if(v.img==="__IMG__"&&imgs["vision_"+i])v.img=imgs["vision_"+i];});}if(S.rank&&S.rank.art){Object.keys(S.rank.art).forEach(function(k){if(S.rank.art[k]==="__IMG__"){if(imgs["rkart_"+k])S.rank.art[k]=imgs["rkart_"+k];else delete S.rank.art[k];}});}}catch(e){}}
 function encode(s){return btoa(unescape(encodeURIComponent(JSON.stringify(stripImages(s)))));}
 function decode(s){try{return JSON.parse(decodeURIComponent(escape(atob(s.trim()))));}catch{return null;}}
-function exportFullBackup(){var blob=new Blob([JSON.stringify(S)],{type:"application/json"});var url=URL.createObjectURL(blob);var a=document.createElement("a");a.href=url;a.download="klara-quest-backup-"+new Date().toISOString().slice(0,10)+".json";document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);flash("📦 完整备份已下载！","earn");}
-function importFullBackup(){var inp=document.createElement("input");inp.type="file";inp.accept=".json";inp.onchange=function(e){var f=e.target.files[0];if(!f)return;var reader=new FileReader();reader.onload=function(ev){try{var d=JSON.parse(ev.target.result);if(d&&typeof d.cp==="number"){S={...d,ct:d.ct||[],cs:d.cs||[],cpn:d.cpn||[],attrs:d.attrs?{...initAttrs(),...d.attrs}:initAttrs(),de:d.de||0,ach:d.ach||{},taskCounts:d.taskCounts||{},dailyTasks:d.dailyTasks||{},dailyPens:d.dailyPens||{},dailyPts:d.dailyPts||{},cards:d.cards||initCards(),dailyPlan:d.dailyPlan||{date:"",items:[]},wishes:d.wishes||{},pyqPosts:d.pyqPosts||[]};if(S.attrs.mood!==undefined)delete S.attrs.mood;saveImagesToLS();saveState();render();flash("📦 完整备份恢复成功！","big");}else{flash("❌ 备份文件无效","fail");}}catch(err){flash("❌ 文件读取失败","fail");}};reader.readAsText(f);};inp.click();}
+function exportFullBackup(){var _bk=Object.assign({},S);try{var _sl=localStorage.getItem("klara-sleep30");if(_sl)_bk._sleep30=_sl;}catch(e){}var blob=new Blob([JSON.stringify(_bk)],{type:"application/json"});var url=URL.createObjectURL(blob);var a=document.createElement("a");a.href=url;a.download="klara-quest-backup-"+new Date().toISOString().slice(0,10)+".json";document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);flash("📦 完整备份已下载！","earn");}
+function importFullBackup(){var inp=document.createElement("input");inp.type="file";inp.accept=".json";inp.onchange=function(e){var f=e.target.files[0];if(!f)return;var reader=new FileReader();reader.onload=function(ev){try{var d=JSON.parse(ev.target.result);if(d&&typeof d.cp==="number"){S={...d,ct:d.ct||[],cs:d.cs||[],cpn:d.cpn||[],attrs:d.attrs?{...initAttrs(),...d.attrs}:initAttrs(),de:d.de||0,ach:d.ach||{},taskCounts:d.taskCounts||{},dailyTasks:d.dailyTasks||{},dailyPens:d.dailyPens||{},dailyPts:d.dailyPts||{},cards:d.cards||initCards(),dailyPlan:d.dailyPlan||{date:"",items:[]},wishes:d.wishes||{},pyqPosts:d.pyqPosts||[]};if(S.attrs.mood!==undefined)delete S.attrs.mood;if(S._sleep30){try{localStorage.setItem("klara-sleep30",S._sleep30);}catch(e){}}delete S._sleep30;saveImagesToLS();saveState();render();flash("📦 完整备份恢复成功！","big");}else{flash("❌ 备份文件无效","fail");}}catch(err){flash("❌ 文件读取失败","fail");}};reader.readAsText(f);};inp.click();}
 let toastTimer;
 function flash(msg,type){const t=document.getElementById("toast");t.textContent=msg;t.className="toast toast-"+(type||"earn");t.classList.remove("hidden");clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.add("hidden"),3500);if(type==="earn"||type==="big"){const b=document.getElementById("cpBox");b.style.animation="sparkle 0.5s ease";setTimeout(()=>b.style.animation="",600);}}
 function applyAttrs(mapping){if(!mapping)return;Object.entries(mapping).forEach(([k,v])=>{if(S.attrs[k]!==undefined)S.attrs[k]=Math.max(0,S.attrs[k]+v);});}
@@ -983,14 +983,14 @@ function settleDecay(){
     }
     /* ── 技能：连续 grace 天零打卡，每满一轮 -1 ── */
     DECAY_SKILLS.forEach(function(sk){
-      var streak=0;
-      for(var i=0;i<sk.grace+2;i++){
+      var streak=0,found=false;
+      for(var i=0;i<366;i++){
         var d2=_shift(day,-i);
         var done=(S.dailyTasks[d2]||[]).some(function(id){return sk.tasks.indexOf(id)!==-1;});
-        if(done)break;
+        if(done){found=true;break;}
         streak++;
       }
-      if(streak>0&&streak%sk.grace===0){
+      if(found&&streak>0&&streak%sk.grace===0){
         _applyDecay(sk.attr,1,sk.em+" "+sk.name+"连续"+streak+"天没练",day,log);
       }
     });
@@ -1097,6 +1097,8 @@ function fetchDailyMsg(){
     _dpMsgLoading=false;
   }).catch(()=>{_dpMsgLoading=false;});
 }
+var ALLDONE_MSGS=["今天排的每一件你都做完了。我从头看到尾，一件都没漏。","计划清空了。今天的你把昨天的你甩在后面了。","全部打勾。这种日子不是运气，是你一件一件磨出来的。","做完了。现在什么都不欠，今晚可以心安理得地躺平。","今天这张单子，你一格都没留给明天。"];
+function _allDoneFallback(){if(!S.dailyPlan||S.dailyPlan.allDoneMsg)return;S.dailyPlan.allDoneMsg=ALLDONE_MSGS[Math.floor(Math.random()*ALLDONE_MSGS.length)];saveState();renderDaily();}
 function fetchAllDoneMsg(){
   const names=S.dailyPlan.items.map(i=>i.em+" "+i.name).join("、");
   const count=S.dailyPlan.items.length;
@@ -1115,8 +1117,8 @@ function fetchAllDoneMsg(){
     body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:200,messages:[{role:"user",content:prompt}]})
   }).then(r=>r.json()).then(d=>{
     const txt=d.content&&d.content[0]&&d.content[0].text;
-    if(txt){S.dailyPlan.allDoneMsg=txt;saveState();renderDaily();}
-  }).catch(()=>{});
+    if(txt){S.dailyPlan.allDoneMsg=txt;saveState();renderDaily();}else _allDoneFallback();
+  }).catch(_allDoneFallback);
 }
 /* ═══════ RENDER DAILY ═══════ */
 var _dpExpanded=true;
@@ -1989,7 +1991,7 @@ function wrHistoryHtml(){
 function wrAuto(){
   var td=todayStr(),thisMon=wrMonday(td),dow=new Date(td+"T12:00:00").getDay();
   S.wr=S.wr||{seen:{}};S.wr.seen=S.wr.seen||{};
-  if(dow===0&&!S.wr.seen[thisMon]){wrOpen(thisMon);return;}
+  if(dow===0&&!S.wr.seen[thisMon]){if(new Date().getHours()>=20)wrOpen(thisMon);return;}
   var last=wrShift(thisMon,-7);
   if(!S.wr.seen[last]){var has=false;for(var j=0;j<7;j++)if((S.dailyTasks[wrShift(last,j)]||[]).length)has=true;if(has)wrOpen(last);}
 }
@@ -2990,7 +2992,8 @@ else{document.addEventListener('DOMContentLoaded',function(){setTimeout(pyqBoot,
 var SL_KEY="klara-sleep30";
 function slLoad(){try{return JSON.parse(localStorage.getItem(SL_KEY))||{days:{},start:""};}catch(e){return {days:{},start:""};}}
 function slSave(d){localStorage.setItem(SL_KEY,JSON.stringify(d));}
-function slToday(){return new Date().toISOString().slice(0,10);}
+function slLocal(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function slToday(){return slLocal(new Date());}
 
 function slInjectTab(){
   var anchor=document.getElementById("tab-tasks");
@@ -3096,7 +3099,7 @@ function slRender(){
   var streak=0;
   var dt=new Date();
   for(var i=0;i<30;i++){
-    var ds=dt.toISOString().slice(0,10);
+    var ds=slLocal(dt);
     if(d.days[ds])streak++;
     else break;
     dt.setDate(dt.getDate()-1);
@@ -3197,7 +3200,7 @@ window.slCheckIn=function(){
   var streak=0;
   var dt=new Date();
   for(var i=0;i<30;i++){
-    var ds=dt.toISOString().slice(0,10);
+    var ds=slLocal(dt);
     if(slLoad().days[ds])streak++;
     else break;
     dt.setDate(dt.getDate()-1);
@@ -3862,7 +3865,7 @@ function slides(R){
   S_.push({k:"在这里",big:R.days,t:"天，你打开这里，给自己打了卡",p:"一共挣了 "+R.pts+" 分。每一分都是一件真的做过的事。"});
   S_.push({k:"厨房",big:R.cook,t:"顿饭，是你自己做给自己吃的",p:R.takeout?"也被外卖抓到过 "+R.takeout+" 次。没关系，灶台记得的比外卖多。":"一次外卖都没被抓到。灶台都要认识你了。"});
   S_.push({k:"DEUTSCH",big:R.de,t:"次德语打卡",p:(R.vocab?"光背单词就打了 "+R.vocab+" 次卡，少说 "+(R.vocab*20)+" 个词进了脑子。<br>":"")+"这些词以后会从你嘴里说出来，在手术室，在莱比锡。"});
-  S_.push({k:"夜里",big:R.early,t:"次，你在十二点前睡着了",p:(R.late?"熬过 "+R.late+" 次夜。":"")+(R.latest?"最晚的一次打卡在 "+R.latest+"，那会儿你在想什么？":"")});
+  S_.push({k:"夜里",big:R.early,t:"次，你在十二点前睡着了",p:(R.late?"熬过 "+R.late+" 次夜。":"")+(R.latest?"最晚的一次打卡在 "+R.latest+"，那会儿你在想什么？":"")+(!R.early&&!R.late&&!R.latest?"这一岁的夜里还没留下记录。下一岁，这一页等你来填。":"")});
   if(R.top.length)S_.push({k:"最常做的事",big:R.top[0].em||"✦",t:R.top.map(function(x,i){return (i+1)+". "+x.n+" · "+x.c+" 次";}).join("<br>"),p:R.topH!=null?"你最常在 "+R.topH+" 点前后打卡。":""});
   var mi=R.topMood&&MOODS.find(function(x){return x.e===R.topMood;});
   S_.push({k:"心情",big:mi?R.topMood:"🎨",t:mi?"这一岁，最常出现的心情是「"+mi.n+"」":"心情格子墙刚刚开始记",p:mi?"一共记了 "+R.moodDays+" 天的心情。颜色攒多了，一年就有了自己的样子。":"从今天起，每天点一下，明年这一页就会有颜色。"});
