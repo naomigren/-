@@ -3953,7 +3953,8 @@ function echoHtml(){
     var what=names.length?"做了"+names.slice(0,3).join("、")+(names.length>3?" 等 "+names.length+" 件事":""):"打了卡";
     return '<div class="echo"><b>'+picks[i][1]+'</b> · '+ds.slice(5).replace("-","/")+'<br>你'+what+'，挣了 '+p+' 分'+(mood?'，心情 '+mood:'')+'。</div>';
   }
-  return "";
+  var m1=picks[1][0];if(m1<(Object.keys(S.dailyTasks||{}).sort()[0]||"9999"))return "";
+  return '<div class="echo"><b>一个月前的今天</b> · '+m1.slice(5).replace("-","/")+'<br>那天没有留下记录。</div>';
 }
 
 /* ───── 页面慢慢变德语 ───── */
