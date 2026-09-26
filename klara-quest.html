@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<script>if(!location.search.includes('_v=0926a')){location.replace(location.pathname+'?_v=0926a');}</script>
+<script>if(!location.search.includes('_v=0926b')){location.replace(location.pathname+'?_v=0926b');}</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="克拉拉养成">
@@ -3812,7 +3812,20 @@ if(_psm)window.plSetMood=function(m){_psm.apply(this,arguments);try{var ds=addD(
 
 /* 格子墙 */
 function firstDay(){var ks=Object.keys(S.dailyTasks||{}).concat(Object.keys(S.dailyPts||{}),Object.keys(M())).filter(function(k){return /^\d{4}-\d\d-\d\d$/.test(k);}).sort();var f=ks[0]||todayStr();var fd=firstDate();if(fd&&fd.slice(0,10)<f)f=fd.slice(0,10);return f;}
-window.mwTap=function(ds){var e=moodOf(ds),p=S.dailyPts[ds]||0,mi=e&&mInfo(e);flash(ds.slice(5).replace("-","/")+(mi?" · "+e+" "+mi.n:"")+" · 加了 "+p+" 分","card");};
+/* Net points for a day: earned points minus penalties and gacha spins */
+function mwNet(ds){
+  var p=S.dailyPts[ds]||0,h=S.h||[],neg=0;
+  var oldest=h.length?_dk(h[h.length-1].d):"";
+  if(oldest&&ds>=oldest){
+    h.forEach(function(e){if(_dk(e.d)!==ds)return;
+      if(e.t==="p")neg+=Math.abs(e.p||0);
+      else if(e.t==="r"&&/扭蛋/.test(e.n||""))neg+=Math.abs(e.p||0);});
+  }else{
+    (S.dailyPens[ds]||[]).forEach(function(id){var d=(typeof PENS!=="undefined"?PENS:[]).find(function(x){return x.id===id;});if(d)neg+=Math.abs(d.pts||0);});
+  }
+  return p-neg;
+}
+window.mwTap=function(ds){var e=moodOf(ds),p=mwNet(ds),mi=e&&mInfo(e);flash(ds.slice(5).replace("-","/")+(mi?" · "+e+" "+mi.n:"")+" · 净得 "+p+" 分","card");};
 function wallHtml(){
   var td=todayStr(),start=firstDay(),y=parseInt(td.slice(0,4)),m=parseInt(td.slice(5,7)),sy=parseInt(start.slice(0,4)),sm=parseInt(start.slice(5,7)),rows="",n=0;
   while((y>sy||(y===sy&&m>=sm))&&n<24){
@@ -3831,7 +3844,7 @@ function wallHtml(){
   }
   var leg='';MOODS.forEach(function(x){leg+='<span><em style="background:'+x.c+'"></em>'+x.n+'</span>';});
   leg+='<span><em style="background:rgba(196,178,150,.45)"></em>没选心情，按积分深浅</span>';
-  return '<div class="fx-card"><div class="fx-title">🎨 心情格子墙</div><div class="fx-sub">一天一格。点一格，看那天的心情和加了多少分。</div><div class="mw-wall">'+rows+'</div><div class="mw-leg">'+leg+'</div></div>';
+  return '<div class="fx-card"><div class="fx-title">🎨 心情格子墙</div><div class="fx-sub">一天一格。点一格，看那天的心情和净得多少分。</div><div class="mw-wall">'+rows+'</div><div class="mw-leg">'+leg+'</div></div>';
 }
 
 /* 年报 */
