@@ -3830,7 +3830,7 @@ function mwNet(ds){
 window.mwTap=function(ds){var e=moodOf(ds),p=mwNet(ds),mi=e&&mInfo(e);flash(ds.slice(5).replace("-","/")+(mi?" · "+e+" "+mi.n:"")+" · 净得 "+p+" 分","card");};
 function wallHtml(){
   var fmd=firstMoodDay();
-  var td=todayStr(),start=firstDay(),y=parseInt(td.slice(0,4)),m=parseInt(td.slice(5,7)),sy=parseInt(start.slice(0,4)),sm=parseInt(start.slice(5,7)),rows="",n=0;
+  var td=todayStr(),start=(fmd?fmd:firstDay()),y=parseInt(td.slice(0,4)),m=parseInt(td.slice(5,7)),sy=parseInt(start.slice(0,4)),sm=parseInt(start.slice(5,7)),rows="",n=0;
   while((y>sy||(y===sy&&m>=sm))&&n<24){
     var days=new Date(y,m,0).getDate(),cells="";
     for(var d=1;d<=31;d++){
