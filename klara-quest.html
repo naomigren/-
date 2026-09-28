@@ -3786,7 +3786,7 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
 <script>
 (function(){
 var MOODS=[{e:"🥰",n:"超开心",c:"#c3dcbc"},{e:"😊",n:"不错",c:"#d8cce8"},{e:"😐",n:"一般",c:"#f2c4cc"},{e:"😢",n:"不开心",c:"#b9d2e8"},{e:"😫",n:"好累",c:"#c9c3c3"},{e:"😤",n:"生气",c:"#d88a84"},{e:"🖤",n:"最深的绝望",c:"#1c1719"}];
-var MW_START="2026-09-01";
+var MW_START="2026-09-24";
 var MOOD_VOID="#1c1719";
 function firstMoodDay(){var best=null;Object.keys(M()).forEach(function(k){if(M()[k]&&(!best||k<best))best=k;});var pl=S.pl&&S.pl.days;if(pl&&typeof PL_START!=="undefined"){Object.keys(pl).forEach(function(n){if(pl[n]&&pl[n].mood){var d=new Date(PL_START+"T12:00:00");d.setDate(d.getDate()+parseInt(n)-1);var ds=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");if(!best||ds<best)best=ds;}});}return best;}
 var PL_START="2026-04-15";
@@ -3837,6 +3837,7 @@ function wallHtml(){
     for(var d=1;d<=31;d++){
       if(d>days){cells+='<i class="none"></i>';continue;}
       var ds=y+"-"+String(m).padStart(2,"0")+"-"+String(d).padStart(2,"0");
+      if(ds<start){cells+='<i class="none"></i>';continue;}
       if(ds>td){cells+='<i style="opacity:.35"></i>';continue;}
       var e=moodOf(ds),mi=e&&mInfo(e),p=S.dailyPts[ds]||0,st="";
       if(mi)st="background:"+mi.c+";border-color:"+mi.c;
