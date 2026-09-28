@@ -3785,7 +3785,9 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
 </style>
 <script>
 (function(){
-var MOODS=[{e:"🥰",n:"超开心",c:"#f2c4cc"},{e:"😊",n:"不错",c:"#c3dcbc"},{e:"😐",n:"一般",c:"#d8cce8"},{e:"😢",n:"不开心",c:"#b9d2e8"},{e:"😫",n:"好累",c:"#c9c3c3"},{e:"😤",n:"生气",c:"#d88a84"}];
+var MOODS=[{e:"🥰",n:"超开心",c:"#c3dcbc"},{e:"😊",n:"不错",c:"#d8cce8"},{e:"😐",n:"一般",c:"#f2c4cc"},{e:"😢",n:"不开心",c:"#b9d2e8"},{e:"😫",n:"好累",c:"#c9c3c3"},{e:"😤",n:"生气",c:"#d88a84"}];
+var MOOD_VOID="#1c1719";
+function firstMoodDay(){var best=null;Object.keys(M()).forEach(function(k){if(M()[k]&&(!best||k<best))best=k;});var pl=S.pl&&S.pl.days;if(pl&&typeof PL_START!=="undefined"){Object.keys(pl).forEach(function(n){if(pl[n]&&pl[n].mood){var d=new Date(PL_START+"T12:00:00");d.setDate(d.getDate()+parseInt(n)-1);var ds=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");if(!best||ds<best)best=ds;}});}return best;}
 var PL_START="2026-04-15";
 function fmt(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
 function addD(ds,n){var d=new Date(ds+"T12:00:00");d.setDate(d.getDate()+n);return fmt(d);}
@@ -3827,6 +3829,7 @@ function mwNet(ds){
 }
 window.mwTap=function(ds){var e=moodOf(ds),p=mwNet(ds),mi=e&&mInfo(e);flash(ds.slice(5).replace("-","/")+(mi?" · "+e+" "+mi.n:"")+" · 净得 "+p+" 分","card");};
 function wallHtml(){
+  var fmd=firstMoodDay();
   var td=todayStr(),start=firstDay(),y=parseInt(td.slice(0,4)),m=parseInt(td.slice(5,7)),sy=parseInt(start.slice(0,4)),sm=parseInt(start.slice(5,7)),rows="",n=0;
   while((y>sy||(y===sy&&m>=sm))&&n<24){
     var days=new Date(y,m,0).getDate(),cells="";
@@ -3836,6 +3839,7 @@ function wallHtml(){
       if(ds>td){cells+='<i style="opacity:.35"></i>';continue;}
       var e=moodOf(ds),mi=e&&mInfo(e),p=S.dailyPts[ds]||0,st="";
       if(mi)st="background:"+mi.c+";border-color:"+mi.c;
+      else if(fmd&&ds>=fmd&&ds<td)st="background:"+MOOD_VOID+";border-color:"+MOOD_VOID;
       else if(p>0)st="background:rgba(196,178,150,"+(0.12+Math.min(p,80)/80*0.4).toFixed(2)+");border-color:transparent";
       cells+='<i'+(ds===td?' class="today"':'')+' style="'+st+'" onclick="mwTap(\''+ds+'\')"></i>';
     }
@@ -3843,7 +3847,7 @@ function wallHtml(){
     m--;if(m===0){m=12;y--;}n++;
   }
   var leg='';MOODS.forEach(function(x){leg+='<span><em style="background:'+x.c+'"></em>'+x.n+'</span>';});
-  leg+='<span><em style="background:rgba(196,178,150,.45)"></em>没选心情，按积分深浅</span>';
+  leg+='<span><em style="background:'+MOOD_VOID+'"></em>没选心情·最深的绝望</span>';
   return '<div class="fx-card"><div class="fx-title">🎨 心情格子墙</div><div class="fx-sub">一天一格。点一格，看那天的心情和净得多少分。</div><div class="mw-wall">'+rows+'</div><div class="mw-leg">'+leg+'</div></div>';
 }
 
