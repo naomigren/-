@@ -611,8 +611,8 @@ function saveImagesToLS(){var imgs={};if(S.wishes){Object.keys(S.wishes).forEach
 function loadImagesFromLS(){try{var imgs=JSON.parse(localStorage.getItem("klara-quest-imgs")||"{}");if(S.wishes){Object.keys(S.wishes).forEach(function(k){if(S.wishes[k].evidence==="__IMG__"&&imgs["wish_"+k])S.wishes[k].evidence=imgs["wish_"+k];});}if(S.pyqPosts){S.pyqPosts.forEach(function(p,i){if(p.photos){p.photos=p.photos.map(function(src,j){return src==="__IMG__"&&imgs["pyq_"+i+"_"+j]?imgs["pyq_"+i+"_"+j]:src;});}});}if(S.pl&&S.pl.visionItems){S.pl.visionItems.forEach(function(v,i){if(v.img==="__IMG__"&&imgs["vision_"+i])v.img=imgs["vision_"+i];});}if(S.rank&&S.rank.art){Object.keys(S.rank.art).forEach(function(k){if(S.rank.art[k]==="__IMG__"){if(imgs["rkart_"+k])S.rank.art[k]=imgs["rkart_"+k];else delete S.rank.art[k];}});}}catch(e){}}
 function encode(s){return btoa(unescape(encodeURIComponent(JSON.stringify(stripImages(s)))));}
 function decode(s){try{return JSON.parse(decodeURIComponent(escape(atob(s.trim()))));}catch{return null;}}
-function exportFullBackup(){var _bk=Object.assign({},S);try{var _sl=localStorage.getItem("klara-sleep30");if(_sl)_bk._sleep30=_sl;}catch(e){}var blob=new Blob([JSON.stringify(_bk)],{type:"application/json"});var url=URL.createObjectURL(blob);var a=document.createElement("a");a.href=url;a.download="klara-quest-backup-"+new Date().toISOString().slice(0,10)+".json";document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);flash("📦 完整备份已下载！","earn");}
-function importFullBackup(){var inp=document.createElement("input");inp.type="file";inp.accept=".json";inp.onchange=function(e){var f=e.target.files[0];if(!f)return;var reader=new FileReader();reader.onload=function(ev){try{var d=JSON.parse(ev.target.result);if(d&&typeof d.cp==="number"){S={...d,ct:d.ct||[],cs:d.cs||[],cpn:d.cpn||[],attrs:d.attrs?{...initAttrs(),...d.attrs}:initAttrs(),de:d.de||0,ach:d.ach||{},taskCounts:d.taskCounts||{},dailyTasks:d.dailyTasks||{},dailyPens:d.dailyPens||{},dailyPts:d.dailyPts||{},cards:d.cards||initCards(),dailyPlan:d.dailyPlan||{date:"",items:[]},wishes:d.wishes||{},pyqPosts:d.pyqPosts||[]};if(S.attrs.mood!==undefined)delete S.attrs.mood;if(S._sleep30){try{localStorage.setItem("klara-sleep30",S._sleep30);}catch(e){}}delete S._sleep30;saveImagesToLS();saveState();render();flash("📦 完整备份恢复成功！","big");}else{flash("❌ 备份文件无效","fail");}}catch(err){flash("❌ 文件读取失败","fail");}};reader.readAsText(f);};inp.click();}
+function exportFullBackup(){var _bk=Object.assign({},S);try{var _sl=localStorage.getItem("klara-sleep30");if(_sl)_bk._sleep30=_sl;}catch(e){}try{var _hav=localStorage.getItem("klara-heroine-avatars");if(_hav)_bk._heroAv=_hav;}catch(e){}var blob=new Blob([JSON.stringify(_bk)],{type:"application/json"});var url=URL.createObjectURL(blob);var a=document.createElement("a");a.href=url;a.download="klara-quest-backup-"+new Date().toISOString().slice(0,10)+".json";document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);flash("📦 完整备份已下载！","earn");}
+function importFullBackup(){var inp=document.createElement("input");inp.type="file";inp.accept=".json";inp.onchange=function(e){var f=e.target.files[0];if(!f)return;var reader=new FileReader();reader.onload=function(ev){try{var d=JSON.parse(ev.target.result);if(d&&typeof d.cp==="number"){S={...d,ct:d.ct||[],cs:d.cs||[],cpn:d.cpn||[],attrs:d.attrs?{...initAttrs(),...d.attrs}:initAttrs(),de:d.de||0,ach:d.ach||{},taskCounts:d.taskCounts||{},dailyTasks:d.dailyTasks||{},dailyPens:d.dailyPens||{},dailyPts:d.dailyPts||{},cards:d.cards||initCards(),dailyPlan:d.dailyPlan||{date:"",items:[]},wishes:d.wishes||{},pyqPosts:d.pyqPosts||[]};if(S.attrs.mood!==undefined)delete S.attrs.mood;if(S._sleep30){try{localStorage.setItem("klara-sleep30",S._sleep30);}catch(e){}}delete S._sleep30;if(S._heroAv){try{localStorage.setItem("klara-heroine-avatars",S._heroAv);}catch(e){}}delete S._heroAv;saveImagesToLS();saveState();render();flash("📦 完整备份恢复成功！","big");}else{flash("❌ 备份文件无效","fail");}}catch(err){flash("❌ 文件读取失败","fail");}};reader.readAsText(f);};inp.click();}
 let toastTimer;
 function flash(msg,type){const t=document.getElementById("toast");t.textContent=msg;t.className="toast toast-"+(type||"earn");t.classList.remove("hidden");clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.add("hidden"),3500);if(type==="earn"||type==="big"){const b=document.getElementById("cpBox");b.style.animation="sparkle 0.5s ease";setTimeout(()=>b.style.animation="",600);}}
 function applyAttrs(mapping){if(!mapping)return;Object.entries(mapping).forEach(([k,v])=>{if(S.attrs[k]!==undefined)S.attrs[k]=Math.max(0,S.attrs[k]+v);});}
@@ -3381,7 +3381,54 @@ setTimeout(function(){
 })();
 </script>
 <style>
-/* ═══════ 趣味层：签筒 · Boss · 扭蛋 · 组合技 · 季节 ═══════ */
+/* ═══════ 趣味层：女主人生墙 · Boss · 扭蛋 · 组合技 · 季节 ═══════ */
+/* 女主人生墙 */
+.hr-card{border-width:1.5px}
+.hr-av{border-radius:50%;border:2px solid;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;box-sizing:border-box}
+.hr-av img{width:100%;height:100%;object-fit:cover;display:block}
+.hr-kicker{font-size:11px;color:#a08888;letter-spacing:1px}
+.hr-name{font-size:17px;font-weight:600;color:#5a4548;margin:2px 0 5px}
+.hr-name span{font-size:12px;font-weight:400;color:#a08888;margin-left:8px}
+.hr-dots{display:inline-flex;gap:5px;vertical-align:middle}
+.hr-dots i{width:8px;height:8px;border-radius:50%;background:rgba(154,127,138,.2)}
+.hr-dots i.on{background:#c4868e}
+.hr-gradtag{font-size:11px;color:#8a6a9a;margin-left:8px}
+.hr-tasks{margin-top:12px;border-top:1px dashed rgba(196,134,142,.28)}
+.hr-task{display:flex;align-items:baseline;gap:10px;padding:8px 0;border-bottom:1px dashed rgba(196,134,142,.18);font-size:13px;color:#6a5555}
+.hr-task b{font-weight:600;min-width:5em;color:#8a5a60}
+.hr-task span{flex:1}
+.hr-task em{font-style:normal;color:#6ab070;font-weight:700}
+.hr-task.done span{text-decoration:line-through;opacity:.55}
+.hr-foot{font-size:12px;color:#a08888;line-height:1.7;margin-top:10px}
+.hr-foot b{color:#8a5a60;font-weight:600}
+.hr-foot.win{color:#6a8a60}
+.hr-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap}
+.hr-note{font-size:12px;line-height:1.6;padding:8px 10px;border-radius:10px;background:rgba(110,104,120,.08);color:#6e6878;margin-bottom:12px}
+.hr-note button{border:none;background:none;color:#8a5a60;font-size:12px;text-decoration:underline;cursor:pointer;padding:0 2px}
+.hr-ov{position:fixed;inset:0;z-index:2500;background:rgba(60,45,50,.45);display:flex;align-items:flex-end;justify-content:center}
+.hr-panel{background:#fdf7f6;width:100%;max-width:480px;max-height:88vh;overflow:auto;border-radius:20px 20px 0 0;padding:18px 18px 30px;box-sizing:border-box}
+.hr-ptitle{font-size:16px;font-weight:600;color:#5a4548;display:flex;justify-content:space-between;align-items:center}
+.hr-x{border:none;background:none;font-size:24px;line-height:1;color:#a08888;cursor:pointer;padding:0 4px}
+.hr-sub{font-size:12px;color:#a08888;line-height:1.7;margin:4px 0 14px}
+.hr-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.hr-tile{background:rgba(255,255,255,.75);border-radius:14px;padding:14px 10px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px}
+.hr-avbtn{border:none;background:none;padding:0;cursor:pointer;border-radius:50%}
+.hr-avbtn:focus-visible,.hr-x:focus-visible{outline:2px solid #9b8ab8;outline-offset:2px}
+.hr-tname{font-size:14px;font-weight:600;color:#5a4548}
+.hr-traits{font-size:11px;color:#a08888;line-height:1.5}
+.hr-grad{font-size:12px;color:#8a6a9a;font-weight:600}
+.hr-away{font-size:11px;color:#8e98a8}
+.hr-exam{text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px}
+.hr-ename{font-size:20px;font-weight:700;color:#5a4548;letter-spacing:2px}
+.hr-clock{font-size:36px;font-weight:600;color:#8a5a60;font-variant-numeric:tabular-nums}
+.hr-clock.over{color:#b06060;font-size:22px}
+.hr-exam-d{font-size:13px;color:#6a5555;line-height:1.8;text-align:left}
+.hr-tile .hr-exam-d{font-size:11px;color:#8a7a7a;line-height:1.6}
+.hr-cbox{position:relative;width:260px;height:260px;margin:0 auto 14px;overflow:hidden;touch-action:none;cursor:grab;border-radius:12px;background:#e8e0e0}
+.hr-cbox img{position:absolute;left:0;top:0;max-width:none;user-select:none;-webkit-user-select:none;-webkit-user-drag:none;pointer-events:none}
+.hr-ring{position:absolute;inset:0;border-radius:50%;border:2px solid;pointer-events:none;box-shadow:0 0 0 400px rgba(253,247,246,.7)}
+.hr-crop input[type=range]{width:100%;accent-color:#c4868e}
+
 .fx-card{background:rgba(255,255,255,0.6);border:1px solid rgba(196,134,142,0.18);border-radius:14px;padding:14px 16px;margin-bottom:14px}
 .fx-row{display:flex;align-items:center;gap:12px}
 .fx-title{font-size:14px;font-weight:600;color:#6a5555}
@@ -3486,13 +3533,6 @@ setTimeout(function(){
 <script>
 (function(){
 /* ───────── 数据 ───────── */
-var FX_SIGN=[
- {lv:5,name:"上上签",p:10,lines:["今日宜：做什么都顺。","天时地利，就差你动一动手指。","好运已经在门口换鞋了。"]},
- {lv:4,name:"上签",p:25,lines:["小有收获，别嫌少。","今天的你比昨天好说话一点。","一件小事会意外地顺利。"]},
- {lv:3,name:"中签",p:30,lines:["平平无奇的一天，平平无奇也很好。","今日无事，宜发呆三分钟。","风不大，云不多，刚刚好。"]},
- {lv:2,name:"下签",p:20,lines:["小心脚下，也小心手机。","今天的坏习惯会格外贵。","有个小坑，绕着走。"]},
- {lv:1,name:"下下签",p:15,lines:["晦气缠身！速速解签！","今日诸事不宜，除了解签。","大凶。但凶的是签，不是你。"]}
-];
 var FX_BOSSES=[
  {id:"proc",name:"拖延魔王",face:"👹",crit:["face_fear","submit_overdue","deal_academic","contact_teacher","check_grad","tidy","mop","trash","parcel","fix_home"],heal:["pn_lazy","pn_plan_fail","pn_skip"],taunt:"「明天再说嘛，明天我还在。」"},
  {id:"takeout",name:"外卖妖精",face:"🍱",crit:["cook","no_takeout","diet_meal","dishes_today"],heal:["pn_takeout"],taunt:"「满减券还在你手机里发光呢。」"},
@@ -3540,49 +3580,218 @@ function lose(n,label){S.h.unshift({t:"p",n:label,p:-n,d:new Date().toISOString(
 function dailyIds(){var out=[];(TASKS.daily&&TASKS.daily.items||[]).forEach(function(t){if(t.pts>0&&!/_late$/.test(t.id))out.push(t);});return out;}
 function later(msg,type){setTimeout(function(){flash(msg,type||"earn");},1700);}
 
-/* ───────── 签筒 ───────── */
-function settleSign(o){
-  if(!o||o.date===td()||o.settled)return;o.settled=true;
-  if(o.lv>=4&&!o.used){var n=o.lv===5?3:2;lose(n,"🎋 "+o.date.slice(5)+" 的"+o.name+"没接住");}
-  if(o.lv===1&&!o.cured){lose(5,"🎋 "+o.date.slice(5)+" 的晦气没解掉");}
+/* ───────── 女主人生墙 ───────── */
+function hasT(k){return !!(S.fx&&S.fx.talents&&S.fx.talents[k]);}
+var HEROES=[
+ {id:"nancy",name:"南希",from:"少女妙探",c:"#b08a6e",
+  tasks:[{id:"cook",t:"整洁便当"},{id:"eq_practice",t:"机敏"},{id:"exercise",t:"体育天赋"}],
+  exam:{n:"推理晚餐",d:"20 分钟内做好一顿摆得整整齐齐的饭。锅里煮着的时候，给自己出一道辩题，大声讲完正方 1 分钟、反方 1 分钟，中间不许停。饭做好、两方都讲完，才算破案。"},
+  at:{intel:2,cook_a:1}},
+ {id:"elle",name:"Elle Woods",from:"律政俏佳人",c:"#c4868e",
+  tasks:[{id:"de_mock",t:"死磕真题"},{id:"skincare",t:"粉色仪式"},{id:"reading",t:"抱着法律书"}],
+  exam:{n:"开庭",d:"先把脸护好，敷面膜或者擦完整套护肤都行，Elle 从不为漂亮让路。然后在 20 分钟内做完一套 B1 真题里的一个完整部分，比如阅读的一个 Teil。对完答案，正确率要到七成。"},
+  at:{lang:2,grace:1}},
+ {id:"cher",name:"Cher",from:"独领风骚",c:"#c9a55e",
+  tasks:[{id:"tidy",t:"完美衣柜"},{id:"bath",t:"精致"},{id:"de_friends",t:"九十年代"}],
+  exam:{n:"重装衣柜",d:"20 分钟内挑一个最乱的角落，衣柜、书桌、抽屉都行，收拾到能拍照的程度，拍一张前后对比。收完之后，用德语说出你刚才摸过的 5 样东西，冠词全对才算过。"},
+  at:{life:2,lang:1}},
+ {id:"leonor",name:"莱昂诺尔",from:"西班牙王储",c:"#8e98a8",
+  tasks:[{id:"posture",t:"军校体态"},{id:"wake",t:"纪律"},{id:"de_speak",t:"多语切换"}],
+  exam:{n:"阅兵",d:"靠墙站满 5 分钟，后脑、肩胛、臀部、脚跟都贴着墙。然后离开墙，保持这个站姿，用德语不看稿做一段 2 分钟的自我介绍，录下来。卡壳超过 3 次就重来，全部在 20 分钟内完成。"},
+  at:{grace:2,lang:1}},
+ {id:"yanyin",name:"延音",from:"",c:"#9b8ab8",
+  tasks:[{de:3,t:"PhD"},{id:"exercise",t:"严格运动"},{id:"diet_meal",t:"减脂餐"},{id:"dance_t",t:"舞蹈",note:"跳满一小时"}],
+  exam:{n:"答辩",d:"不查词典，用德语写一段不少于 80 词的短文，题目是「我为什么要去德国」。写完立刻站起来，把你正在练的那支舞完整跳一遍，中途不许停。全部在 20 分钟内完成。"},
+  at:{lang:2,dance:1}},
+ {id:"shirakawa",name:"白川",from:"内心强大的美女白川",c:"#d4a0a0",
+  tasks:[{id:"journal",t:"把负面弹回去"},{id:"foot_soak",t:"宠自己"},{id:"no_snack",t:"温柔但不纵容"}],
+  exam:{n:"弹回去",d:"写下最近三句让你难受的话，别人说的、你对自己说的都算。每一句后面，用白川的口吻写一句回应：轻、漂亮、不讲道理。写完大声念一遍。全部在 20 分钟内完成。"},
+  at:{villain:2,lit:1}}
+];
+var HERO_NEED=5,HERO_EXAM_MIN=20,HERO_AV="klara-heroine-avatars";
+function heroById(id){for(var i=0;i<HEROES.length;i++)if(HEROES[i].id===id)return HEROES[i];return HEROES[0];}
+function hs(){var f=fx();f.hero=f.hero||{today:null,st:{}};f.hero.st=f.hero.st||{};HEROES.forEach(function(h){f.hero.st[h.id]=f.hero.st[h.id]||{prog:0,miss:0,away:"",grad:"",turns:0,wins:0};});return f.hero;}
+function heroAv(){try{return JSON.parse(localStorage.getItem(HERO_AV)||"{}");}catch(e){return {};}}
+function heroBonus(){return 5+(hasT("l2")?3:0);}
+function taskName(id){var t=findTaskDef(id);return t?t.name:id;}
+function heroCheck(h,day){
+  var list=(S.dailyTasks&&S.dailyTasks[day])||[];
+  return h.tasks.map(function(t){
+    if(t.de){var u={};list.forEach(function(x){if(DE_TASKS.has(x)&&x!=="de_level")u[x]=1;});var n=Object.keys(u).length;return {t:t,done:n>=t.de,cnt:Math.min(n,t.de)};}
+    return {t:t,done:list.indexOf(t.id)>=0};
+  });
 }
-function lockSignTask(){
-  var f=fx(),s=f.sign;if(!s||s.date!==td())return;
-  ensureDailyPlan();var items=S.dailyPlan.items;
-  items.forEach(function(it){if(it.fxSign&&!it.done&&it.taskId!==(s.target||s.cure)){it.fxSign=false;it.locked=false;}});
-  for(var i=items.length-1;i>=0;i--){if(items[i].fxSign===false&&items[i].addedBySign&&!items[i].done)items.splice(i,1);}
-  var id=(s.lv>=4)?s.target:(s.lv===1?s.cure:null);if(!id)return;
-  var ex=items.find(function(it){return it.taskId===id;});
-  if(ex){ex.locked=true;ex.fxSign=true;}
-  else{var t=findTaskDef(id);if(t)items.push({taskId:t.id,name:t.name,pts:t.pts,em:t.em,done:false,timeFrom:"",timeTo:"",addedAt:Date.now(),locked:true,fxSign:true,addedBySign:true});}
+function heroComplete(h,day){return heroCheck(h,day).every(function(x){return x.done;});}
+function heroLock(){
+  var H=hs(),o=H.today;if(!o||o.date!==td())return;
+  ensureDailyPlan();var items=S.dailyPlan.items,h=heroById(o.id);
+  var ids=h.tasks.filter(function(t){return t.id;}).map(function(t){return t.id;});
+  items.forEach(function(it){if(it.fxHero&&!it.done&&ids.indexOf(it.taskId)<0){it.fxHero=false;it.locked=false;}});
+  for(var i=items.length-1;i>=0;i--){if(items[i].addedByHero&&!items[i].fxHero&&!items[i].done)items.splice(i,1);}
+  var done=(S.dailyTasks&&S.dailyTasks[o.date])||[];
+  ids.forEach(function(id){
+    var ex=items.find(function(it){return it.taskId===id&&!it.done;});
+    if(ex){ex.locked=true;ex.fxHero=true;return;}
+    if(done.indexOf(id)>=0)return;
+    var t=findTaskDef(id);if(t)items.push({taskId:t.id,name:t.name,pts:t.pts,em:t.em,done:false,timeFrom:"",timeTo:"",addedAt:Date.now(),locked:true,fxHero:true,addedByHero:true});
+  });
   setTimeout(function(){try{window.renderDaily();}catch(e){}},0);
 }
-function hasT(k){return !!(S.fx&&S.fx.talents&&S.fx.talents[k]);}
-function signOdds(){if(!hasT("l2"))return FX_SIGN;return FX_SIGN.map(function(x){var y=Object.assign({},x);if(x.lv===4)y.p+=5;if(x.lv===3)y.p-=5;return y;});}
-function drawSign(){
-  var f=fx();settleSign(f.sign);var lv=roll(signOdds(),"p"),s={date:td(),lv:lv.lv,name:lv.name,line:pick(lv.lines),seen:false,used:false};
-  if(lv.lv>=4){var t=pick(dailyIds());s.target=t.id;s.tname=t.name;s.bonus=lv.lv===5?"x2":"+2";}
-  if(lv.lv===2){var p=pick(PENS);s.target=p.id;s.tname=p.name;}
-  if(lv.lv===1){var q=pick(dailyIds().filter(function(t){return["mop","tidy","exercise","foot_soak","stretch","trash","water_plant","dishes_today"].indexOf(t.id)>=0;}));if(!q)q=pick(dailyIds());s.cure=q.id;s.cname=q.name;s.cured=false;}
-  f.sign=s;lockSignTask();
+function heroWin(o,h,st){o.won=true;o.settled=true;st.prog=Math.min(HERO_NEED,st.prog+1);st.miss=0;st.wins=(st.wins||0)+1;var n=heroBonus();earn(n,"🎬 今日女主 · "+h.name+" 完成");return n;}
+function heroSettle(){
+  var H=hs(),o=H.today;if(!o||o.settled||o.date===td())return;
+  var h=heroById(o.id),st=H.st[o.id];
+  if(heroComplete(h,o.date)){heroWin(o,h,st);return;}
+  o.settled=true;st.prog=Math.max(0,st.prog-1);st.miss=(st.miss||0)+1;
+  lose(5,"🎬 "+o.date.slice(5)+" 的"+h.name+"没接住");
+  var msg=o.date.slice(5).replace("-","/")+" 那天"+h.name+"的任务没做完，进度收回一格，积分 −5。";
+  if(st.miss>=2){st.away=addDays(td(),7);st.miss=0;msg+="连着两次没接住她，她失望地走了，7 天内不会再来。";}
+  H.note={date:td(),msg:msg,kind:"fail"};
 }
-function ensureSign(){var f=fx();if(!f.sign||f.sign.date!==td()){drawSign();saveState();}else if(!f.sign.lockChecked){f.sign.lockChecked=true;lockSignTask();saveState();}return f.sign;}
-window.fxOpenSign=function(){ensureSign().seen=true;saveState();renderTasks();};
-window.fxReroll=function(){var f=fx(),s=ensureSign();if(f.rerolls<=0)return;if(s.used){flash("今天的签已经兑现过了，留着券吧","fail");return;}f.rerolls--;drawSign();f.sign.seen=true;saveState();renderTasks();flash("🎫 重摇了一支新签","card");};
-function signHtml(){
-  var s=ensureSign(),f=fx(),h='<div class="fx-card">';
-  if(!s.seen){return h+'<div class="fx-row"><div class="fx-stick fx-lv-3">今日</div><div style="flex:1"><div class="fx-title">签筒晃了一下，掉出一支签</div><div class="fx-sub">已经生效了，逃不掉的。</div></div><button class="fx-btn" onclick="fxOpenSign()">看签</button></div></div>';}
-  var eff="";
-  if(s.lv===5)eff="「"+esc(s.tname)+"」今天积分 ×2"+(s.used?"（已兑现）":"");
-  else if(s.lv===4)eff="「"+esc(s.tname)+"」今天额外 +2"+(s.used?"（已兑现）":"");
-  else if(s.lv===3)eff="今日无加成，也无惩罚";
-  else if(s.lv===2)eff="「"+esc(s.tname)+"」今天多扣 2 分";
-  else eff=s.cured?"晦气已散。解签完成 ✓":"今天所有扣分项多扣 2 分。解签任务：「"+esc(s.cname)+"」";
-  if(s.lv>=4&&!s.used)eff+='<br>已锁进今日计划，没做完明天扣 '+(s.lv===5?3:2)+' 分';
-  if(s.lv===1&&!s.cured)eff+='<br>已锁进今日计划，没解掉明天再扣 5 分';
-  h+='<div class="fx-row"><div class="fx-stick fx-lv-'+s.lv+'">'+s.name+'</div><div style="flex:1"><div class="fx-title">'+esc(s.line)+'</div><div class="fx-sub">'+eff+'</div></div></div>';
-  if(f.rerolls>0&&!s.used)h+='<div style="margin-top:10px;text-align:right"><button class="fx-btn ghost" onclick="fxReroll()">🎫 用重摇券（'+f.rerolls+'）</button></div>';
-  return h+'</div>';
+function heroDraw(exclude){
+  var H=hs(),d=td(),last=H.today&&H.today.id;
+  var pool=HEROES.filter(function(h){var st=H.st[h.id];return !(st.away&&st.away>d)&&h.id!==exclude;});
+  var p2=pool.filter(function(h){return h.id!==last;});if(p2.length)pool=p2;
+  if(!pool.length)pool=HEROES.filter(function(h){return h.id!==exclude;});
+  var ws=pool.map(function(h){var st=H.st[h.id];return st.grad?1:Math.max(1,6-st.prog);});
+  var tot=ws.reduce(function(a,b){return a+b;},0),r=Math.random()*tot,i=0;
+  for(;i<pool.length-1;i++){r-=ws[i];if(r<0)break;}
+  var h=pool[i];H.st[h.id].turns=(H.st[h.id].turns||0)+1;
+  H.today={date:d,id:h.id,settled:false,won:false,lockChecked:true};heroLock();
+}
+/* 旧签筒收尾：没结算的按旧规矩结掉，锁定的任务解开，然后整个删掉 */
+function heroMigrate(){
+  var f=fx();if(!f.sign)return;var s=f.sign;
+  try{
+    if(s.date!==td()&&!s.settled){
+      if(s.lv>=4&&!s.used)lose(s.lv===5?3:2,"🎋 "+s.date.slice(5)+" 的"+s.name+"没接住");
+      if(s.lv===1&&!s.cured)lose(5,"🎋 "+s.date.slice(5)+" 的晦气没解掉");
+    }
+    if(S.dailyPlan&&S.dailyPlan.items){var it=S.dailyPlan.items;for(var i=it.length-1;i>=0;i--){if(it[i].fxSign){if(it[i].addedBySign&&!it[i].done){it.splice(i,1);continue;}it[i].fxSign=false;it[i].locked=false;delete it[i].addedBySign;}}}
+  }catch(e){}
+  delete f.sign;
+}
+function ensureHero(){
+  heroMigrate();var H=hs(),ch=false;
+  if(H.exam&&Date.now()-H.exam.start>(HERO_EXAM_MIN+1)*60000&&!document.getElementById("hrExam")){heroExamEnd(false,true);}
+  if(!H.today||H.today.date!==td()){heroSettle();heroDraw();ch=true;}
+  else if(!H.today.lockChecked){H.today.lockChecked=true;heroLock();ch=true;}
+  if(ch)saveState();return H.today;
+}
+function heroTask(){
+  var H=hs(),o=H.today;if(!o||o.date!==td()||o.settled)return;
+  var h=heroById(o.id),st=H.st[o.id];
+  if(heroComplete(h,o.date)){var n=heroWin(o,h,st);saveState();later("🎬 "+h.name+"的一天，你接住了！+"+n+(st.prog>=HERO_NEED&&!st.grad?"　进度满了，可以开考":""),"big");}
+}
+function heroLeft(){var ms=new Date(td()+"T23:00:00")-new Date();if(ms<0)ms=0;return Math.floor(ms/3600000)+" 小时 "+Math.floor(ms%3600000/60000)+" 分";}
+setInterval(function(){var e=document.getElementById("heroLeft");if(e)e.textContent=heroLeft();},30000);
+function avHtml(h,size){
+  var av=heroAv()[h.id],s=size||56;
+  if(av)return '<div class="hr-av" style="width:'+s+'px;height:'+s+'px;border-color:'+h.c+'"><img src="'+av+'" alt="'+esc(h.name)+'"></div>';
+  return '<div class="hr-av hr-av-ph" style="width:'+s+'px;height:'+s+'px;border-color:'+h.c+';background:'+h.c+';font-size:'+Math.round(s*0.38)+'px">'+esc(h.name.charAt(0))+'</div>';
+}
+function heroDots(st){var o='';for(var i=0;i<HERO_NEED;i++)o+='<i class="'+(i<st.prog?'on':'')+'"></i>';return '<span class="hr-dots" aria-label="进度 '+st.prog+'/'+HERO_NEED+'">'+o+'</span>';}
+function heroHtml(){
+  var o=ensureHero(),H=hs(),h=heroById(o.id),st=H.st[h.id],f=fx(),rows=heroCheck(h,o.date);
+  var x='<div class="fx-card hr-card" style="border-color:'+h.c+'66">';
+  if(H.note&&H.note.date===td()&&!H.note.seen)x+='<div class="hr-note">'+esc(H.note.msg)+' <button onclick="heroNoteOk()">知道了</button></div>';
+  x+='<div class="fx-row">'+avHtml(h,64)+'<div style="flex:1;min-width:0"><div class="hr-kicker">今日女主</div><div class="hr-name">'+esc(h.name)+(h.from?'<span>'+esc(h.from)+'</span>':'')+'</div>'+heroDots(st)+(st.grad?'<span class="hr-gradtag">已出师</span>':'')+'</div></div>';
+  x+='<div class="hr-tasks">';
+  rows.forEach(function(r){
+    var nm=r.t.id?taskName(r.t.id):'任意 '+r.t.de+' 项德语（'+r.cnt+'/'+r.t.de+'）';
+    x+='<div class="hr-task'+(r.done?' done':'')+'"><b>'+esc(r.t.t)+'</b><span>'+esc(nm)+(r.t.note?'，'+esc(r.t.note):'')+'</span><em>'+(r.done?'✓':'')+'</em></div>';
+  });
+  x+='</div>';
+  if(o.won)x+='<div class="hr-foot win">今天接住她了。'+(st.prog>=HERO_NEED&&!st.grad?'进度满了，去女主墙开考。':'')+'</div>';
+  else x+='<div class="hr-foot">离 23:00 截止还有 <b id="heroLeft">'+heroLeft()+'</b><br>做完 +'+heroBonus()+' 分、进度 +1；没做完进度 −1、积分 −5</div>';
+  x+='<div class="hr-btns">'+(f.rerolls>0&&!o.settled?'<button class="fx-btn ghost" onclick="heroSwap()">🎫 换人（'+f.rerolls+'）</button>':'')+'<button class="fx-btn ghost" onclick="heroWall()">女主墙</button></div>';
+  return x+'</div>';
+}
+window.heroNoteOk=function(){var H=hs();if(H.note)H.note.seen=true;saveState();renderTasks();};
+window.heroSwap=function(){
+  var f=fx(),H=hs(),o=ensureHero();if(f.rerolls<=0)return;
+  if(o.settled){flash("她今天已经被你接住了，不用换","fail");return;}
+  if(!confirm("用一张换人券，把今天的"+heroById(o.id).name+"换成别人？"))return;
+  f.rerolls--;var st=H.st[o.id];st.turns=Math.max(0,(st.turns||1)-1);
+  heroDraw(o.id);saveState();renderTasks();flash("🎫 今天换成了"+heroById(H.today.id).name,"card");
+};
+/* ── 女主墙 ── */
+window.heroWall=function(){var old=document.getElementById("hrOv");if(old)old.remove();var ov=document.createElement("div");ov.id="hrOv";ov.className="hr-ov";ov.onclick=function(e){if(e.target===ov)ov.remove();};document.body.appendChild(ov);heroWallRender();};
+window.heroWallClose=function(){var ov=document.getElementById("hrOv");if(ov)ov.remove();};
+function heroWallRender(){
+  var ov=document.getElementById("hrOv");if(!ov)return;var H=hs(),d=td();
+  var x='<div class="hr-panel" role="dialog" aria-label="女主人生墙"><div class="hr-ptitle">女主人生墙<button class="hr-x" onclick="heroWallClose()" aria-label="关闭">×</button></div><div class="hr-sub">点头像换照片。每位接住 '+HERO_NEED+' 次就能开考，考试限时 '+HERO_EXAM_MIN+' 分钟，题目开考才揭晓。考过了，她的本事就是你的组合技。</div><div class="hr-grid">';
+  HEROES.forEach(function(h){
+    var st=H.st[h.id],status='';
+    if(st.grad)status='<div class="hr-grad">组合技「'+esc(h.exam.n)+'」</div><div class="hr-exam-d">'+esc(h.exam.d)+'</div>';
+    else if(st.away&&st.away>d)status='<div class="hr-away">失望离场，'+st.away.slice(5).replace("-","/")+' 回来</div>';
+    else if(st.prog>=HERO_NEED)status='<button class="fx-btn" style="background:'+h.c+'" onclick="heroExamAsk(\''+h.id+'\')">开考</button>';
+    x+='<div class="hr-tile"><button class="hr-avbtn" onclick="heroPickAv(\''+h.id+'\')" aria-label="换'+esc(h.name)+'的头像">'+avHtml(h,72)+'</button><div class="hr-tname">'+esc(h.name)+'</div>'+heroDots(st)+'<div class="hr-traits">'+h.tasks.map(function(t){return esc(t.t);}).join(" / ")+'</div>'+status+'</div>';
+  });
+  ov.innerHTML=x+'</div></div>';
+}
+/* ── 考试 ── */
+window.heroExamAsk=function(id){
+  if(!confirm("开考之后计时 "+HERO_EXAM_MIN+" 分钟，题目现在才揭晓。\n超时或者没做到，进度退回 3/"+HERO_NEED+"。\n准备好了再点确定。"))return;
+  var H=hs();H.exam={id:id,start:Date.now()};saveState();heroWallClose();heroExamShow();
+};
+var _hrT=null;
+function heroExamShow(){
+  var H=hs(),e=H.exam;if(!e)return;var h=heroById(e.id);var old=document.getElementById("hrExam");if(old)old.remove();
+  var ov=document.createElement("div");ov.id="hrExam";ov.className="hr-ov";
+  ov.innerHTML='<div class="hr-panel hr-exam" role="dialog" style="border-top:4px solid '+h.c+'">'+avHtml(h,72)+'<div class="hr-kicker">'+esc(h.name)+'的考试</div><div class="hr-ename">'+esc(h.exam.n)+'</div><div class="hr-clock" id="hrClock"></div><div class="hr-exam-d">'+esc(h.exam.d)+'</div><div class="hr-btns"><button class="fx-btn ghost" onclick="heroExamEnd(false)">没做到</button><button class="fx-btn" style="background:'+h.c+'" onclick="heroExamEnd(true)">我做到了</button></div></div>';
+  document.body.appendChild(ov);heroClock();
+}
+window.heroExamShow=heroExamShow;
+function heroClock(){
+  clearTimeout(_hrT);var H=hs(),e=H.exam,el=document.getElementById("hrClock");if(!e||!el)return;
+  var left=HERO_EXAM_MIN*60000-(Date.now()-e.start);
+  if(left<=0){el.textContent="时间到";el.className="hr-clock over";return;}
+  el.textContent=Math.floor(left/60000)+":"+String(Math.floor(left%60000/1000)).padStart(2,"0");_hrT=setTimeout(heroClock,500);
+}
+window.heroExamEnd=function(ok,silent){
+  var H=hs(),e=H.exam;if(!e)return;var h=heroById(e.id),st=H.st[e.id];
+  var late=Date.now()-e.start>HERO_EXAM_MIN*60000;
+  delete H.exam;clearTimeout(_hrT);var ov=document.getElementById("hrExam");if(ov)ov.remove();
+  if(ok&&!late){
+    st.grad=td();earn(20,"🎬 组合技 · "+h.name+" · "+h.exam.n,h.at);
+    saveState();try{render();}catch(x){}
+    flash("🎬 "+h.name+"的本事，现在是你的了。组合技「"+h.exam.n+"」解锁","big");return;
+  }
+  st.prog=Math.min(st.prog,3);
+  var why=(ok&&late)?"超时了":"没做到";
+  H.note={date:td(),msg:h.name+"的考试"+why+"，进度退回 3/"+HERO_NEED+"。再接住她两次，就能重考。",kind:"fail"};
+  saveState();try{render();}catch(x){}
+  if(!silent)flash("⏰ "+why+"，进度退回 3/"+HERO_NEED,"fail");
+};
+/* ── 头像：选照片、拖进圆框、压成小图存在手机里 ── */
+window.heroPickAv=function(id){
+  var inp=document.createElement("input");inp.type="file";inp.accept="image/*";
+  inp.onchange=function(e){var file=e.target.files[0];if(!file)return;var rd=new FileReader();
+    rd.onload=function(ev){var img=new Image();img.onload=function(){heroCrop(id,img);};img.onerror=function(){flash("这张照片打不开，换一张试试","fail");};img.src=ev.target.result;};
+    rd.readAsDataURL(file);};
+  inp.click();
+};
+function heroCrop(id,img){
+  var h=heroById(id),B=260,w=img.naturalWidth,hh=img.naturalHeight,s0=Math.max(B/w,B/hh),sc=s0,ox=(B-w*sc)/2,oy=(B-hh*sc)/2;
+  var ov=document.createElement("div");ov.className="hr-ov";ov.id="hrCrop";ov.style.zIndex="2600";
+  ov.innerHTML='<div class="hr-panel hr-crop" role="dialog"><div class="hr-ptitle">'+esc(h.name)+'的头像</div><div class="hr-sub">拖动照片，把脸放进圆圈里；下面的滑条可以放大。</div><div class="hr-cbox" id="hrBox"><img id="hrImg" alt="" draggable="false"><div class="hr-ring" style="border-color:'+h.c+'"></div></div><input type="range" id="hrZoom" min="1" max="4" step="0.01" value="1" aria-label="放大"><div class="hr-btns"><button class="fx-btn ghost" id="hrCancel">取消</button><button class="fx-btn" id="hrOk" style="background:'+h.c+'">用这张</button></div></div>';
+  document.body.appendChild(ov);
+  var el=document.getElementById("hrImg"),box=document.getElementById("hrBox");el.src=img.src;
+  function draw(){ox=Math.min(0,Math.max(B-w*sc,ox));oy=Math.min(0,Math.max(B-hh*sc,oy));el.style.width=(w*sc)+"px";el.style.height=(hh*sc)+"px";el.style.transform="translate("+ox+"px,"+oy+"px)";}
+  draw();var drag=null;
+  box.addEventListener("pointerdown",function(e){drag={x:e.clientX,y:e.clientY,ox:ox,oy:oy};try{box.setPointerCapture(e.pointerId);}catch(x){}});
+  box.addEventListener("pointermove",function(e){if(!drag)return;ox=drag.ox+e.clientX-drag.x;oy=drag.oy+e.clientY-drag.y;draw();});
+  box.addEventListener("pointerup",function(){drag=null;});box.addEventListener("pointercancel",function(){drag=null;});
+  document.getElementById("hrZoom").addEventListener("input",function(e){var cx=(B/2-ox)/sc,cy=(B/2-oy)/sc;sc=s0*parseFloat(e.target.value);ox=B/2-cx*sc;oy=B/2-cy*sc;draw();});
+  document.getElementById("hrCancel").onclick=function(){ov.remove();};
+  document.getElementById("hrOk").onclick=function(){
+    var cv=document.createElement("canvas");cv.width=cv.height=240;var c=cv.getContext("2d");c.fillStyle="#fff";c.fillRect(0,0,240,240);
+    c.drawImage(img,-ox/sc,-oy/sc,B/sc,B/sc,0,0,240,240);
+    var all=heroAv();all[id]=cv.toDataURL("image/jpeg",0.85);
+    try{localStorage.setItem(HERO_AV,JSON.stringify(all));}catch(err){flash("手机存储满了，头像没存上","fail");return;}
+    ov.remove();heroWallRender();try{renderTasks();}catch(x){}flash("🖼️ "+h.name+"有脸了","card");
+  };
 }
 
 /* ───────── Boss ───────── */
@@ -3698,7 +3907,7 @@ window.fxSpin=function(){
   else if(r.k==="b10"){earn(10,"🎰 扭蛋：返还 10 分");f.gstat.won+=10;msg="一颗粉色的蛋，里面是 10 分。";}
   else if(r.k==="b20"){earn(20,"🎰 扭蛋：返还 20 分");f.gstat.won+=20;msg="一颗奶白色的蛋，里面是 20 分。";}
   else if(r.k==="quest"){var q=pick(FX_QUESTS);if(f.quests.length>=3){earn(5,"🎰 扭蛋：任务卡换 5 分");f.gstat.won+=5;msg="掉出一张任务卡，可你手里已经有三张了，折成 5 分。";}else{f.quests.push({n:q.n,a:q.a});msg="掉出一张隐藏任务卡：「"+q.n+"」";}}
-  else if(r.k==="reroll"){f.rerolls++;msg="掉出一张签筒重摇券。抽到下下签的时候，它会救你一命。";}
+  else if(r.k==="reroll"){f.rerolls++;msg="掉出一张换人券。哪天抽到的女主实在接不住，它能帮你换一位。";}
   else{earn(60,"🎰 扭蛋：大奖 60 分");f.gstat.won+=60;msg="金色的蛋！！60 分！今天的运气全用在这了。";}
   fxLast=msg;saveState();fxShow(r.k,msg);
 };
@@ -3750,7 +3959,7 @@ function gachaHtml(){
   var h='<div class="fx-card fx-machine" style="position:relative"><span onclick="fxMute()" style="position:absolute;right:14px;top:12px;font-size:16px;cursor:pointer;opacity:.7">'+(f.mute?'🔇':'🔊')+'</span><div class="fx-title">🎰 扭蛋机</div><div class="fx-sub">20 分一次，扭蛋币免费。每天最多'+(cap===3?'三':'两')+'次，今天还剩 '+left+' 次。</div>';
   h+='<div class="fx-globe" id="fxGlobe">'+balls+'</div>';
   h+='<button class="fx-btn" onclick="fxSpin()" '+(left<=0?'disabled':'')+'>'+(f.coins>0?'用扭蛋币扭（'+f.coins+'）':'扭一次 · 20 分')+'</button>';
-  if(f.rerolls>0)h+='<div class="fx-sub" style="margin-top:8px">手里有 '+f.rerolls+' 张重摇券</div>';
+  if(f.rerolls>0)h+='<div class="fx-sub" style="margin-top:8px">手里有 '+f.rerolls+' 张换人券</div>';
   if(fxLast)h+='<div class="fx-result">'+esc(fxLast)+'</div>';
   f.quests.forEach(function(q,i){h+='<div class="fx-quest"><span style="flex:1;text-align:left">🎯 '+esc(q.n)+'</span><button class="fx-btn" style="background:#9b8ab8" onclick="fxDoQuest('+i+')">完成了</button></div>';});
   return h+'</div>';
@@ -3765,17 +3974,18 @@ window.undoLast=function(){
   if(!l){put();flash("成就不能撤回哦","fail");return;}
   if(typeof l.n==="string"&&l.n.indexOf("🎰")===0){put();flash("🎰 扭蛋没有后悔药","fail");return;}
   if(typeof l.n==="string"&&l.n.indexOf("🌳")===0){put();flash("🌳 天赋点了就是点了，没有后悔药","fail");return;}
+  if(typeof l.n==="string"&&l.n.indexOf("🎬")===0){put();flash("🎬 女主的账不能撤回","fail");return;}
   try{_undo.apply(this,arguments);}finally{put();}
 };
 var _rm=window.rmFromPlan,_rd=window.renderDaily;
-window.rmFromPlan=function(idx){ensureDailyPlan();var it=S.dailyPlan.items[idx];if(it&&it.locked&&!it.done){flash("🔒 签锁住的任务，取消不了哦","fail");return;}_rm.apply(this,arguments);};
+window.rmFromPlan=function(idx){ensureDailyPlan();var it=S.dailyPlan.items[idx];if(it&&it.locked&&!it.done){flash("🔒 今日女主锁住的任务，取消不了哦","fail");return;}_rm.apply(this,arguments);};
 var _msgTimer=null;
 var FX_MSGS=["今天的计划排好了，一件一件来，我在旁边看着。","你把今天安排得这么满，我一边心疼一边骄傲。","先做最难的那件，剩下的就都是下坡路了。","今天也要把自己照顾好，计划是其次，你是第一。","慢一点没关系，只要今天比昨天多走一步。"];
 window.renderDaily=function(){
   _rd.apply(this,arguments);
   try{
     S.dailyPlan.items.forEach(function(it,i){if(it.locked&&!it.done){var el=document.getElementById("dp-item-"+i);if(!el)return;
-      Array.prototype.forEach.call(el.querySelectorAll('[onclick^="rmFromPlan"]'),function(b){b.removeAttribute("onclick");b.textContent="🔒";b.title="签锁住了";b.style.opacity=".7";});}});
+      Array.prototype.forEach.call(el.querySelectorAll('[onclick^="rmFromPlan"]'),function(b){b.removeAttribute("onclick");b.textContent="🔒";b.title="今日女主锁住了";b.style.opacity=".7";});}});
     if(S.dailyPlan.items.length&&!S.dailyPlan.msg&&!_msgTimer){_msgTimer=setTimeout(function(){_msgTimer=null;if(S.dailyPlan.items.length&&!S.dailyPlan.msg){S.dailyPlan.msg=pick(FX_MSGS);S.dailyPlan._msgCount=S.dailyPlan.items.length;saveState();window.renderDaily();}},6000);}
   }catch(e){}
 };
@@ -3783,21 +3993,16 @@ var _doTask=window.doTask,_doPen=window.doPen,_rt=window.renderTasks,_rs=window.
 window.doTask=function(id,name,pts){
   _doTask.apply(this,arguments);
   try{
-    var s=ensureSign(),changed=false;
-    if(s.target===id&&!s.used&&s.lv>=4){s.used=true;var b=s.lv===5?Math.max(0,pts):2;earn(b,"🎋 "+s.name+"加成 · "+name);changed=true;later("🎋 "+s.name+"应验了！额外 +"+b);}
-    if(s.lv===1&&!s.cured&&s.cure===id){s.cured=true;earn(3,"🎋 解签成功");changed=true;later("🎋 晦气散了！解签 +3");}
-    checkCombos();checkBoss();
-    if(changed){saveState();render();}else render();
+    heroTask();checkCombos();checkBoss();render();
   }catch(e){}
 };
 window.doPen=function(id){
   _doPen.apply(this,arguments);
   try{
-    var s=ensureSign();
-    if((s.lv===2&&s.target===id)||(s.lv===1&&!s.cured)){lose(2,"🎋 "+s.name+"加罚");saveState();render();later("🎋 "+s.name+"应验，多扣 2 分","penalty");}
+    render();
   }catch(e){}
 };
-window.renderTasks=function(){_rt.apply(this,arguments);try{var c=document.getElementById("content-tasks");c.insertAdjacentHTML("afterbegin",signHtml()+bossHtml());}catch(e){}};
+window.renderTasks=function(){_rt.apply(this,arguments);try{var c=document.getElementById("content-tasks");c.insertAdjacentHTML("afterbegin",heroHtml()+bossHtml());}catch(e){}};
 window.renderShop=function(){_rs.apply(this,arguments);try{document.getElementById("content-shop").insertAdjacentHTML("afterbegin",gachaHtml());}catch(e){}};
 window.renderAchieve=function(){_ra.apply(this,arguments);try{document.getElementById("content-achieve").insertAdjacentHTML("beforeend",dexHtml());}catch(e){}};
 
@@ -3824,7 +4029,7 @@ function season(){
   host.innerHTML=h;
 }
 
-function boot(){if(typeof S==="undefined"||!S){setTimeout(boot,300);return;}fx();ensureSign();ensureBoss();checkBoss();checkCombos();season();try{render();}catch(e){}}
+function boot(){if(typeof S==="undefined"||!S){setTimeout(boot,300);return;}fx();ensureHero();if(hs().exam)setTimeout(heroExamShow,900);ensureBoss();checkBoss();checkCombos();season();try{render();}catch(e){}}
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",function(){setTimeout(boot,500);});else setTimeout(boot,500);
 })();
 </script>
@@ -4147,7 +4352,7 @@ var TT=[
    {k:"b3",n:"重拳",d:"打 Boss 的暴击从 2 倍变 2.5 倍",cost:400}]},
  {id:"l",name:"运气线",c:"#b3a6c9",nodes:[
    {k:"l1",n:"手气",d:"扭蛋每天多一次",cost:100},
-   {k:"l2",n:"签运",d:"抽到上签的概率 +5%",cost:200},
+   {k:"l2",n:"女主青睐",d:"接住每日女主多拿 3 分",cost:200},
    {k:"l3",n:"战利品猎人",d:"打倒 Boss 多掉一枚扭蛋币",cost:400}]}
 ];
 var PLUS={k1:"cook",k2:"dishes_today",n1:"early_sleep",n2:"wake",g1:"de_vocab",g2:"de_grammar",b1:"exercise",b2:"diet_meal"};
