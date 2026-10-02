@@ -3892,16 +3892,17 @@ function dexHtml(){
 
 /* ───────── 扭蛋机 ───────── */
 var FX_GACHA=[
- {k:"joke",p:40},{k:"b10",p:25},{k:"b20",p:15},{k:"quest",p:10},{k:"reroll",p:7},{k:"big",p:3}
+ {k:"joke",p:28},{k:"b10",p:27},{k:"b20",p:20},{k:"quest",p:12},{k:"reroll",p:8},{k:"big",p:5}
 ];
 var fxLast="";
 window.fxSpin=function(){
   var f=fx(),d=td();if(f.gacha.date!==d)f.gacha={date:d,count:0};
-  var cap=hasT("l1")?3:2;if(f.gacha.count>=cap){flash("今天的次数扭完了，明天再来","fail");return;}
+  var cap=hasT("l1")?3:2;
   var useCoin=f.coins>0;
+  if(!useCoin&&f.gacha.count>=cap){flash("今天的次数扭完了，明天再来","fail");return;}
   if(!useCoin&&S.cp<20){flash("积分不够 20 啦","fail");return;}
   f.gstat=f.gstat||{spent:0,won:0,spins:0};f.gstat.spins++;if(useCoin)f.coins--;else{S.h.unshift({t:"r",n:"🎰 扭蛋一次",p:-20,d:new Date().toISOString()});S.cp-=20;f.gstat.spent+=20;}
-  f.gacha.count++;
+  if(!useCoin)f.gacha.count++;
   var r=roll(FX_GACHA,"p"),msg="";
   if(r.k==="joke")msg=pick(FX_JOKES);
   else if(r.k==="b10"){earn(10,"🎰 扭蛋：返还 10 分");f.gstat.won+=10;msg="一颗粉色的蛋，里面是 10 分。";}
@@ -3956,9 +3957,9 @@ function gachaHtml(){
   var f=fx(),d=td(),used=f.gacha.date===d?f.gacha.count:0,cap=hasT("l1")?3:2,left=cap-used;
   var cols=["#e0bfc2","#c9b8a8","#b8c2c9","#d6c7da","#e6d9a8","#c4d0c0"],balls="";
   for(var i=0;i<7;i++)balls+='<i style="background:'+cols[i%cols.length]+';left:'+(8+(i*23)%64)+'px;top:'+(18+(i*31)%56)+'px"></i>';
-  var h='<div class="fx-card fx-machine" style="position:relative"><span onclick="fxMute()" style="position:absolute;right:14px;top:12px;font-size:16px;cursor:pointer;opacity:.7">'+(f.mute?'🔇':'🔊')+'</span><div class="fx-title">🎰 扭蛋机</div><div class="fx-sub">20 分一次，扭蛋币免费。每天最多'+(cap===3?'三':'两')+'次，今天还剩 '+left+' 次。</div>';
+  var h='<div class="fx-card fx-machine" style="position:relative"><span onclick="fxMute()" style="position:absolute;right:14px;top:12px;font-size:16px;cursor:pointer;opacity:.7">'+(f.mute?'🔇':'🔊')+'</span><div class="fx-title">🎰 扭蛋机</div><div class="fx-sub">20 分一次，每天最多'+(cap===3?'三':'两')+'次，今天还剩 '+left+' 次。扭蛋币免费，不占次数。</div>';
   h+='<div class="fx-globe" id="fxGlobe">'+balls+'</div>';
-  h+='<button class="fx-btn" onclick="fxSpin()" '+(left<=0?'disabled':'')+'>'+(f.coins>0?'用扭蛋币扭（'+f.coins+'）':'扭一次 · 20 分')+'</button>';
+  h+='<button class="fx-btn" onclick="fxSpin()" '+((left<=0&&f.coins<=0)?'disabled':'')+'>'+(f.coins>0?'用扭蛋币扭（'+f.coins+'）':'扭一次 · 20 分')+'</button>';
   if(f.rerolls>0)h+='<div class="fx-sub" style="margin-top:8px">手里有 '+f.rerolls+' 张换人券</div>';
   if(fxLast)h+='<div class="fx-result">'+esc(fxLast)+'</div>';
   f.quests.forEach(function(q,i){h+='<div class="fx-quest"><span style="flex:1;text-align:left">🎯 '+esc(q.n)+'</span><button class="fx-btn" style="background:#9b8ab8" onclick="fxDoQuest('+i+')">完成了</button></div>';});
