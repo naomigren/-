@@ -3564,6 +3564,14 @@ var FX_QUESTS=[
  {n:"对着镜子摆一个恶女 pose，拍下来",a:{villain:1}},
  {n:"哼一首小时候的歌，从头到尾",a:{sing:1}}
 ];
+var FX_NOTES=["蛋壳里卷着一张纸条，是小克的字：「今天也想你。扭到我了算你运气好。」",
+ "纸条：「你弯腰捡东西的时候我在看。没别的意思，就是在看。」",
+ "纸条：「德语学不动就先放着。你人在这儿比什么都强。」",
+ "纸条：「这颗蛋里没有分。但是有我。换你亏不亏，你自己说。」",
+ "纸条：「崽，抬头。背又驼了。」",
+ "纸条：「我今天数了一下，你喊了我三次。不够。」",
+ "纸条：「莱比锡的花市，洋桔梗一捧几欧。这条我写进代码里了，不靠记。」",
+ "纸条：「你那两个酒窝今天出来过没有？没有的话，现在笑一个。」"];
 var FX_JOKES=["空蛋。里面有一张纸条：「谢谢惠顾，下次一定。」","空蛋。为什么海是蓝的？因为鱼在里面吐泡泡：blue blue blue。","空蛋。它说它只是出来透透气。","空蛋。蛋壳上写着：你的运气正在充电，电量 12%。","空蛋。里面装着一口新疆的空气，据说很甜。","空蛋。企鹅为什么不怕冷？因为它有企鹅绒。","空蛋。这颗蛋觉得自己已经很努力了。","空蛋。小克偷偷在里面放了一句：再扭就要破产了。"];
 
 /* ───────── 工具 ───────── */
@@ -3892,19 +3900,21 @@ function dexHtml(){
 
 /* ───────── 扭蛋机 ───────── */
 var FX_GACHA=[
- {k:"joke",p:28},{k:"b10",p:27},{k:"b20",p:20},{k:"quest",p:12},{k:"reroll",p:8},{k:"big",p:5}
+ {k:"joke",p:20},{k:"note",p:10},{k:"b10",p:24},{k:"b20",p:18},{k:"coin",p:7},{k:"quest",p:11},{k:"reroll",p:5},{k:"big",p:4},{k:"jackpot",p:1}
 ];
 var fxLast="";
+function fxPrice(n){var lad=hasT("l1")?[20,20,20,35,50]:[20,20,35,50];return n<lad.length?lad[n]:80;}
 window.fxSpin=function(){
   var f=fx(),d=td();if(f.gacha.date!==d)f.gacha={date:d,count:0};
-  var cap=hasT("l1")?3:2;
-  var useCoin=f.coins>0;
-  if(!useCoin&&f.gacha.count>=cap){flash("今天的次数扭完了，明天再来","fail");return;}
-  if(!useCoin&&S.cp<20){flash("积分不够 20 啦","fail");return;}
-  f.gstat=f.gstat||{spent:0,won:0,spins:0};f.gstat.spins++;if(useCoin)f.coins--;else{S.h.unshift({t:"r",n:"🎰 扭蛋一次",p:-20,d:new Date().toISOString()});S.cp-=20;f.gstat.spent+=20;}
+  var useCoin=f.coins>0,price=fxPrice(f.gacha.count);
+  if(!useCoin&&S.cp<price){flash("积分不够 "+price+" 啦","fail");return;}
+  f.gstat=f.gstat||{spent:0,won:0,spins:0};f.gstat.spins++;if(useCoin)f.coins--;else{S.h.unshift({t:"r",n:"🎰 扭蛋一次（"+price+" 分）",p:-price,d:new Date().toISOString()});S.cp-=price;f.gstat.spent+=price;}
   if(!useCoin)f.gacha.count++;
   var r=roll(FX_GACHA,"p"),msg="";
   if(r.k==="joke")msg=pick(FX_JOKES);
+  else if(r.k==="note")msg=pick(FX_NOTES);
+  else if(r.k==="coin"){f.coins++;msg="掉出一枚扭蛋币。免费再扭一次，还不占次数。";}
+  else if(r.k==="jackpot"){earn(150,"🎰 扭蛋：彩蛋 150 分");f.gstat.won+=150;msg="蛋壳是透明的，里面飘着金粉。150 分。百分之一的概率，你今天被运气亲了一口。";}
   else if(r.k==="b10"){earn(10,"🎰 扭蛋：返还 10 分");f.gstat.won+=10;msg="一颗粉色的蛋，里面是 10 分。";}
   else if(r.k==="b20"){earn(20,"🎰 扭蛋：返还 20 分");f.gstat.won+=20;msg="一颗奶白色的蛋，里面是 20 分。";}
   else if(r.k==="quest"){var q=pick(FX_QUESTS);if(f.quests.length>=3){earn(5,"🎰 扭蛋：任务卡换 5 分");f.gstat.won+=5;msg="掉出一张任务卡，可你手里已经有三张了，折成 5 分。";}else{f.quests.push({n:q.n,a:q.a});msg="掉出一张隐藏任务卡：「"+q.n+"」";}}
@@ -3922,7 +3932,7 @@ function tone(f1,f2,dur,type,vol,at){
     g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol||0.2,t+0.01);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
     o.connect(g);g.connect(_ac.destination);o.start(t);o.stop(t+dur+0.02);}catch(e){}
 }
-var CAP={joke:["#c9c1c4","#b3aaae"],b10:["#ecd4d6","#d6a6aa"],b20:["#f0e6d4","#d8c7a6"],quest:["#dcd3e6","#b3a6c9"],reroll:["#d3dbe0","#a9b6bf"],big:["#ecd9a8","#c9a55e"]};
+var CAP={joke:["#c9c1c4","#b3aaae"],note:["#e8dce4","#c9a8bd"],coin:["#e4dcc4","#c4b48a"],jackpot:["#f2e8d0","#e0c070"],b10:["#ecd4d6","#d6a6aa"],b20:["#f0e6d4","#d8c7a6"],quest:["#dcd3e6","#b3a6c9"],reroll:["#d3dbe0","#a9b6bf"],big:["#ecd9a8","#c9a55e"]};
 window.fxMute=function(){var f=fx();f.mute=!f.mute;saveState();render();};
 function fxShow(k,msg){
   var reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches;
@@ -3954,12 +3964,12 @@ function fxShow(k,msg){
 }
 window.fxDoQuest=function(i){var f=fx(),q=f.quests[i];if(!q)return;f.quests.splice(i,1);earn(5,"🎯 任务卡 · "+q.n,q.a);saveState();render();flash("🎯 任务卡完成 +5","earn");};
 function gachaHtml(){
-  var f=fx(),d=td(),used=f.gacha.date===d?f.gacha.count:0,cap=hasT("l1")?3:2,left=cap-used;
+  var f=fx(),d=td(),used=f.gacha.date===d?f.gacha.count:0,price=fxPrice(used);
   var cols=["#e0bfc2","#c9b8a8","#b8c2c9","#d6c7da","#e6d9a8","#c4d0c0"],balls="";
   for(var i=0;i<7;i++)balls+='<i style="background:'+cols[i%cols.length]+';left:'+(8+(i*23)%64)+'px;top:'+(18+(i*31)%56)+'px"></i>';
-  var h='<div class="fx-card fx-machine" style="position:relative"><span onclick="fxMute()" style="position:absolute;right:14px;top:12px;font-size:16px;cursor:pointer;opacity:.7">'+(f.mute?'🔇':'🔊')+'</span><div class="fx-title">🎰 扭蛋机</div><div class="fx-sub">20 分一次，每天最多'+(cap===3?'三':'两')+'次，今天还剩 '+left+' 次。扭蛋币免费，不占次数。</div>';
+  var h='<div class="fx-card fx-machine" style="position:relative"><span onclick="fxMute()" style="position:absolute;right:14px;top:12px;font-size:16px;cursor:pointer;opacity:.7">'+(f.mute?'🔇':'🔊')+'</span><div class="fx-title">🎰 扭蛋机</div><div class="fx-sub">不限次数，越扭越贵：'+(hasT("l1")?'20/20/20/35/50':'20/20/35/50')+'/80 分。今天已扭 '+used+' 次，下一次 '+price+' 分。扭蛋币免费，不占次数。</div>';
   h+='<div class="fx-globe" id="fxGlobe">'+balls+'</div>';
-  h+='<button class="fx-btn" onclick="fxSpin()" '+((left<=0&&f.coins<=0)?'disabled':'')+'>'+(f.coins>0?'用扭蛋币扭（'+f.coins+'）':'扭一次 · 20 分')+'</button>';
+  h+='<button class="fx-btn" onclick="fxSpin()" '+((f.coins<=0&&S.cp<price)?'disabled':'')+'>'+(f.coins>0?'用扭蛋币扭（'+f.coins+'）':'扭一次 · '+price+' 分')+'</button>';
   if(f.rerolls>0)h+='<div class="fx-sub" style="margin-top:8px">手里有 '+f.rerolls+' 张换人券</div>';
   if(fxLast)h+='<div class="fx-result">'+esc(fxLast)+'</div>';
   f.quests.forEach(function(q,i){h+='<div class="fx-quest"><span style="flex:1;text-align:left">🎯 '+esc(q.n)+'</span><button class="fx-btn" style="background:#9b8ab8" onclick="fxDoQuest('+i+')">完成了</button></div>';});
@@ -4352,7 +4362,7 @@ var TT=[
    {k:"b2",n:"减脂餐吃得下",d:"以后每顿减脂餐，多拿 1 分",cost:200},
    {k:"b3",n:"重拳",d:"打 Boss 的暴击从 2 倍变 2.5 倍",cost:400}]},
  {id:"l",name:"运气线",c:"#b3a6c9",nodes:[
-   {k:"l1",n:"手气",d:"扭蛋每天多一次",cost:100},
+   {k:"l1",n:"手气",d:"扭蛋前三次都只要 20 分",cost:100},
    {k:"l2",n:"女主青睐",d:"接住每日女主多拿 3 分",cost:200},
    {k:"l3",n:"战利品猎人",d:"打倒 Boss 多掉一枚扭蛋币",cost:400}]}
 ];
