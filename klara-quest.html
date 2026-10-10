@@ -8,7 +8,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<script>(function(){var B="2026-10-10-30";if(!/[?&](_v|v)=/.test(location.search)){location.replace(location.pathname+'?_v='+B);}})();</script>
+<script>(function(){var B="2026-10-11-31";if(!/[?&](_v|v)=/.test(location.search)){location.replace(location.pathname+'?_v='+B);}})();</script>
 <!-- 开屏遮罩：必须是文档里最早生效的样式。
      这份文件 50 多万字节，#hvSplash 排在 93% 的位置，浏览器边下边画，
      在它被解析到之前，先画出来的是 html 的 #fdf2f0 和 body 的粉色渐变 ——
@@ -5764,7 +5764,7 @@ window.hvClearSplashBg=function(){
 <script>
 /* ═══════ 版本自检 ═══════ */
 (function(){
-  var APP_BUILD="2026-10-10-30";
+  var APP_BUILD="2026-10-11-31";
   window.APP_BUILD=APP_BUILD;
 
   function banner(remote,note){
@@ -6979,8 +6979,15 @@ function boot(){
       "（她把朋友圈设成了三天可见。）"]
   };
 
+  function _dayShift(ds,n){
+    try{var p=ds.split("-");var dt=new Date(+p[0],+p[1]-1,+p[2]);dt.setDate(dt.getDate()+n);
+      var m=String(dt.getMonth()+1),dd=String(dt.getDate());
+      return dt.getFullYear()+"-"+(m.length<2?"0"+m:m)+"-"+(dd.length<2?"0"+dd:dd);}catch(e){return ds;}
+  }
   function npcFeedData(){
-    var d=tds(), base=seedOf(d+"|pyq");
+    /* 深夜打开时，今天的动态都还没到点。把刚过去那一天整天的放出来看。 */
+    var _night=(new Date()).getHours()<7;
+    var d=_night?_dayShift(tds(),-1):tds(), base=seedOf(d+"|pyq");
     var ids=Object.keys(NPC), out=[];
     /* 今天谁发：固定 4 个，按日期轮换；10/17 之前新上墙的三位优先 */
     var NEW3=["xiayizhou_w","lishen_w","qiyu_s"], NEW_UNTIL="2026-10-26", chosen=[];
@@ -7108,7 +7115,7 @@ function boot(){
         text:pool[idx], hh:8+(ys%14), mm:ys%60});
     }
     /* 到点才出现，按时间倒序 */
-    var now=new Date(), cur=now.getHours()*60+now.getMinutes();
+    var now=new Date(), cur=_night?(24*60):(now.getHours()*60+now.getMinutes());
     out.sort(function(a,b){return (a.hh*60+a.mm)-(b.hh*60+b.mm);});
     var due=out.filter(function(o){return o.hh*60+o.mm<=cur;});
     /* 一条都还没到点的话，至少把最早那条放出来，别空着 */
