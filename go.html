@@ -1,0 +1,15 @@
+<!doctype html><html lang="zh"><head>
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet"><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>克拉拉养成计划</title>
+<style>html,body{height:100%;margin:0;background:linear-gradient(165deg,#f5eff0,#e6e2ee);
+font-family:-apple-system,system-ui,sans-serif;display:flex;align-items:center;justify-content:center}
+div{text-align:center;color:#8a7276;font-size:13px;letter-spacing:2px}
+b{display:block;font-size:17px;color:#5a4548;margin-bottom:7px;letter-spacing:1px}</style></head>
+<body><div><b>克拉拉养成计划</b>正在载入最新版…</div>
+<script>
+fetch("version.json?t="+Date.now(),{cache:"no-store"})
+ .then(function(r){return r.json();})
+ .then(function(j){location.replace("klara-quest.html?v="+encodeURIComponent(j.build));})
+ .catch(function(){location.replace("klara-quest.html?v="+Date.now());});
+</script></body></html>

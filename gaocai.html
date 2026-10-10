@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>阿姜的高财上岸宫殿</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Noto+Serif+SC:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;0,500;1,400&display=swap');
+
+:root {
+  --mg1:#8a9e7a;--mg2:#a3b593;--mg3:#bfcdb5;--mg4:#d8e4d0;--mg5:#e5ebe0;--mg6:#f0f4ec;
+  --md:#5a6e4a;--mi:#3d4a33;--mw:#9aaa8a;
+  --paper:#faf9f6;--pl:#d8e4d0;
+  --gold:#c8b070;--gold2:#d4c490;
+  --urgent:#c0785a;--urgent2:#d4956e;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+html{height:100%;}
+body{
+  background:var(--mg5);
+  font-family:'Noto Serif SC',serif;
+  color:var(--mi);
+  min-height:100%;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+body::before{
+  content:'';position:fixed;top:-20%;right:-15%;
+  width:50vw;height:50vw;
+  background:radial-gradient(ellipse,rgba(163,181,147,0.25) 0%,transparent 70%);
+  border-radius:50%;pointer-events:none;z-index:0;
+}
+
+.container{
+  position:relative;z-index:1;
+  max-width:520px;margin:0 auto;
+  padding:20px 16px 40px;
+}
+
+/* Header */
+.header{
+  text-align:center;padding:28px 20px 20px;
+  background:var(--paper);border-radius:16px;
+  box-shadow:0 2px 12px rgba(90,110,74,0.06);
+  margin-bottom:20px;position:relative;overflow:hidden;
+}
+.header::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--mg3),var(--mg1),var(--mg3));
+}
+.header h1{
+  font-family:'Playfair Display',serif;font-weight:400;
+  font-size:1.5rem;color:var(--md);letter-spacing:3px;margin-bottom:4px;
+}
+.header .sub{
+  font-family:'Caveat',cursive;font-size:0.9rem;color:var(--mw);letter-spacing:1px;
+}
+
+.stats-row{
+  display:flex;justify-content:center;gap:28px;
+  margin-top:14px;font-size:0.78rem;color:var(--mw);
+}
+.stats-row b{color:var(--md);font-size:1rem;font-family:'Playfair Display',serif;}
+
+/* Countdown */
+.countdown-card{
+  background:var(--paper);border-radius:16px;
+  box-shadow:0 2px 16px rgba(90,110,74,0.08);
+  padding:24px 20px;margin-bottom:20px;
+  text-align:center;position:relative;overflow:hidden;
+}
+.countdown-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--urgent),var(--gold),var(--urgent));
+}
+.countdown-label{
+  font-family:'Caveat',cursive;font-size:1rem;
+  color:var(--mw);letter-spacing:1px;margin-bottom:8px;
+}
+.countdown-number{
+  font-family:'Playfair Display',serif;
+  font-size:3.5rem;font-weight:500;
+  color:var(--md);line-height:1;
+  margin-bottom:4px;
+  transition:color 0.3s;
+}
+.countdown-number.urgent{color:var(--urgent);}
+.countdown-unit{
+  font-family:'Caveat',cursive;font-size:0.85rem;
+  color:var(--mw);letter-spacing:2px;
+}
+.countdown-week{
+  margin-top:10px;font-size:0.78rem;color:var(--mw);
+  font-family:'Noto Serif SC',serif;
+}
+.countdown-week b{color:var(--md);font-family:'Playfair Display',serif;}
+.countdown-progress{
+  margin-top:14px;height:6px;
+  background:var(--mg5);border-radius:3px;
+  overflow:hidden;
+}
+.countdown-progress-bar{
+  height:100%;border-radius:3px;
+  background:linear-gradient(90deg,var(--mg1),var(--gold));
+  transition:width 0.6s cubic-bezier(0.4,0,0.2,1);
+}
+
+.chart-wrap{
+  margin-top:16px;height:160px;position:relative;
+  background:var(--mg6);border-radius:10px;padding:8px;
+}
+
+/* Grid - 7 columns for weeks */
+.section-label{
+  font-family:'Caveat',cursive;font-size:1rem;
+  color:var(--mw);text-align:center;margin:20px 0 6px;
+  letter-spacing:1px;
+}
+.week-labels{
+  display:grid;grid-template-columns:repeat(7,1fr);
+  gap:5px;max-width:520px;margin:0 auto 4px;
+  text-align:center;
+}
+.week-labels span{
+  font-family:'Caveat',cursive;font-size:0.7rem;
+  color:var(--mg3);letter-spacing:0.5px;
+}
+.grid{
+  display:grid;grid-template-columns:repeat(7,1fr);
+  gap:5px;max-width:520px;margin:0 auto;
+}
+.day{
+  aspect-ratio:1;
+  background:var(--paper);
+  border:1.5px solid var(--mg4);
+  border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Caveat',cursive;font-size:0.85rem;
+  color:var(--mw);
+  cursor:pointer;
+  transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+  position:relative;
+  overflow:hidden;
+}
+.day:hover{
+  transform:translateY(-2px);
+  box-shadow:0 4px 12px rgba(90,110,74,0.12);
+  border-color:var(--mg2);
+}
+.day.active{
+  background:linear-gradient(135deg,var(--mg1),var(--mg2));
+  color:white;
+  border-color:var(--mg1);
+  box-shadow:0 2px 8px rgba(138,158,122,0.3);
+}
+.day.active::after{
+  content:'✓';position:absolute;
+  font-size:0.5rem;top:2px;right:3px;opacity:0.7;
+}
+.day.today{
+  border-color:var(--urgent);
+  border-width:2px;
+  box-shadow:0 0 0 2px rgba(192,120,90,0.15);
+}
+.day.today::before{
+  content:'';position:absolute;top:0;left:0;right:0;bottom:0;
+  background:rgba(192,120,90,0.05);border-radius:8px;
+}
+.day.milestone{
+  border-color:var(--gold);
+  border-width:2px;
+}
+.day.milestone.active{
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  border-color:var(--gold);
+  box-shadow:0 2px 12px rgba(200,176,112,0.35);
+}
+.day.past:not(.active){
+  background:var(--mg6);
+  opacity:0.5;
+}
+
+/* Cards */
+.card{
+  background:var(--paper);border-radius:16px;
+  box-shadow:0 2px 12px rgba(90,110,74,0.06);
+  padding:20px;margin-top:20px;position:relative;overflow:hidden;
+}
+.card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--mg4),var(--mg2),var(--mg4));
+}
+.card h3{
+  font-family:'Playfair Display',serif;font-weight:400;
+  font-size:0.95rem;color:var(--md);margin-bottom:12px;
+  letter-spacing:1px;
+}
+
+/* Checklist */
+.check-list{text-align:left;font-size:0.82rem;line-height:2.2;padding:0 8px;}
+.check-item{
+  display:flex;align-items:center;gap:10px;
+  padding:4px 8px;border-radius:8px;
+  transition:background 0.2s;
+}
+.check-item:hover{background:var(--mg6);}
+.check-item input[type="checkbox"]{
+  appearance:none;-webkit-appearance:none;
+  width:18px;height:18px;border:2px solid var(--mg3);
+  border-radius:5px;cursor:pointer;position:relative;
+  transition:all 0.2s;flex-shrink:0;
+}
+.check-item input[type="checkbox"]:checked{
+  background:var(--mg1);border-color:var(--mg1);
+}
+.check-item input[type="checkbox"]:checked::after{
+  content:'✓';position:absolute;top:-1px;left:2px;
+  color:white;font-size:13px;
+}
+
+/* Archive */
+.archive-section{
+  margin-top:20px;background:var(--paper);
+  border-radius:16px;padding:16px 20px;
+  box-shadow:0 2px 12px rgba(90,110,74,0.06);
+}
+.archive-section h3{
+  font-family:'Caveat',cursive;font-size:0.85rem;
+  color:var(--mw);margin-bottom:8px;font-weight:400;
+}
+.archive-section textarea{
+  width:100%;padding:6px 8px;border:1px solid var(--mg4);
+  border-radius:6px;font-family:monospace;font-size:0.6rem;
+  color:var(--mi);background:var(--mg6);resize:none;height:40px;outline:none;
+}
+.archive-btns{display:flex;gap:8px;margin-top:8px;}
+.ar-btn{
+  flex:1;background:var(--mg1);color:white;border:none;
+  padding:8px;border-radius:8px;cursor:pointer;
+  font-family:'Noto Serif SC',serif;font-size:0.72rem;
+  letter-spacing:1px;transition:background 0.15s;
+}
+.ar-btn:hover{background:var(--md);}
+.ar-btn.secondary{background:var(--mg3);color:var(--mi);}
+
+/* Panel overlay */
+.overlay{
+  display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+  background:rgba(61,74,51,0.25);backdrop-filter:blur(4px);
+  z-index:90;
+  animation:fadeIn 0.2s ease;
+}
+.panel{
+  display:none;position:fixed;
+  top:50%;left:50%;transform:translate(-50%,-50%) scale(0.95);
+  background:var(--paper);padding:24px;border-radius:16px;
+  width:88%;max-width:380px;z-index:100;
+  box-shadow:0 8px 40px rgba(61,74,51,0.15);
+  animation:panelIn 0.3s ease forwards;
+}
+@keyframes panelIn{
+  from{transform:translate(-50%,-50%) scale(0.92);opacity:0;}
+  to{transform:translate(-50%,-50%) scale(1);opacity:1;}
+}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+.panel::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--mg2),var(--md),var(--mg2));
+  border-radius:16px 16px 0 0;
+}
+.panel h3{
+  font-family:'Playfair Display',serif;font-weight:400;
+  font-size:1.05rem;color:var(--md);margin-bottom:16px;
+  text-align:center;letter-spacing:1px;
+}
+.panel label{
+  display:block;font-size:0.78rem;color:var(--mw);
+  margin:12px 0 4px;font-family:'Caveat',cursive;font-size:0.9rem;
+}
+.panel input[type="number"],
+.panel textarea{
+  width:100%;padding:8px 10px;
+  border:1px solid var(--mg4);border-radius:8px;
+  font-family:'Noto Serif SC',serif;font-size:0.85rem;
+  color:var(--mi);background:var(--mg6);outline:none;
+  transition:border-color 0.2s;
+}
+.panel input:focus,.panel textarea:focus{border-color:var(--mg1);}
+.panel textarea{min-height:60px;resize:vertical;}
+
+.range-wrap{display:flex;align-items:center;gap:10px;margin-top:6px;}
+.range-wrap input[type="range"]{
+  flex:1;-webkit-appearance:none;appearance:none;
+  height:6px;background:var(--mg4);border-radius:3px;outline:none;
+}
+.range-wrap input[type="range"]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:18px;height:18px;
+  background:var(--mg1);border-radius:50%;cursor:pointer;
+  box-shadow:0 2px 6px rgba(90,110,74,0.3);
+}
+.range-val{
+  font-family:'Playfair Display',serif;font-size:1rem;
+  color:var(--md);min-width:36px;text-align:right;
+}
+.btn-save{
+  width:100%;background:var(--mg1);color:white;border:none;
+  padding:12px;border-radius:10px;cursor:pointer;
+  font-family:'Noto Serif SC',serif;font-size:0.85rem;
+  letter-spacing:3px;margin-top:18px;
+  transition:background 0.2s,transform 0.1s;
+}
+.btn-save:hover{background:var(--md);}
+.btn-save:active{transform:scale(0.98);}
+
+/* Particles canvas */
+#particles{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  pointer-events:none;z-index:200;
+}
+
+/* Toast */
+.toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  background:var(--md);color:white;padding:8px 22px;
+  border-radius:20px;font-size:0.78rem;opacity:0;
+  pointer-events:none;transition:opacity 0.3s;z-index:300;
+  font-family:'Noto Serif SC',serif;letter-spacing:1px;
+}
+.toast.show{opacity:1;}
+
+/* Motivational quote */
+.quote-bar{
+  text-align:center;margin:16px 0 0;
+  font-family:'Caveat',cursive;font-size:0.85rem;
+  color:var(--mw);letter-spacing:0.5px;
+  font-style:italic;
+}
+
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--mg3);border-radius:2px;}
+
+@media(max-width:400px){
+  .grid{gap:4px;}
+  .day{font-size:0.75rem;border-radius:8px;}
+  .countdown-number{font-size:2.8rem;}
+}
+</style>
+</head>
+<body>
+
+<canvas id="particles"></canvas>
+
+<div class="container">
+  <div class="header">
+    <h1>高财上岸宫殿</h1>
+    <div class="sub">Advanced Accounting Mastery 🌿</div>
+    <div class="stats-row">
+      <span>累计刷题 <b id="totalQ">0</b> 道</span>
+      <span>平均掌握 <b id="avgM">0</b>%</span>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="accChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Countdown -->
+  <div class="countdown-card">
+    <div class="countdown-label">距离上岸还剩</div>
+    <div class="countdown-number" id="countdownNum">35</div>
+    <div class="countdown-unit">天</div>
+    <div class="countdown-week">第 <b id="currentWeek">1</b> 周 · 共 5 周</div>
+    <div class="countdown-progress">
+      <div class="countdown-progress-bar" id="progressBar" style="width:0%"></div>
+    </div>
+    <div class="quote-bar" id="quoteBar"></div>
+  </div>
+
+  <div class="section-label">✧ 5周冲刺 ✧</div>
+  <div class="week-labels">
+    <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
+  </div>
+  <div class="grid" id="grid"></div>
+
+  <div class="card">
+    <h3>📋 重点攻坚模块</h3>
+    <div class="check-list" id="checkList">
+      <div class="check-item"><input type="checkbox" id="ck1"><label for="ck1">合并财务报表 (抵销分录)</label></div>
+      <div class="check-item"><input type="checkbox" id="ck2"><label for="ck2">所得税会计 (递延所得税)</label></div>
+      <div class="check-item"><input type="checkbox" id="ck3"><label for="ck3">外币折算与汇兑损益</label></div>
+      <div class="check-item"><input type="checkbox" id="ck4"><label for="ck4">租赁与金融工具会计</label></div>
+    </div>
+  </div>
+
+  <div class="archive-section">
+    <h3>📦 存档 / 恢复</h3>
+    <textarea id="codeBox" readonly placeholder="存档码"></textarea>
+    <div class="archive-btns">
+      <button class="ar-btn" onclick="copyCode()">复制存档</button>
+      <button class="ar-btn secondary" onclick="importCode()">恢复存档</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay" onclick="closePanel()"></div>
+<div class="panel" id="panel">
+  <h3 id="panelDate">第 X 天</h3>
+  <label>📝 今日刷题数</label>
+  <input type="number" id="quesIn" placeholder="多少道">
+  <label>📊 掌握程度</label>
+  <div class="range-wrap">
+    <input type="range" id="mastIn" min="0" max="100" value="50">
+    <span class="range-val" id="mastVal">50%</span>
+  </div>
+  <label>💭 难点心得</label>
+  <textarea id="noteIn" placeholder="今天还没啃透的坑..."></textarea>
+  <button class="btn-save" onclick="saveDay()">记录成长</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const TOTAL_DAYS = 35;
+
+// Start date: today when first used, then persisted
+let accData = JSON.parse(localStorage.getItem('ajiang_acc_35v1') || '{}');
+
+// If no start date saved, set it to today
+if (!accData._startDate) {
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  accData._startDate = today.toISOString();
+}
+
+const startDate = new Date(accData._startDate);
+const endDate = new Date(startDate);
+endDate.setDate(endDate.getDate() + TOTAL_DAYS);
+
+let currentDay = 0;
+let chart;
+
+const pCanvas = document.getElementById('particles');
+const pCtx = pCanvas.getContext('2d');
+let particles = [];
+
+const quotes = [
+  "踢开最后一块石头，你就自由了",
+  "五周后的你会感谢现在的自己",
+  "你不是在学习，你是在通关",
+  "这本书不配占你更多的时间",
+  "每做完一天，离德国近一步",
+  "你科三都100分过了，高财算什么",
+  "咬牙的样子最好看",
+  "把它解决掉，然后永远不回头",
+  "你的未来在手术室，不在这本书里",
+  "最后一个boss，打完退游",
+];
+
+function toast(m) {
+  const t = document.getElementById('toast');
+  t.textContent = m;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// How many days since start
+function getDayNumber() {
+  const now = new Date();
+  now.setHours(0,0,0,0);
+  const diff = Math.floor((now - startDate) / (1000*60*60*24));
+  return Math.max(0, Math.min(diff, TOTAL_DAYS));
+}
+
+function getDaysLeft() {
+  const now = new Date();
+  now.setHours(0,0,0,0);
+  const diff = Math.floor((endDate - now) / (1000*60*60*24));
+  return Math.max(0, diff);
+}
+
+function getCurrentWeek() {
+  const dayNum = getDayNumber();
+  return Math.min(5, Math.floor(dayNum / 7) + 1);
+}
+
+// Particles
+function initParticles() {
+  pCanvas.width = window.innerWidth;
+  pCanvas.height = window.innerHeight;
+}
+
+function spawnParticles(x, y) {
+  const colors = ['#a3b593','#bfcdb5','#c8b070','#d4c490','#8a9e7a'];
+  for (let i = 0; i < 18; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 1.5 + Math.random() * 3;
+    const size = 3 + Math.random() * 5;
+    particles.push({
+      x, y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed - 1,
+      size,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      life: 1,
+      decay: 0.015 + Math.random() * 0.015,
+      type: Math.random() > 0.5 ? 'circle' : 'leaf'
+    });
+  }
+}
+
+function drawParticles() {
+  pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.x += p.vx; p.y += p.vy;
+    p.vy += 0.05;
+    p.vx *= 0.99;
+    p.life -= p.decay;
+    pCtx.globalAlpha = p.life;
+    pCtx.fillStyle = p.color;
+    if (p.type === 'leaf') {
+      pCtx.save();
+      pCtx.translate(p.x, p.y);
+      pCtx.rotate(p.vx * 0.5);
+      pCtx.beginPath();
+      pCtx.ellipse(0, 0, p.size, p.size * 0.4, 0, 0, Math.PI * 2);
+      pCtx.fill();
+      pCtx.restore();
+    } else {
+      pCtx.beginPath();
+      pCtx.arc(p.x, p.y, p.size * 0.5, 0, Math.PI * 2);
+      pCtx.fill();
+    }
+  });
+  pCtx.globalAlpha = 1;
+  if (particles.length > 0) requestAnimationFrame(drawParticles);
+}
+
+function updateCountdown() {
+  const daysLeft = getDaysLeft();
+  const dayNum = getDayNumber();
+  const week = getCurrentWeek();
+  const progress = Math.min(100, Math.round((dayNum / TOTAL_DAYS) * 100));
+
+  const numEl = document.getElementById('countdownNum');
+  numEl.textContent = daysLeft;
+  if (daysLeft <= 7) numEl.classList.add('urgent');
+  else numEl.classList.remove('urgent');
+
+  document.getElementById('currentWeek').textContent = week;
+  document.getElementById('progressBar').style.width = progress + '%';
+
+  // Random quote
+  const q = quotes[Math.floor(Math.random() * quotes.length)];
+  document.getElementById('quoteBar').textContent = '「' + q + '」';
+}
+
+function init() {
+  initParticles();
+
+  // Restore checkboxes
+  if (accData.checks) {
+    accData.checks.forEach((v, i) => {
+      const cb = document.getElementById('ck' + (i + 1));
+      if (cb) cb.checked = v;
+    });
+  }
+
+  updateCountdown();
+  renderGrid();
+  updateStats();
+  initChart();
+
+  document.getElementById('mastIn').oninput = function() {
+    document.getElementById('mastVal').innerText = this.value + '%';
+  };
+
+  // Save checkboxes on change
+  document.querySelectorAll('.check-item input').forEach(cb => {
+    cb.addEventListener('change', saveAll);
+  });
+}
+
+function renderGrid() {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  const todayNum = getDayNumber();
+  const milestones = [7, 14, 21, 28, 35]; // End of each week
+
+  for (let i = 1; i <= TOTAL_DAYS; i++) {
+    const div = document.createElement('div');
+    const isActive = accData[i]?.checked;
+    const isMilestone = milestones.includes(i);
+    const isToday = (i === todayNum + 1); // day 1 = first day
+    const isPast = (i <= todayNum) && !isActive;
+
+    let cls = 'day';
+    if (isActive) cls += ' active';
+    if (isMilestone) cls += ' milestone';
+    if (isToday) cls += ' today';
+    if (isPast && !isActive) cls += ' past';
+
+    div.className = cls;
+    div.innerText = i;
+    div.onclick = () => openPanel(i);
+    grid.appendChild(div);
+  }
+}
+
+function openPanel(day) {
+  currentDay = day;
+  const week = Math.ceil(day / 7);
+  document.getElementById('panelDate').innerText = `第${day}天 · 第${week}周`;
+  document.getElementById('quesIn').value = accData[day]?.ques || "";
+  document.getElementById('mastIn').value = accData[day]?.mast || 50;
+  document.getElementById('mastVal').innerText = (accData[day]?.mast || 50) + '%';
+  document.getElementById('noteIn').value = accData[day]?.note || "";
+  document.getElementById('overlay').style.display = 'block';
+  document.getElementById('panel').style.display = 'block';
+}
+
+function saveDay() {
+  const wasNew = !accData[currentDay]?.checked;
+  accData[currentDay] = {
+    checked: true,
+    ques: parseInt(document.getElementById('quesIn').value) || 0,
+    mast: parseInt(document.getElementById('mastIn').value),
+    note: document.getElementById('noteIn').value
+  };
+  closePanel();
+  renderGrid();
+  updateStats();
+  updateChart();
+  saveAll();
+
+  if (wasNew) {
+    const dayEl = document.querySelectorAll('.day')[currentDay - 1];
+    if (dayEl) {
+      const rect = dayEl.getBoundingClientRect();
+      spawnParticles(rect.left + rect.width / 2, rect.top + rect.height / 2);
+      requestAnimationFrame(drawParticles);
+    }
+
+    // Check if a week is completed
+    const weekEnd = Math.ceil(currentDay / 7) * 7;
+    let weekComplete = true;
+    const weekStart = weekEnd - 6;
+    for (let d = weekStart; d <= Math.min(weekEnd, TOTAL_DAYS); d++) {
+      if (!accData[d]?.checked) { weekComplete = false; break; }
+    }
+
+    if (weekComplete) {
+      toast(`🎉 第${Math.ceil(currentDay/7)}周全部完成！`);
+    } else {
+      toast(`🌿 第${currentDay}天打卡成功`);
+    }
+  } else {
+    toast('已更新记录');
+  }
+}
+
+function closePanel() {
+  document.getElementById('overlay').style.display = 'none';
+  document.getElementById('panel').style.display = 'none';
+}
+
+function saveAll() {
+  // Save checkboxes
+  accData.checks = [];
+  document.querySelectorAll('.check-item input').forEach(cb => {
+    accData.checks.push(cb.checked);
+  });
+
+  localStorage.setItem('ajiang_acc_35v1', JSON.stringify(accData));
+  document.getElementById('codeBox').value = btoa(unescape(encodeURIComponent(JSON.stringify(accData))));
+}
+
+function updateStats() {
+  const entries = Object.keys(accData).filter(k => !isNaN(k) && accData[k].checked).map(k => accData[k]);
+  const totalQ = entries.reduce((s, c) => s + (c.ques || 0), 0);
+  const avgM = entries.length ? Math.floor(entries.reduce((s, c) => s + (c.mast || 0), 0) / entries.length) : 0;
+  document.getElementById('totalQ').innerText = totalQ;
+  document.getElementById('avgM').innerText = avgM;
+}
+
+function initChart() {
+  const ctx = document.getElementById('accChart').getContext('2d');
+  Chart.defaults.font.family = "'Noto Serif SC',serif";
+  Chart.defaults.font.size = 10;
+  Chart.defaults.color = '#9aaa8a';
+
+  chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: [],
+      datasets: [
+        {
+          label: '刷题量', data: [],
+          borderColor: '#8a9e7a',
+          backgroundColor: 'rgba(138,158,122,0.15)',
+          fill: true, tension: 0.4,
+          pointRadius: 3, pointBackgroundColor: '#8a9e7a',
+          borderWidth: 2, yAxisID: 'y'
+        },
+        {
+          label: '掌握度', data: [],
+          borderColor: '#c8b070', borderDash: [4,4],
+          tension: 0.4,
+          pointRadius: 2, pointBackgroundColor: '#c8b070',
+          borderWidth: 1.5, yAxisID: 'y1'
+        }
+      ]
+    },
+    options: {
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { labels: { boxWidth: 12, padding: 10, font: { size: 10 } } }
+      },
+      scales: {
+        y: {
+          type: 'linear', display: true, position: 'left',
+          grid: { color: 'rgba(191,205,181,0.2)' },
+          title: { display: true, text: '题数', font: { size: 10 } }
+        },
+        y1: {
+          type: 'linear', display: true, position: 'right',
+          min: 0, max: 100,
+          grid: { drawOnChartArea: false },
+          title: { display: true, text: '掌握%', font: { size: 10 } }
+        }
+      }
+    }
+  });
+  updateChart();
+}
+
+function updateChart() {
+  let labels = [], qData = [], mData = [];
+  for (let i = 1; i <= TOTAL_DAYS; i++) {
+    if (accData[i]?.checked) {
+      labels.push('D' + i);
+      qData.push(accData[i].ques || 0);
+      mData.push(accData[i].mast || 0);
+    }
+  }
+  chart.data.labels = labels;
+  chart.data.datasets[0].data = qData;
+  chart.data.datasets[1].data = mData;
+  chart.update();
+}
+
+function copyCode() {
+  saveAll();
+  const code = document.getElementById('codeBox').value;
+  if (!code) { toast('没有数据可存档'); return; }
+  navigator.clipboard.writeText(code).then(() => toast('存档已复制')).catch(() => {
+    document.getElementById('codeBox').select();
+    document.execCommand('copy');
+    toast('存档已复制');
+  });
+}
+
+function importCode() {
+  const code = prompt('请粘贴存档码：');
+  if (!code) return;
+  try {
+    accData = JSON.parse(decodeURIComponent(escape(atob(code))));
+    localStorage.setItem('ajiang_acc_35v1', JSON.stringify(accData));
+    init();
+    toast('恢复成功');
+  } catch(e) { toast('存档码有误'); }
+}
+
+window.addEventListener('resize', initParticles);
+init();
+</script>
+
+</body>
+</html>
