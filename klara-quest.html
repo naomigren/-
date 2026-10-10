@@ -8,7 +8,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<script>(function(){var B="2026-10-11-31";if(!/[?&](_v|v)=/.test(location.search)){location.replace(location.pathname+'?_v='+B);}})();</script>
+<script>(function(){var B="2026-10-11-32";if(!/[?&](_v|v)=/.test(location.search)){location.replace(location.pathname+'?_v='+B);}})();</script>
 <!-- 开屏遮罩：必须是文档里最早生效的样式。
      这份文件 50 多万字节，#hvSplash 排在 93% 的位置，浏览器边下边画，
      在它被解析到之前，先画出来的是 html 的 #fdf2f0 和 body 的粉色渐变 ——
@@ -3809,7 +3809,7 @@ window.heroWall=function(){var old=document.getElementById("hrOv");if(old)old.re
 window.heroWallClose=function(){var ov=document.getElementById("hrOv");if(ov)ov.remove();};
 function heroWallRender(){
   var ov=document.getElementById("hrOv");if(!ov)return;var H=hs(),d=td();
-  var x='<div class="hr-panel" role="dialog" aria-label="女主人生墙"><div class="hr-ptitle">女主人生墙<button class="hr-x" onclick="heroWallClose()" aria-label="关闭">×</button></div><div class="hr-sub">'+((fx().swaps||0)>0&&hs().today&&hs().today.date===td()?'<button class="fx-btn" style="margin:0 0 8px" onclick="heroSwap()">\ud83d\udd01 \u7528\u6362\u4eba\u5238\u6362\u6389\u4eca\u5929\u8fd9\u4f4d\uff08'+(fx().swaps||0)+'\uff09</button><br>':'')+'点头像换照片。每位接住 '+HERO_NEED+' 次就能开考，考试限时 '+HERO_EXAM_MIN+' 分钟，题目开考才揭晓。考过了，她的本事就是你的组合技。点名字旁边的 ★ 设偏爱，被偏爱的那位会更常被抽到。</div><div class="hr-grid">';
+  var x='<div class="hr-panel" role="dialog" aria-label="女主人生墙"><div class="hr-ptitle">女主人生墙<button class="hr-x" onclick="heroWallClose()" aria-label="关闭">×</button></div><div class="hr-sub">点头像换照片。每位接住 '+HERO_NEED+' 次就能开考，考试限时 '+HERO_EXAM_MIN+' 分钟，题目开考才揭晓。考过了，她的本事就是你的组合技。点名字旁边的 ★ 设偏爱，被偏爱的那位会更常被抽到。</div><div class="hr-grid">';
   HEROES.forEach(function(h){
     var st=H.st[h.id],status='';
     if(st.grad)status='<div class="hr-grad">组合技「'+esc(h.exam.n)+'」</div><div class="hr-exam-d">'+esc(h.exam.d)+'</div>';
@@ -3867,21 +3867,6 @@ window.heroExamEnd=function(ok,silent){
   if(!silent)flash("⏰ "+why+"，进度退回 3/"+HERO_NEED,"fail");
 };
 /* ── 头像：选照片、拖进圆框、压成小图存在手机里 ── */
-window.heroSwap=function(){
-  var H=hs(),f=fx(),d=td();
-  if((f.swaps||0)<1){flash("\u6ca1\u6709\u6362\u4eba\u5238","fail");return;}
-  if(!H.today||H.today.date!==d){flash("\u4eca\u5929\u8fd8\u6ca1\u62bd\u4eba\u5462","fail");return;}
-  var cur=heroById(H.today.id);
-  if(!confirm("\u7528\u4e00\u5f20\u6362\u4eba\u5238\uff0c\u628a\u4eca\u5929\u7684\u300c"+cur.name+"\u300d\u6362\u6389\uff1f\n\u4eca\u5929\u5728\u5979\u8eab\u4e0a\u505a\u7684\u8fdb\u5ea6\u4f1a\u6e05\u6389\u3002"))return;
-  f.swaps=(f.swaps||0)-1;
-  heroDraw(cur.id);
-  saveState();
-  try{heroWallRender();}catch(e){}
-  try{renderTasks();}catch(e){}
-  try{render();}catch(e){}
-  var nw=heroById(hs().today.id);
-  flash("\ud83d\udd01 \u6362\u6210\u4e86\u300c"+nw.name+"\u300d","big");
-};
 window.heroPickAv=function(id){
   var inp=document.createElement("input");inp.type="file";inp.accept="image/*";
   inp.onchange=function(e){var file=e.target.files[0];if(!file)return;var rd=new FileReader();
@@ -5764,7 +5749,7 @@ window.hvClearSplashBg=function(){
 <script>
 /* ═══════ 版本自检 ═══════ */
 (function(){
-  var APP_BUILD="2026-10-11-31";
+  var APP_BUILD="2026-10-11-32";
   window.APP_BUILD=APP_BUILD;
 
   function banner(remote,note){
@@ -6167,7 +6152,8 @@ function boot(){
       S.fx=S.fx||{};
       var f=S.fx;
       f.recalls=f.recalls||0;
-      f.swaps=f.swaps||0;
+      f.rerolls=f.rerolls||0;
+      if(f.swaps){f.rerolls+=f.swaps;f.swaps=0;}
       f.pity=f.pity||{recall:0};
       if(typeof f.pity.swap!=="number")f.pity.swap=f.pity.recall||0;
       return f;
@@ -6184,7 +6170,7 @@ function boot(){
     {
       g.pity.swap=(g.pity.swap||0)+1;
       if(forced||g.pity.swap>=PITY_MAX){
-        g.swaps=(g.swaps||0)+1;
+        g.rerolls=(g.rerolls||0)+1;
         g.pity.swap=0;
         setTimeout(function(){
           try{flash("\ud83d\udd01 \u4fdd\u5e95\u89e6\u53d1\uff1a\u6362\u4eba\u5238 +1","earn");}catch(e){}
@@ -6204,7 +6190,7 @@ function boot(){
       var f=pityState(); if(!f)return;
       var left=Math.max(0,PITY_MAX-(f.pity.swap||0));
       var el=btn.parentNode.querySelector(".fx-pity");
-      var txt="\ud83d\udd01 \u6362\u4eba\u5238\u4fdd\u5e95\uff1a\u8fd8\u5dee "+left+" \u6b21\u5fc5\u51fa\uff08\u5df2\u6301\u6709 "+(f.swaps||0)+" \u5f20\uff09";
+      var txt="\ud83d\udd01 \u6362\u4eba\u5238\u4fdd\u5e95\uff1a\u8fd8\u5dee "+left+" \u6b21\u5fc5\u51fa\uff08\u5df2\u6301\u6709 "+(f.rerolls||0)+" \u5f20\uff09";
       if(!el){
         btn.insertAdjacentHTML("afterend",
           '<div class="fx-pity">'+txt+'<div class="fx-pbar"><i style="width:'+
@@ -6853,6 +6839,14 @@ function boot(){
       "有人等着看我摔。我摔给他们看，然后爬起来接着干。",
       "工作到最后你会发现，拦住你的从来不是能力，是你肯不肯再来一次。"]},
     xiayizhou_w:{n:"夏以昼的爱人",c:"#7f8fa6",posts:[
+      "他回来那天我在厨房，听见门响没回头。他从后面走过来，下巴搁我肩膀上，一句话没说，站了很久。",
+      "他吃苹果一定要脆的，软一点就放下。我现在买苹果也会先掂一下。",
+      "他说香菜是一种错误。我偏要放。他吃完了，一边吃一边数落我。",
+      "他教我看航线图，讲到一半发现我在看他。他耳朵红了，说你认真点。",
+      "半夜他接了个电话，出去了四十分钟。回来的时候手是凉的，我把他的手按在我胸口上捂着。",
+      "他睡着的时候眉头还是皱的。我伸手去抹，他闭着眼抓住我的手。",
+      "他说下次巡航要四十天。我说知道了。然后一整晚都没睡着。",
+      "他第一次叫我名字的时候，声音卡了一下。我装作没听出来。",
       "他出任务那几天，家里的灯我照常开到十一点。不是等，是我本来就这个点睡。",
       "背了四公里的菜回来，胳膊酸。但是冰箱满了，这个月都不用慌。",
       "平板支撑比上次多了十八秒。十八秒听着不多，是我蹬了十八秒才攒下来的。",
@@ -6862,6 +6856,14 @@ function boot(){
       "下雪前把东西囤齐了。他回来的时候，这屋子是暖的。",
       "等人回来这件事，我已经学会怎么做了：把自己的日子过满。"]},
     lishen_w:{n:"黎深的爱人",c:"#6e8aa0",posts:[
+      "他下班回来第一件事是洗手，洗很久。洗完才肯碰我。",
+      "他给我示范打结，捏着我的手指一个一个摆位置。摆到第三遍我已经不看绳子了。",
+      "他很少笑。今天我把器官名念错了一个音，他憋着，耳根在动。",
+      "他车里永远放着一瓶没开的水，说是给我准备的。我从来没说过我会渴。",
+      "他值夜班，我去送饭。他从手术室出来，白大褂上有血，站在走廊尽头看了我三秒才走过来。",
+      "我说你手这么稳，他说因为我每天都在练。然后他把手伸过来，让我摸。是凉的。",
+      "他睡着的时候呼吸特别轻。我趴着听了很久，确认他还在。",
+      "他说医生最怕的是乱。我想了想，他家里也确实没有一样东西是歪的——除了我。",
       "他台上站了七个小时，下来第一句话是问我吃了没。我说吃了。其实没有。后来吃了。",
       "今天打了二十个结，滑了三个。滑的那三个我重打了。",
       "二十分钟一篇作文，铃响停笔。改不了的东西才看得出真水平。",
@@ -6871,6 +6873,14 @@ function boot(){
       "冷静不是天生的。是练出来的——情绪上来的时候先不说话，等十分钟。",
       "他说医生最怕的不是难，是乱。所以我先把桌子收干净。"]},
     qiyu_s:{n:"祁煜的妹妹",c:"#9b8ab8",posts:[
+      "今天他把最后一块排骨夹给我，然后说这不算什么，我本来也不爱吃。骗人，他盯了三秒。",
+      "他考试考砸了，一路上不说话。到家翻出一盒颜料塞给我，说这个给你了别烦我。",
+      "下大雪，他把围巾解下来绕我脖子上两圈，自己缩着脖子走。",
+      "我发烧那天他翘课了。醒来看见他趴在床边睡着，手里还捏着温度计。",
+      "他画了我一张，画得特别丑。我说难看，他立刻要撕，我抢过来藏起来了。",
+      "有男生跟我说话，他从走廊那头走过来，什么都没说，就站在我旁边。",
+      "他说以后赚了钱给我买大房子。我说你先把这学期的数学及格了。",
+      "他睡着了还攥着画笔。我掰了半天才掰开，手上全是颜料。",
       "他画画的时候颜料甩了一桌子，画完人就跑了。拖地的是我。",
       "今天替他洗了碗。他说下次一定自己来。这句话我听了四百遍。",
       "他房间乱得像被抄过家，我收拾到一半找到三支没盖帽的笔。",
