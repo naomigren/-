@@ -8,7 +8,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<script>(function(){var B="2026-10-10-28";if(!/[?&](_v|v)=/.test(location.search)){location.replace(location.pathname+'?_v='+B);}})();</script>
+<script>(function(){var B="2026-10-10-29";if(!/[?&](_v|v)=/.test(location.search)){location.replace(location.pathname+'?_v='+B);}})();</script>
 <!-- 开屏遮罩：必须是文档里最早生效的样式。
      这份文件 50 多万字节，#hvSplash 排在 93% 的位置，浏览器边下边画，
      在它被解析到之前，先画出来的是 html 的 #fdf2f0 和 body 的粉色渐变 ——
@@ -3680,11 +3680,12 @@ function avInit(){
     var old={};try{old=JSON.parse(localStorage.getItem(HERO_AV)||"{}");}catch(e){}
     var ks=Object.keys(old);
     if(!ks.length){AvStore.ready=true;return;}
+    var okAll=true;
     return Promise.all(ks.map(function(k){
       if(AvStore.cache[k])return null;
-      return avPut(k,old[k]).catch(function(){});
+      return avPut(k,old[k]).catch(function(){okAll=false;});
     })).then(function(){
-      try{localStorage.removeItem(HERO_AV);}catch(e){}
+      if(okAll){try{localStorage.removeItem(HERO_AV);}catch(e){}}
       AvStore.ready=true;
       try{heroWallRender();}catch(e){}
       try{if(window.mountNpcFeedForce)window.mountNpcFeedForce();}catch(e){}
@@ -3893,11 +3894,14 @@ function heroCrop(id,img){
     AvStore.cache[id]=data;
     ov.remove();heroWallRender();try{renderTasks();}catch(x){}
     try{if(window.mountNpcFeedForce)window.mountNpcFeedForce();}catch(x){}
-    flash("🖼️ "+h.name+"有脸了","card");
-    avPut(id,data).catch(function(){
+    avPut(id,data).then(function(){
+      flash("🖼️ "+h.name+"有脸了","card");
+    }).catch(function(e1){
+      var saved=false;
       try{var all={};try{all=JSON.parse(localStorage.getItem(HERO_AV)||"{}");}catch(y){}
-        all[id]=data;localStorage.setItem(HERO_AV,JSON.stringify(all));}
-      catch(y){flash("存不下了，手机存储满了","fail");}
+        all[id]=data;localStorage.setItem(HERO_AV,JSON.stringify(all));saved=true;}catch(y){}
+      if(saved)flash("🖼️ "+h.name+"有脸了（存在旧位置）","card");
+      else flash("没存上：大库写不了，小格子也满了","fail");
     });
   };
 }
@@ -5745,7 +5749,7 @@ window.hvClearSplashBg=function(){
 <script>
 /* ═══════ 版本自检 ═══════ */
 (function(){
-  var APP_BUILD="2026-10-10-28";
+  var APP_BUILD="2026-10-10-29";
   window.APP_BUILD=APP_BUILD;
 
   function banner(remote,note){
@@ -7153,7 +7157,7 @@ function boot(){
             try{mountNpcFeed(true);}catch(x){}
             navSet(id,data).then(function(){
               try{flash("立绘换好了","earn");}catch(x){}
-            }).catch(function(){
+            }).catch(function(e1){
               try{
                 var o={};try{o=JSON.parse(localStorage.getItem("klara-heroine-avatars")||"{}");}catch(y){}
                 o[id]=data;localStorage.setItem("klara-heroine-avatars",JSON.stringify(o));
