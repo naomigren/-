@@ -27,7 +27,7 @@ font-size:14px;letter-spacing:2px}
 <script>
 (function(){
 "use strict";
-var BUILD = "2026-10-16-4";
+var BUILD = "2026-10-16-5";
 var SALT  = "5ea74d36cf95d52045e4cb5bc2c2b9cf";
 var PKEY  = "staticrypt_passphrase";      // 沿用旧的 key，手机上存着的密码照样能用
 var DBN   = "klara-quest-cache", STORE = "app";
@@ -120,17 +120,9 @@ function decryptWith(hashedHex){
       .then(function(out){
         var html = new TextDecoder().decode(new Uint8Array(out));
         if(html.lastIndexOf("<", 20) < 0) throw new Error("bad");
-        return patch(html);
+        return html;
       });
   });
-}
-
-/* ---------- 热补丁：注入前打在解密结果上 ---------- */
-var HOTFIX = '/* ── 撤回修正（临时热补丁） ──\n   源码里已经有 clmUnassign 的话就什么都不做，避免重复扣账。 */\n(function(){\n  if(typeof window.clmUnassign==="function")return;\n  var _orig=window.undoLast;\n  if(typeof _orig!=="function")return;\n  function sub(side,id,day){\n    try{\n      var c=(S.claimLog&&S.claimLog[day])||null;\n      if(!c||!c[side]||!c[side][id])return false;\n      c[side][id]--;\n      if(c[side][id]<=0)delete c[side][id];\n      return true;\n    }catch(e){return false;}\n  }\n  window.undoLast=function(){\n    var top=(S.h&&S.h[0])||null, n0=(S.h&&S.h.length)||0;\n    var r=_orig.apply(this,arguments);\n    try{\n      if(S.h.length<n0 && top && top.t==="e" && top._id){\n        var td=top.d?_dk(top.d):todayStr();\n        if(!sub("rival",top._id,td))sub("hero",top._id,td);\n        saveState();\n        try{if(typeof window.rvHuntSync==="function")window.rvHuntSync();}catch(e){}\n        try{if(typeof window.heroLock==="function")window.heroLock();}catch(e){}\n        try{render();renderDaily();}catch(e){}\n      }\n    }catch(e){}\n    return r;\n  };\n})();\n\n/* ── 一次性校正：卡顿期间点错留下的旧账 ──\n   把今天的账本删掉重算一遍（clmMigrate 会按实际完成记录重建），\n   只跑一次，跑完插旗。 */\n(function(){\n  var FLAG="kq-clm-repair-1";\n  try{ if(localStorage.getItem(FLAG))return; }catch(e){ return; }\n  function go(){\n    try{\n      if(typeof clmMigrate!=="function"||typeof todayStr!=="function")return;\n      if(typeof window.rvHuntNeed!=="function")return setTimeout(go,400);\n      var d=todayStr();\n      if(S.claimLog&&S.claimLog[d])delete S.claimLog[d];\n      clmMigrate(d);\n      saveState();\n      try{if(typeof window.rvHuntSync==="function")window.rvHuntSync();}catch(e){}\n      try{if(typeof window.heroLock==="function")window.heroLock();}catch(e){}\n      try{render();renderDaily();}catch(e){}\n      try{localStorage.setItem(FLAG,"1");}catch(e){}\n    }catch(e){}\n  }\n  setTimeout(go,900);\n})();\n';
-function patch(html){
-  var i = html.lastIndexOf("</body>");
-  var tag = "<script>" + HOTFIX + "<\/script>";
-  return i < 0 ? (html + tag) : (html.slice(0,i) + tag + html.slice(i));
 }
 
 /* ---------- 注入 ---------- */
