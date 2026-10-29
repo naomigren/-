@@ -1,1 +1,1 @@
-{"build": "2026-10-29-2", "note": "undo: heroine bonus rolls back with the task"}
+{"build": "2026-10-29-3", "note": "cast: unsigned shift so the daily line is never undefined"}
