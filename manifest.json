@@ -10,7 +10,7 @@
       "purpose": "any maskable"
     }
   ],
-  "start_url": "./klara-quest.html",
+  "start_url": "./go.html",
   "display": "standalone",
   "background_color": "#fdf2f0",
   "theme_color": "#c4868e",
