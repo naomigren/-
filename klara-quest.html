@@ -27,7 +27,7 @@ font-size:14px;letter-spacing:2px}
 <script>
 (function(){
 "use strict";
-var BUILD = "2026-10-31-2";
+var BUILD = "2026-10-31-3";
 var SALT  = "5ea74d36cf95d52045e4cb5bc2c2b9cf";
 var PKEY  = "staticrypt_passphrase";      // 沿用旧的 key，手机上存着的密码照样能用
 var DBN   = "klara-quest-cache", STORE = "app";
@@ -138,6 +138,14 @@ function boot(html){
 /* ---------- 主流程 ---------- */
 function run(){
   say("正在打开…", 5);
+  /* 壳可能被 PWA 缓存死，自己那个 BUILD 不可信 —— 每次先问一下 version.json */
+  fetch("version.json?t=" + Date.now(), {cache:"no-store"})
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(j){ if(j && j.build) BUILD = String(j.build); })
+    .catch(function(){})
+    .then(function(){ run2(); });
+}
+function run2(){
   idbGet("html:" + BUILD).then(function(cached){
     if(cached){ say("正在打开…", 90); boot(cached); return; }     // 命中缓存：不下载、不解密
     var saved = null;
