@@ -2,9 +2,12 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#e6e2ee">
 <title>克拉拉养成计划</title>
 <style>
-html,body{height:100%;margin:0;background:linear-gradient(165deg,#f5eff0,#e6e2ee);
+/* 根元素只铺纯色：渐变放在根上会平铺，屏幕比 100% 多出来的那一截会从渐变的浅色头重新画起，看着就是底下一条白 */
+html{height:100%;margin:0;background:#e6e2ee}
+body{height:100%;margin:0;background:#e6e2ee linear-gradient(180deg,#f5eff0,#e6e2ee) no-repeat;box-shadow:0 0 0 50vh #e6e2ee;
 font-family:-apple-system,system-ui,sans-serif;-webkit-text-size-adjust:100%}
 #w{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 32px;box-sizing:border-box}
 h1{font-size:17px;color:#5a4548;letter-spacing:2px;margin:0 0 10px;font-weight:600}
@@ -27,7 +30,7 @@ font-size:14px;letter-spacing:2px}
 <script>
 (function(){
 "use strict";
-var BUILD = "2026-11-12-1";
+var BUILD = "2026-11-12-2";
 var SALT  = "5ea74d36cf95d52045e4cb5bc2c2b9cf";
 var PKEY  = "staticrypt_passphrase";      // 沿用旧的 key，手机上存着的密码照样能用
 var DBN   = "klara-quest-cache", STORE = "app";
