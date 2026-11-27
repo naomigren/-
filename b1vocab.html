@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="词卡匣">
+<meta name="theme-color" content="#e7eae4">
+<link rel="apple-touch-icon" sizes="180x180" href="b1vocab-icon-180.png">
+<link rel="apple-touch-icon" sizes="192x192" href="b1vocab-icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="b1vocab-icon-512.png">
+<link rel="manifest" href="b1vocab-manifest.json">
+<title>B1 词卡匣</title>
+<style>
+/* VOICE: quiet, tender study desk; few hues, fine detail
+   IDEA: a Karteikasten — index cards filed behind tabbed dividers
+   PICTURE: the card box itself, tabs on top, cards below
+   COLOUR+TYPE: Morandi sage ground; der dusty blue, die dusty rose, das sage; Literata for German, system CJK for Chinese
+   LAYOUT: one calm column, sticky tabs, cards stack; two columns above 900px */
+:root{color-scheme:light dark;
+--bg:light-dark(#e7eae4,#151917);--card:light-dark(#fbfbf8,#1f2421);--ink:light-dark(#252a27,#e6e9e4);
+--mute:light-dark(#6d736e,#9aa29c);--line:light-dark(#d5d9d2,#323a35);--tab:light-dark(#d9ddd5,#262c28);
+--der:light-dark(#4f6f91,#8fb0d2);--die:light-dark(#a85f63,#e0a0a3);--das:light-dark(#5f8462,#9cc49f);
+--acc:light-dark(#7c6a8f,#b9a6cc);--ok:light-dark(#5f8462,#9cc49f)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,"PingFang SC","Hiragino Sans GB","Noto Sans SC",system-ui,sans-serif;overflow-x:clip}
+.de{font-family:Literata,Georgia,serif}
+header{padding:calc(28px + env(safe-area-inset-top)) max(5vw,16px) 8px;max-width:1240px;margin:auto}
+h1{font:600 clamp(30px,6vw,44px)/1.05 Literata,Georgia,serif;margin:0 0 6px;letter-spacing:-.01em}
+.sub{color:var(--mute);margin:0 0 14px;font-size:15px}
+.bar{height:8px;border-radius:8px;background:var(--tab);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ok);width:0;transition:width .5s}
+.stat{display:flex;gap:16px;flex-wrap:wrap;font-size:14px;color:var(--mute);margin-top:8px}
+.stat b{color:var(--ink);font-variant-numeric:tabular-nums}
+.ctrl{position:sticky;top:0;padding-top:max(10px,env(safe-area-inset-top)) !important;z-index:5;background:var(--bg);padding:10px max(5vw,16px);max-width:1240px;margin:auto}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+.tabs button{flex:none;border:0;border-radius:12px 12px 4px 4px;background:var(--tab);color:var(--ink);font:inherit;font-size:15px;padding:10px 14px;min-height:44px;cursor:pointer}
+.tabs button.on{background:var(--card);box-shadow:0 -2px 0 var(--acc) inset;font-weight:600}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;align-items:center}
+.row input[type=search]{flex:1 1 180px;font:inherit;font-size:16px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);min-height:44px}
+.tg{display:flex;align-items:center;gap:6px;font-size:14px;padding:8px 12px;border-radius:10px;background:var(--tab);min-height:44px;cursor:pointer;user-select:none}
+.tg input{width:18px;height:18px;accent-color:var(--acc)}
+.legend{font-size:13px;color:var(--mute);display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
+.legend span b{font-weight:600}
+main{max-width:1240px;margin:auto;padding:6px max(5vw,16px) calc(60px + env(safe-area-inset-bottom));display:grid;gap:12px;grid-template-columns:minmax(0,1fr)}
+@media(min-width:900px){main{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.sec{grid-column:1/-1;font:600 15px/1.4 inherit;color:var(--mute);margin:14px 0 0;padding-bottom:6px;border-bottom:1px solid var(--line)}
+.card{background:var(--card);border-radius:14px;padding:16px 16px 12px;border:1px solid var(--line);position:relative}
+.card.known{opacity:.62}
+.top{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.art{font-weight:600;font-size:17px}
+.g-der{color:var(--der)}.g-die{color:var(--die)}.g-das{color:var(--das)}.g-x{color:var(--mute)}
+.w{font-size:22px;font-weight:600;line-height:1.2}
+.tag{margin-left:auto;font-size:12px;padding:3px 9px;border-radius:20px;white-space:nowrap;border:1px solid currentColor}
+.lv-m{color:var(--die)}.lv-w{color:var(--acc)}.lv-r{color:var(--mute)}
+.meta{font-size:14px;color:var(--mute);margin-top:4px}
+.meta .de{color:var(--ink)}
+.vf{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:10px 0 2px}
+.vf div{background:var(--bg);border-radius:8px;padding:6px 8px;font-size:15px}
+.vf small{display:block;font-size:12px;color:var(--mute)}
+.mean{margin-top:10px;font-size:17px}
+.mean .en{color:var(--mute);font-size:14px;margin-left:6px}
+.ex{margin:8px 0 0;font-size:15px;border-left:3px solid var(--line);padding-left:10px}
+.ex span{display:block;color:var(--mute);font-size:14px}
+.note{margin:8px 0 0;font-size:14px;background:light-dark(#f1eef4,#262230);border-radius:8px;padding:7px 10px}
+.btns{display:flex;gap:8px;margin-top:12px}
+.btns button{flex:1;font:inherit;font-size:14px;min-height:40px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+.btns button.sel{background:var(--ink);color:var(--card);border-color:var(--ink)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.hide .card:not(.open) .hid{filter:blur(7px);user-select:none}
+.hide .card:not(.open){cursor:pointer}
+.empty{grid-column:1/-1;text-align:center;color:var(--mute);padding:40px 0}
+@media(prefers-reduced-motion:reduce){.bar i{transition:none}}
+</style>
+</head>
+<body>
+<header>
+<h1>B1 词卡匣</h1>
+<p class="sub">歌德 Zertifikat B1 官方词表 · 已收录 1.1–1.3</p>
+<div class="bar"><i id="pg"></i></div>
+<div class="stat"><span>共 <b id="nAll">0</b> 个</span><span>认识了 <b id="nOk">0</b></span><span>还不熟 <b id="nNo">0</b></span><span>没标 <b id="nNew">0</b></span></div>
+</header>
+<div class="ctrl">
+<div class="tabs" id="tabs"></div>
+<div class="row">
+<input type="search" id="q" placeholder="搜德语或中文…" aria-label="搜索">
+<label class="tg"><input type="checkbox" id="hide">遮住释义</label>
+<label class="tg"><input type="checkbox" id="onlyNo">只看没背下的</label>
+</div>
+<div class="legend"><span><b class="g-der">der</b> 阳性</span><span><b class="g-die">die</b> 阴性</span><span><b class="g-das">das</b> 中性</span><span><b class="lv-m">题干必会</b> 考卷上的指令</span><span><b class="lv-w">要会写</b> 作文用得上</span><span><b class="lv-r">认得就行</b> 阅读见了不懵</span></div>
+</div>
+<main id="list"></main>
+<script>
+{
+/* s=节 a=冠词 w=词 pl=复数 full=全称 v=[现在时er,过去时,完成时] vt=动词说明 zh en ex exz n=提示 lv=m/w/r */
+const D=[
+{s:"1.1",a:"das",w:"Abo",pl:"die Abos",full:"das Abonnement",zh:"订阅（报刊、会员、流媒体）",en:"subscription",ex:"Ich habe mein Abo für die Zeitung gekündigt.",exz:"我把报纸的订阅退掉了。",n:"退订＝ein Abo kündigen，阅读里很常见。",lv:"r"},
+{s:"1.1",a:"der",w:"Akku",pl:"die Akkus",full:"der Akkumulator",zh:"充电电池（手机、电脑的电池）",en:"rechargeable battery",ex:"Mein Akku ist fast leer.",exz:"我（手机）快没电了。",lv:"r"},
+{s:"1.1",a:"der",w:"Azubi",pl:"die Azubis",full:"der/die Auszubildende",zh:"学徒，职业培训（Ausbildung）学员",en:"trainee, apprentice",ex:"Sie ist Azubi in einer Bank.",exz:"她在一家银行当学徒。",n:"Azubi 是口语缩写，男女通用；正式写法 der/die Auszubildende。",lv:"r"},
+{s:"1.1",a:"",w:"bzw.",full:"beziehungsweise",zh:"或者说；确切地说；分别",en:"or rather; respectively",ex:"Ich komme aus Köln bzw. aus einem Dorf bei Köln.",exz:"我来自科隆，确切说是科隆附近的一个村子。",lv:"r"},
+{s:"1.1",a:"",w:"ca.",full:"circa / zirka",zh:"大约",en:"approximately",ex:"Die Fahrt dauert ca. zwei Stunden.",exz:"车程大约两小时。",lv:"w"},
+{s:"1.1",a:"",w:"d. h.",full:"das heißt",zh:"也就是说",en:"that is (i.e.)",ex:"Ich habe am Montag frei, d. h. ich kann dich besuchen.",exz:"我周一休息，也就是说我能去看你。",n:"作文里解释一句话时很好用；注意 d. h. 后面接正常语序。",lv:"w"},
+{s:"1.1",a:"die",w:"DVD",pl:"die DVDs",zh:"DVD 光盘",en:"DVD",ex:"Wir haben gestern eine DVD angesehen.",exz:"我们昨天看了一张 DVD。",lv:"r"},
+{s:"1.1",a:"das",w:"EG / OG / UG",full:"Erdgeschoss / Obergeschoss / Untergeschoss",zh:"底层（地面层）/ 楼上层 / 地下层",en:"ground floor / upper floor / basement",ex:"Die Toiletten sind im UG.",exz:"卫生间在地下层。",n:"陷阱：德国的 EG 等于中国的「一楼」，1. OG 才是中国的「二楼」。奥地利拼作 Erdgeschoß。",lv:"r"},
+{s:"1.1",a:"",w:"etc.",full:"et cetera",zh:"等等",en:"etc.",ex:"Wir brauchen Brot, Milch, Käse etc.",exz:"我们需要面包、牛奶、奶酪等等。",lv:"r"},
+{s:"1.1",a:"der",w:"ICE",pl:"die ICEs",full:"der Intercity-Express",zh:"德国高铁",en:"high-speed train",ex:"Mit dem ICE ist man in vier Stunden in München.",exz:"坐 ICE 四个小时就到慕尼黑。",lv:"r"},
+{s:"1.1",a:"das",w:"Kfz",pl:"die Kfz / Kfzs",full:"das Kraftfahrzeug",zh:"机动车（公文、告示用语）",en:"motor vehicle",ex:"Die Kfz-Steuer muss man jedes Jahr bezahlen.",exz:"机动车税每年都得交。",n:"多出现在告示和公文里，日常说 das Auto。",lv:"r"},
+{s:"1.1",a:"der",w:"Lkw",pl:"die Lkw / Lkws",full:"der Lastkraftwagen",zh:"卡车，货车",en:"truck",ex:"Auf der Autobahn fahren viele Lkws.",exz:"高速公路上跑着很多卡车。",lv:"r"},
+{s:"1.1",a:"der",w:"PC",pl:"die PCs",full:"der Personal Computer",zh:"个人电脑",en:"PC",ex:"Ich schreibe meine E-Mails am PC.",exz:"我在电脑上写邮件。",n:"「在电脑上」用 am PC / am Computer。",lv:"r"},
+{s:"1.1",a:"der",w:"Pkw",pl:"die Pkw / Pkws",full:"der Personenkraftwagen",zh:"小汽车，客车（公文用语）",en:"passenger car",ex:"Der Parkplatz ist nur für Pkws.",exz:"这个停车场只供小汽车使用。",n:"Pkw 小汽车，Lkw 卡车——只差一个字母，别看串。",lv:"r"},
+{s:"1.1",a:"die",w:"SMS",pl:"die SMS（单复同形）",full:"die Textnachricht",zh:"短信",en:"text message",ex:"Schick mir eine SMS, wenn du angekommen bist.",exz:"到了给我发条短信。",n:"德国、奥地利用 die SMS，瑞士用 das SMS。",lv:"r"},
+{s:"1.1",a:"das",w:"TV",pl:"单复同形，很少用复数",full:"die Television",zh:"电视",en:"TV",ex:"Was läuft heute im TV?",exz:"今天电视上演什么？",n:"日常更常说 der Fernseher（电视机）和 das Fernsehen（电视节目）。",lv:"r"},
+{s:"1.1",a:"",w:"usw.",full:"und so weiter",zh:"等等",en:"and so on",ex:"Im Kurs lernen wir Grammatik, Wörter usw.",exz:"课上我们学语法、单词等等。",lv:"w"},
+{s:"1.1",a:"",w:"vgl.",full:"vergleiche",zh:"参见；比较",en:"cf., compare",ex:"vgl. Seite 12",exz:"参见第 12 页",lv:"r"},
+{s:"1.1",a:"das",w:"WC",pl:"die WCs",full:"das Wasserklosett",zh:"厕所，洗手间",en:"toilet",ex:"Entschuldigung, wo ist hier das WC?",exz:"请问这里洗手间在哪？",lv:"r"},
+{s:"1.1",a:"die",w:"WG",pl:"die WGs",full:"die Wohngemeinschaft",zh:"合租公寓（几个人合住、共用厨房卫生间）",en:"shared flat",ex:"Ich wohne mit zwei Studentinnen in einer WG.",exz:"我和两个大学生合住一套 WG。",n:"德国租房最常见的形式之一，阅读题里的租房广告经常出现。",lv:"w"},
+{s:"1.1",a:"",w:"z. B.",full:"zum Beispiel",zh:"例如",en:"for example",ex:"Ich esse gern Obst, z. B. Äpfel und Bananen.",exz:"我爱吃水果，比如苹果和香蕉。",lv:"w"},
+
+{s:"1.2",a:"das",w:"Baby",pl:"die Babys",zh:"婴儿",en:"baby",ex:"Das Baby schläft endlich.",exz:"宝宝终于睡着了。",lv:"r"},
+{s:"1.2",a:"der",w:"Babysitter",pl:"die Babysitter",fem:"die Babysitterin, die Babysitterinnen",zh:"临时帮忙看孩子的人",en:"babysitter",ex:"Am Samstag kommt eine Babysitterin, dann gehen wir ins Kino.",exz:"周六有个保姆来看孩子，我们就去看电影。",lv:"r"},
+{s:"1.2",a:"die",w:"Band",pl:"die Bands",zh:"乐队",en:"band",ex:"Die Band spielt heute Abend im Park.",exz:"乐队今晚在公园演出。",n:"die Band 乐队 · das Band 带子 · der Band（书的）一卷——冠词不同，意思全变。",lv:"r"},
+{s:"1.2",a:"die",w:"Bar",pl:"die Bars",zh:"酒吧",en:"bar",ex:"Nach dem Konzert gehen wir noch in eine Bar.",exz:"音乐会后我们再去个酒吧。",lv:"r"},
+{s:"1.2",a:"der",w:"Bikini",pl:"die Bikinis",zh:"比基尼",en:"bikini",ex:"Vergiss deinen Bikini nicht!",exz:"别忘了带你的比基尼！",lv:"r"},
+{s:"1.2",a:"der",w:"Blog",pl:"die Blogs",zh:"博客",en:"blog",ex:"Sie schreibt einen Blog über Reisen.",exz:"她写一个关于旅行的博客。",lv:"r"},
+{s:"1.2",a:"",w:"bloggen",v:["bloggt","bloggte","hat gebloggt"],zh:"写博客",en:"to blog",ex:"Er bloggt jeden Tag über sein Essen.",exz:"他每天都在博客上写自己吃了什么。",lv:"r"},
+{s:"1.2",a:"das",w:"Camp",pl:"die Camps",zh:"营地，夏令营",en:"camp",ex:"Im Sommer fahren die Kinder in ein Camp.",exz:"夏天孩子们去参加营地活动。",lv:"r"},
+{s:"1.2",a:"",w:"campen",v:["campt","campte","hat gecampt"],zh:"露营",en:"to camp",ex:"Letztes Jahr haben wir am See gecampt.",exz:"去年我们在湖边露营了。",lv:"r"},
+{s:"1.2",a:"die",w:"Castingshow",pl:"die Castingshows",zh:"选秀节目",en:"talent show",ex:"Sie hat bei einer Castingshow mitgemacht.",exz:"她参加过一个选秀节目。",lv:"r"},
+{s:"1.2",a:"der",w:"CD-Player",pl:"die CD-Player",zh:"CD 播放机",en:"CD player",ex:"Mein alter CD-Player funktioniert noch.",exz:"我那台旧 CD 机还能用。",lv:"r"},
+{s:"1.2",a:"der",w:"Chat(room)",pl:"die Chats / Chatrooms",zh:"网上聊天；聊天室",en:"chat (room)",ex:"Wir haben uns in einem Chat kennengelernt.",exz:"我们是在一个聊天室认识的。",lv:"r"},
+{s:"1.2",a:"",w:"chatten",v:["chattet","chattete","hat gechattet"],zh:"网上聊天",en:"to chat online",ex:"Wir chatten fast jeden Abend.",exz:"我们几乎每晚都在网上聊天。",lv:"r"},
+{s:"1.2",a:"",w:"checken",v:["checkt","checkte","hat gecheckt"],zh:"检查，查看；（口语）弄懂",en:"to check; (colloq.) to get it",ex:"Ich checke kurz meine E-Mails.",exz:"我看一眼邮件。",n:"口语里 Hast du's gecheckt? ＝「你懂了没？」",lv:"w"},
+{s:"1.2",a:"der",w:"Chip",pl:"die Chips",zh:"芯片；（复数 Chips）薯片",en:"chip; (pl.) crisps",ex:"Im Kino essen wir immer Chips.",exz:"在电影院我们总是吃薯片。",lv:"r"},
+{s:"1.2",a:"die",w:"City",pl:"die Citys",zh:"市中心，市区繁华地段",en:"city centre",ex:"Am Samstag ist die City voller Menschen.",exz:"周六市中心全是人。",n:"陷阱：德语 die City 不是「城市」，城市是 die Stadt。",lv:"r"},
+{s:"1.2",a:"der",w:"Club",pl:"die Clubs",zh:"俱乐部；夜店",en:"club",ex:"Er ist Mitglied in einem Tennisclub.",exz:"他是一家网球俱乐部的会员。",lv:"r"},
+{s:"1.2",a:"die/das",w:"Cola",pl:"die Colas",zh:"可乐",en:"cola",ex:"Eine Cola, bitte!",exz:"来一杯可乐！",n:"德国北部多说 die Cola，南德和奥地利也说 das Cola。",lv:"r"},
+{s:"1.2",a:"der/das",w:"Comic",pl:"die Comics",zh:"漫画",en:"comic",ex:"Als Kind habe ich viele Comics gelesen.",exz:"小时候我读了很多漫画。",lv:"r"},
+{s:"1.2",a:"der",w:"Computer",pl:"die Computer",zh:"电脑",en:"computer",ex:"Der Computer ist schon wieder kaputt.",exz:"电脑又坏了。",lv:"r"},
+{s:"1.2",a:"",w:"cool",zh:"酷，很棒；淡定",en:"cool",ex:"Das Konzert war echt cool.",exz:"那场音乐会真的很棒。",vt:"形容词",lv:"r"},
+{s:"1.2",a:"das",w:"E-Bike",pl:"die E-Bikes",zh:"电动自行车",en:"e-bike",ex:"Mit dem E-Bike fahre ich zur Arbeit.",exz:"我骑电动自行车上班。",lv:"r"},
+{s:"1.2",a:"das",w:"E-Book",pl:"die E-Books",zh:"电子书",en:"e-book",ex:"Im Urlaub lese ich lieber E-Books.",exz:"度假时我更喜欢读电子书。",lv:"r"},
+{s:"1.2",a:"der",w:"Fan",pl:"die Fans",zh:"粉丝，迷",en:"fan",ex:"Ich bin ein großer Fan von dieser Band.",exz:"我是这支乐队的铁粉。",lv:"r"},
+{s:"1.2",a:"das",w:"Fax",pl:"die Faxe",zh:"传真",en:"fax",ex:"Bitte schicken Sie uns das Formular per Fax.",exz:"请把表格传真给我们。",n:"德国一些机关和诊所至今还在用传真，阅读材料里会碰到。",lv:"r"},
+{s:"1.2",a:"",w:"faxen",v:["faxt","faxte","hat gefaxt"],zh:"发传真",en:"to fax",ex:"Ich habe den Vertrag gestern gefaxt.",exz:"我昨天把合同传真过去了。",lv:"r"},
+{s:"1.2",a:"das",w:"Festival",pl:"die Festivals",zh:"音乐节，节庆活动",en:"festival",ex:"Im Juli gibt es ein großes Festival in der Stadt.",exz:"七月城里有个大型音乐节。",lv:"r"},
+{s:"1.2",a:"",w:"fit",zh:"身体好，有活力，状态好",en:"fit",ex:"Seit ich jogge, fühle ich mich fit.",exz:"自从开始慢跑，我觉得自己精神多了。",vt:"形容词",lv:"r"},
+{s:"1.2",a:"die",w:"Fitness",pl:"无复数",zh:"健身；身体素质",en:"fitness",ex:"Für meine Fitness gehe ich zweimal pro Woche schwimmen.",exz:"为了保持身体素质，我每周游两次泳。",lv:"r"},
+{s:"1.2",a:"",w:"global",zh:"全球的",en:"global",ex:"Der Klimawandel ist ein globales Problem.",exz:"气候变化是个全球性问题。",vt:"形容词",lv:"r"},
+{s:"1.2",a:"",w:"googeln",v:["googelt","googelte","hat gegoogelt"],zh:"用谷歌搜，上网搜",en:"to google",ex:"Ich habe die Adresse schnell gegoogelt.",exz:"我飞快地上网搜了一下地址。",lv:"r"},
+{s:"1.2",a:"der",w:"Hamburger",pl:"die Hamburger",zh:"汉堡包",en:"hamburger",ex:"Die Kinder wollen Hamburger mit Pommes.",exz:"孩子们想吃汉堡配薯条。",lv:"r"},
+{s:"1.2",a:"der",w:"Hit",pl:"die Hits",zh:"热门歌曲；爆款",en:"hit",ex:"Das Lied war früher ein großer Hit.",exz:"这首歌以前很火。",lv:"r"},
+{s:"1.2",a:"die",w:"Homepage",pl:"die Homepages",zh:"网站主页",en:"homepage, website",ex:"Alle Infos finden Sie auf unserer Homepage.",exz:"所有信息都在我们的网站上。",n:"广告结尾的固定句，阅读里很常见。",lv:"r"},
+{s:"1.2",a:"das",w:"Internet",pl:"无复数",zh:"互联网",en:"internet",ex:"Ich habe die Wohnung im Internet gefunden.",exz:"我是在网上找到这套房子的。",n:"「在网上」固定用 im Internet。",lv:"w"},
+{s:"1.2",a:"der",w:"Jazz",pl:"无复数",zh:"爵士乐",en:"jazz",ex:"Mein Vater hört gern Jazz.",exz:"我爸爸爱听爵士乐。",lv:"r"},
+{s:"1.2",a:"der",w:"Job",pl:"die Jobs",zh:"工作（口语，常指零工、兼职）",en:"job",ex:"Sie sucht einen Job für die Ferien.",exz:"她在找一份假期打工。",lv:"w"},
+{s:"1.2",a:"",w:"jobben",v:["jobbt","jobbte","hat gejobbt"],zh:"打零工，做兼职",en:"to do odd jobs",ex:"Im Sommer jobbe ich in einem Café.",exz:"夏天我在一家咖啡馆打工。",n:"jobben 只指临时、兼职的活；正式上班说 arbeiten。",lv:"r"},
+{s:"1.2",a:"",w:"joggen",v:["joggt","joggte","ist / hat gejoggt"],zh:"慢跑",en:"to jog",ex:"Ich bin heute durch den Park gejoggt.",exz:"我今天绕公园跑了一圈。",n:"跑到某处、穿过某处用 ist；只说「跑步了多久」用 hat：Ich habe eine Stunde gejoggt.",lv:"r"},
+{s:"1.2",a:"der/das",w:"Ketchup",pl:"die Ketchups",zh:"番茄酱",en:"ketchup",ex:"Möchtest du Ketchup zu den Pommes?",exz:"薯条要配番茄酱吗？",n:"也可拼作 Ketschup。",lv:"r"},
+{s:"1.2",a:"der",w:"Killer",pl:"die Killer",fem:"die Killerin, die Killerinnen",zh:"杀手",en:"killer",ex:"Im Film sucht die Polizei einen Killer.",exz:"电影里警察在追捕一个杀手。",lv:"r"},
+{s:"1.2",a:"der",w:"Laptop",pl:"die Laptops",zh:"笔记本电脑",en:"laptop",ex:"Ich nehme meinen Laptop mit in den Unterricht.",exz:"我带笔记本电脑去上课。",lv:"r"},
+{s:"1.2",a:"der",w:"Link",pl:"die Links",zh:"链接",en:"link",ex:"Ich schicke dir den Link per E-Mail.",exz:"我把链接用邮件发给你。",lv:"r"},
+{s:"1.2",a:"",w:"live",zh:"现场，直播",en:"live",ex:"Das Spiel wird live im Fernsehen gezeigt.",exz:"比赛会在电视上直播。",vt:"副词",lv:"r"},
+{s:"1.2",a:"die",w:"E-Mail",pl:"die E-Mails",zh:"电子邮件",en:"e-mail",ex:"Vielen Dank für Ihre E-Mail.",exz:"感谢您的来信。",n:"德国、奥地利用 die E-Mail；奥地利和瑞士也说 das E-Mail。作文开头最常用的一句就是上面那句。",lv:"w"},
+{s:"1.2",a:"die",w:"Mailbox",pl:"die Mailboxen",zh:"（手机）语音信箱",en:"voicemail",ex:"Ich habe dir auf die Mailbox gesprochen.",exz:"我给你语音信箱留了言。",n:"陷阱：德语里 Mailbox 通常是手机的语音信箱，不是电子邮箱。",lv:"r"},
+{s:"1.2",a:"",w:"mailen",v:["mailt","mailte","hat gemailt"],zh:"发电子邮件",en:"to e-mail",ex:"Kannst du mir die Fotos mailen?",exz:"你能把照片发邮件给我吗？",lv:"w"},
+{s:"1.2",a:"der",w:"Manager",pl:"die Manager",fem:"die Managerin, die Managerinnen",zh:"经理，管理者",en:"manager",ex:"Die Managerin hat heute keine Zeit.",exz:"经理今天没空。",lv:"r"},
+{s:"1.2",a:"die",w:"Mobilbox",pl:"die Mobilboxen",zh:"（手机）语音信箱，奥地利说法",en:"voicemail (Austria)",ex:"Sprich mir einfach auf die Mobilbox.",exz:"直接给我语音信箱留言就行。",n:"和 Mailbox 同义，认得就行。",lv:"r"},
+{s:"1.2",a:"das",w:"Mountainbike",pl:"die Mountainbikes",zh:"山地自行车",en:"mountain bike",ex:"Am Wochenende fahren wir mit dem Mountainbike in die Berge.",exz:"周末我们骑山地车进山。",lv:"r"},
+{s:"1.2",a:"",w:"okay",zh:"好的，行；还可以",en:"okay",ex:"Ist das okay für dich?",exz:"这样你可以吗？",n:"也写作 o.k. / O.K.",vt:"口语",lv:"r"},
+{s:"1.2",a:"",w:"online",zh:"在线，网上",en:"online",ex:"Man kann die Tickets auch online kaufen.",exz:"票也可以在网上买。",vt:"副词 / 形容词",lv:"w"},
+{s:"1.2",a:"die",w:"Plattform",pl:"die Plattformen",zh:"（网络）平台",en:"platform",ex:"Auf dieser Plattform kann man gebrauchte Möbel verkaufen.",exz:"在这个平台上可以卖二手家具。",n:"火车站台平时说 der Bahnsteig 或 das Gleis。",lv:"r"},
+{s:"1.2",a:"das",w:"Poster",pl:"die Poster",zh:"海报",en:"poster",ex:"An der Wand hängt ein Poster.",exz:"墙上挂着一张海报。",lv:"r"},
+{s:"1.2",a:"das",w:"Puzzle",pl:"die Puzzles",zh:"拼图",en:"jigsaw puzzle",ex:"Wir machen ein Puzzle mit 1000 Teilen.",exz:"我们在拼一个 1000 片的拼图。",lv:"r"},
+{s:"1.2",a:"das/der",w:"Sandwich",pl:"die Sandwichs / Sandwiches / Sandwiche",zh:"三明治",en:"sandwich",ex:"Zum Mittagessen esse ich nur ein Sandwich.",exz:"午饭我只吃一个三明治。",lv:"r"},
+{s:"1.2",a:"die",w:"Show",pl:"die Shows",zh:"表演，秀，娱乐节目",en:"show",ex:"Die Show beginnt um 20 Uhr.",exz:"演出晚上八点开始。",lv:"r"},
+{s:"1.2",a:"das",w:"Smartphone",pl:"die Smartphones",zh:"智能手机",en:"smartphone",ex:"Ohne Smartphone gehe ich nicht aus dem Haus.",exz:"不带手机我是不出门的。",n:"日常更常说 das Handy。",lv:"r"},
+{s:"1.2",a:"der",w:"Snack",pl:"die Snacks",zh:"小吃，零食",en:"snack",ex:"Im Zug gibt es kleine Snacks.",exz:"火车上有小零食卖。",lv:"r"},
+{s:"1.2",a:"die",w:"Software",pl:"die Softwares（很少用）",zh:"软件",en:"software",ex:"Die neue Software ist leicht zu bedienen.",exz:"这款新软件很好上手。",lv:"r"},
+{s:"1.2",a:"der",w:"Song",pl:"die Songs",zh:"歌，歌曲",en:"song",ex:"Diesen Song höre ich jeden Morgen.",exz:"这首歌我每天早上都听。",lv:"r"},
+{s:"1.2",a:"der",w:"Spot",pl:"die Spots",zh:"广告短片（＝Werbespot）",en:"(TV/radio) ad",ex:"Der Spot läuft jeden Abend im Fernsehen.",exz:"这支广告每晚都在电视上播。",lv:"r"},
+{s:"1.2",a:"das",w:"Steak",pl:"die Steaks",zh:"牛排",en:"steak",ex:"Ich hätte gern ein Steak mit Salat.",exz:"我想要一份牛排配沙拉。",lv:"r"},
+{s:"1.2",a:"",w:"surfen",v:["surft","surfte","ist / hat gesurft"],zh:"冲浪；上网",en:"to surf",ex:"Er surft stundenlang im Internet.",exz:"他一上网就是好几个小时。",n:"上网、单纯说冲浪这项活动用 hat；冲浪划到某处用 ist。",lv:"r"},
+{s:"1.2",a:"der",w:"Swimmingpool",pl:"die Swimmingpools",zh:"游泳池（多指私人、酒店的）",en:"swimming pool",ex:"Das Hotel hat einen Swimmingpool.",exz:"这家酒店有游泳池。",n:"公共游泳馆说 das Schwimmbad。",lv:"r"},
+{s:"1.2",a:"das",w:"Taxi",pl:"die Taxis",zh:"出租车",en:"taxi",ex:"Wir nehmen ein Taxi zum Bahnhof.",exz:"我们打车去火车站。",n:"打车＝ein Taxi nehmen。",lv:"r"},
+{s:"1.2",a:"das",w:"Team",pl:"die Teams",zh:"团队",en:"team",ex:"Wir sind ein gutes Team.",exz:"我们是个好团队。",lv:"w"},
+{s:"1.2",a:"der",w:"Terminal",pl:"die Terminals",zh:"（机场）航站楼",en:"(airport) terminal",ex:"Unser Flug geht von Terminal 2.",exz:"我们的航班从 2 号航站楼出发。",n:"别和 der Termin（预约）看混。电脑终端说 das Terminal。",lv:"r"},
+{s:"1.2",a:"die",w:"Tour",pl:"die Touren",zh:"游览，行程；巡演",en:"tour",ex:"Wir machen eine Tour durch die Altstadt.",exz:"我们去老城转一圈。",lv:"r"},
+{s:"1.2",a:"der",w:"Trend",pl:"die Trends",zh:"潮流，趋势",en:"trend",ex:"Vegan zu essen ist ein Trend.",exz:"吃纯素是一种潮流。",lv:"r"},
+{s:"1.2",a:"das",w:"T-Shirt",pl:"die T-Shirts",zh:"T 恤",en:"T-shirt",ex:"Im Sommer trage ich meistens ein T-Shirt.",exz:"夏天我大多穿 T 恤。",lv:"r"},
+{s:"1.2",a:"",w:"twittern",v:["twittert","twitterte","hat getwittert"],zh:"发推特",en:"to tweet",ex:"Der Politiker twittert jeden Tag.",exz:"那位政治人物每天都发推。",lv:"r"},
+{s:"1.2",a:"der",w:"User",pl:"die User",fem:"die Userin, die Userinnen",zh:"用户",en:"user",ex:"Die App hat schon eine Million User.",exz:"这个应用已经有一百万用户了。",lv:"r"},
+
+{s:"1.3",a:"die",w:"Aufgabe",pl:"die Aufgaben",zh:"题目；任务",en:"task, exercise",ex:"Lesen Sie die Aufgabe genau.",exz:"请仔细读题。",lv:"m"},
+{s:"1.3",a:"",w:"ankreuzen",v:["kreuzt an","kreuzte an","hat angekreuzt"],vt:"可分动词",zh:"打叉勾选",en:"to mark with a cross",ex:"Kreuzen Sie die richtige Antwort an.",exz:"请勾选正确答案。",n:"德国答题习惯是在框里打 ✗，不是打 ✓。",lv:"m"},
+{s:"1.3",a:"der",w:"Antwortbogen",pl:"die Antwortbogen / Antwortbögen",zh:"答题卡",en:"answer sheet",ex:"Schreiben Sie Ihren Namen auf den Antwortbogen.",exz:"请在答题卡上写上姓名。",lv:"m"},
+{s:"1.3",a:"die",w:"Anzeige",pl:"die Anzeigen",zh:"广告，启事（报纸、网上的小广告）",en:"advertisement",ex:"Ich habe Ihre Anzeige in der Zeitung gelesen.",exz:"我在报纸上看到了您的广告。",n:"阅读有一部分专门给几个人匹配合适的广告。",lv:"m"},
+{s:"1.3",a:"die",w:"Aussage",pl:"die Aussagen",zh:"陈述，说法",en:"statement",ex:"Ist die Aussage richtig oder falsch?",exz:"这个说法对还是错？",n:"「对错判断题」的核心词：每一条要你判断的句子就是一个 Aussage。",lv:"m"},
+{s:"1.3",a:"die",w:"Durchsage",pl:"die Durchsagen",zh:"广播通知（车站、商场、电台）",en:"announcement",ex:"Achtung, eine Durchsage: Der Zug hat zehn Minuten Verspätung.",exz:"请注意，广播通知：列车晚点十分钟。",lv:"m"},
+{s:"1.3",a:"die",w:"Einleitung",pl:"die Einleitungen",zh:"开头，引言",en:"introduction",ex:"Schreiben Sie eine kurze Einleitung.",exz:"写一段简短的开头。",n:"作文题干原词。配套：der Hauptteil 正文，der Schluss 结尾。",lv:"m"},
+{s:"1.3",a:"die",w:"Folie",pl:"die Folien",zh:"（演示文稿的）一页幻灯片",en:"slide",ex:"Auf der ersten Folie steht das Thema.",exz:"第一页幻灯片上写着题目。",n:"另一个意思是保鲜膜。",lv:"m"},
+{s:"1.3",a:"das",w:"Hilfsmittel",pl:"die Hilfsmittel",zh:"辅助工具",en:"aid, tool",ex:"In der Prüfung darf man keine Hilfsmittel benutzen.",exz:"考试时不许使用任何辅助工具。",n:"比如手机、词典都算。",lv:"m"},
+{s:"1.3",a:"der",w:"Kommentar",pl:"die Kommentare",zh:"评论",en:"comment",ex:"Unter dem Artikel stehen viele Kommentare.",exz:"文章底下有很多评论。",lv:"m"},
+{s:"1.3",a:"",w:"lösen",v:["löst","löste","hat gelöst"],zh:"解答；解决",en:"to solve",ex:"Ich konnte die letzte Aufgabe nicht lösen.",exz:"最后一道题我没做出来。",n:"解决问题＝ein Problem lösen。",lv:"m"},
+{s:"1.3",a:"die",w:"Lösung",pl:"die Lösungen",zh:"答案；解决办法",en:"answer, solution",ex:"Für jede Aufgabe gibt es nur eine richtige Lösung.",exz:"每道题只有一个正确答案。",lv:"m"},
+{s:"1.3",a:"der",w:"Moderator",pl:"die Moderatoren",fem:"die Moderatorin, die Moderatorinnen",zh:"（节目）主持人",en:"presenter, host",ex:"Der Moderator stellt die Gäste vor.",exz:"主持人介绍嘉宾。",lv:"m"},
+{s:"1.3",a:"das",w:"Modul",pl:"die Module",zh:"（考试的）科目，模块",en:"module",ex:"Die Prüfung hat vier Module.",exz:"这个考试有四个科目。",n:"Lesen、Hören、Schreiben、Sprechen 各是一个 Modul，可以分开考。",lv:"m"},
+{s:"1.3",a:"die",w:"Präsentation",pl:"die Präsentationen",zh:"演示，展示",en:"presentation",ex:"Am Ende der Präsentation bedanke ich mich.",exz:"展示最后我会致谢。",lv:"m"},
+{s:"1.3",a:"der",w:"Punkt",pl:"die Punkte",zh:"要点；分数；点",en:"point",ex:"Ich habe im Test 80 Punkte bekommen.",exz:"我测试拿了 80 分。",n:"作文题干说三个 Punkte 都要写，意思是题目给的三个要点一个都不能漏，漏了扣分。",lv:"m"},
+{s:"1.3",a:"die",w:"Rückmeldung",pl:"die Rückmeldungen",zh:"反馈，回复",en:"feedback, reply",ex:"Vielen Dank für Ihre schnelle Rückmeldung.",exz:"感谢您的快速回复。",n:"正式信件里很好用。",lv:"m"},
+{s:"1.3",a:"die",w:"Struktur",pl:"die Strukturen",zh:"结构",en:"structure",ex:"Der Text hat eine klare Struktur.",exz:"这篇文章结构清楚。",lv:"m"},
+{s:"1.3",a:"der",w:"Textaufbau",pl:"无复数",zh:"文章结构，行文布局",en:"text structure",ex:"Achten Sie auf den Textaufbau: Einleitung, Hauptteil, Schluss.",exz:"注意文章结构：开头、正文、结尾。",lv:"m"},
+{s:"1.3",a:"",w:"übertragen",v:["überträgt","übertrug","hat übertragen"],vt:"不可分动词",zh:"誊写到，转抄到",en:"to transfer",ex:"Übertragen Sie Ihre Lösungen auf den Antwortbogen.",exz:"请把答案誊到答题卡上。",n:"不可分动词，所以完成时没有 ge-。考试只看答题卡，做完一定要誊。",lv:"m"},
+{s:"1.3",a:"",w:"zuordnen",v:["ordnet zu","ordnete zu","hat zugeordnet"],vt:"可分动词",zh:"匹配，归类",en:"to match, assign",ex:"Ordnen Sie die Anzeigen den Personen zu.",exz:"请把广告和人对应起来。",n:"结构：jemandem（第三格）etwas（第四格）zuordnen。",lv:"m"}
+];
+const SEC={"1.1":"1.1 缩写","1.2":"1.2 外来词","1.3":"1.3 考试指令词"};
+const LV={m:"题干必会",w:"要会写",r:"认得就行"};
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const key=d=>d.s+"|"+d.w;
+let mark={};
+try{mark=JSON.parse(localStorage.getItem("b1vocab-mark")||"{}")}catch(e){mark={}}
+const save=()=>{try{localStorage.setItem("b1vocab-mark",JSON.stringify(mark))}catch(e){}};
+let tab="all";
+try{tab=localStorage.getItem("b1vocab-tab")||"all"}catch(e){}
+const $=id=>document.getElementById(id);
+const gcls=a=>a?("g-"+a.split("/")[0]):"g-x";
+function card(d){
+const k=key(d),m=mark[k];
+const art=d.a?`<span class="art de ${gcls(d.a)}">${esc(d.a)}</span>`:"";
+const meta=[];
+if(d.full)meta.push(`全称 <span class="de">${esc(d.full)}</span>`);
+if(d.pl)meta.push(`复数 <span class="de">${esc(d.pl)}</span>`);
+if(d.fem)meta.push(`女性 <span class="de">${esc(d.fem)}</span>`);
+if(d.vt)meta.push(esc(d.vt));
+const vf=d.v?`<div class="vf"><div><small>现在时 er/sie</small><span class="de">${esc(d.v[0])}</span></div><div><small>过去时</small><span class="de">${esc(d.v[1])}</span></div><div><small>完成时</small><span class="de">${esc(d.v[2])}</span></div></div>`:"";
+return `<article class="card${m===1?" known":""}" data-k="${esc(k)}">
+<div class="top">${art}<span class="w de">${esc(d.w)}</span><span class="tag lv-${d.lv}">${LV[d.lv]}</span></div>
+${meta.length?`<div class="meta">${meta.join(" · ")}</div>`:""}${vf}
+<div class="mean hid">${esc(d.zh)}<span class="en">${esc(d.en)}</span></div>
+<p class="ex"><span class="de" style="color:var(--ink);font-size:15px">${esc(d.ex)}</span><span class="hid">${esc(d.exz)}</span></p>
+${d.n?`<p class="note hid">${esc(d.n)}</p>`:""}
+<div class="btns"><button data-v="1" class="${m===1?"sel":""}">认识了</button><button data-v="0" class="${m===0?"sel":""}">还不熟</button></div>
+</article>`}
+function draw(){
+const q=$("q").value.trim().toLowerCase(),only=$("onlyNo").checked;
+let html="",last="",n=0;
+for(const d of D){
+if(tab!=="all"&&d.s!==tab)continue;
+if(only&&mark[key(d)]===1)continue;
+if(q&&!(d.w+" "+d.zh+" "+(d.full||"")+" "+d.en).toLowerCase().includes(q))continue;
+if(d.s!==last){html+=`<h2 class="sec">${SEC[d.s]}</h2>`;last=d.s}
+html+=card(d);n++}
+$("list").innerHTML=n?html:`<p class="empty">${only?"这一组全认识了，换一组吧":"没有找到"}</p>`;
+stats()}
+function stats(){
+const ok=D.filter(d=>mark[key(d)]===1).length,no=D.filter(d=>mark[key(d)]===0).length;
+$("nAll").textContent=D.length;$("nOk").textContent=ok;$("nNo").textContent=no;$("nNew").textContent=D.length-ok-no;
+$("pg").style.width=(ok/D.length*100)+"%"}
+function tabs(){
+const t=[["all","全部"],...Object.entries(SEC)];
+$("tabs").innerHTML=t.map(([k,v])=>`<button data-t="${k}" class="${k===tab?"on":""}">${v}</button>`).join("")}
+$("tabs").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;tab=b.dataset.t;try{localStorage.setItem("b1vocab-tab",tab)}catch(x){}tabs();draw();window.scrollTo({top:0})});
+$("list").addEventListener("click",e=>{
+const c=e.target.closest(".card");if(!c)return;
+const b=e.target.closest("button[data-v]");
+if(b){const v=+b.dataset.v,k=c.dataset.k;if(mark[k]===v)delete mark[k];else mark[k]=v;save();
+c.classList.toggle("known",mark[k]===1);c.querySelectorAll("button[data-v]").forEach(x=>x.classList.toggle("sel",mark[k]===+x.dataset.v));stats();return}
+if(document.body.classList.contains("hide"))c.classList.toggle("open")});
+$("q").addEventListener("input",draw);
+$("onlyNo").addEventListener("change",draw);
+$("hide").addEventListener("change",e=>{document.body.classList.toggle("hide",e.target.checked);document.querySelectorAll(".card.open").forEach(c=>c.classList.remove("open"))});
+tabs();draw();
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "name": "B1 词卡匣",
+  "short_name": "词卡匣",
+  "icons": [
+    {"src": "b1vocab-icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "b1vocab-icon-512.png", "sizes": "512x512", "type": "image/png"}
+  ],
+  "start_url": "./b1vocab.html",
+  "display": "standalone",
+  "background_color": "#e7eae4",
+  "theme_color": "#e7eae4"
+}
