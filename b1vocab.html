@@ -73,6 +73,21 @@ main{max-width:1240px;margin:auto;padding:6px max(5vw,16px) calc(60px + env(safe
 button:focus-visible,input:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 .hide .card:not(.open) .hid{filter:blur(7px);user-select:none}
 .hide .card:not(.open){cursor:pointer}
+.hideDe .card:not(.open) .hd{filter:blur(7px);user-select:none}
+.hideDe .card:not(.open){cursor:pointer}
+.qIn{display:block;width:100%;margin-top:6px;font:20px Literata,Georgia,serif;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);min-height:48px}
+textarea.qIn{font-size:17px;resize:vertical}
+.qlab{font-size:13px;color:var(--mute);margin:14px 0 0}
+.qlab b{color:var(--ink);font-weight:500}
+.qyou{margin-top:10px;font-size:15px}
+.qyou small{display:block;font-size:12px;color:var(--mute);margin-bottom:2px}
+.dm{border-radius:4px;padding:0 2px}
+.dm.x{color:var(--die);text-decoration:line-through}
+.dm.m{background:light-dark(#f4e4e4,#3a2627);color:var(--die);font-weight:600}
+.dm.c{background:light-dark(#f6ecd2,#3a3220)}
+.qwarn{font-size:13px;color:#b07a1e;margin:6px 0 0}
+.qOv{margin-top:8px;font:inherit;font-size:14px;color:var(--mute);background:none;border:1px dashed var(--line);border-radius:10px;padding:8px 12px;min-height:40px;cursor:pointer;width:100%}
+
 .empty{grid-column:1/-1;text-align:center;color:var(--mute);padding:40px 0}
 .wb{font-size:12px;padding:3px 9px;border-radius:20px;white-space:nowrap;background:light-dark(#f4e4e4,#3a2627);color:var(--die)}
 .btns button.wbtn{flex:1.15}.btns button.ed{flex:none;width:48px}
@@ -135,6 +150,7 @@ footer button{font:inherit;font-size:14px;color:var(--mute);background:none;bord
 <div class="row">
 <input type="search" id="q" placeholder="搜德语或中文…" aria-label="搜索">
 <label class="tg"><input type="checkbox" id="hide">遮住释义</label>
+<label class="tg"><input type="checkbox" id="hideDe">遮住德文</label>
 <label class="tg"><input type="checkbox" id="onlyNo">只看没背下的</label>
 </div>
 <div class="acts"><button id="addBtn">＋ 加生词</button><button id="quizBtn">小测一轮</button></div>
@@ -298,10 +314,10 @@ if(wr)tg.push(`<span class="wb">错 ${wr.n} 次${wr.art?" · 冠词":""}${wr.s?`
 if(d.id)tg.push(`<span class="tag lv-r">我加的</span>`);
 if(d.lv)tg.push(`<span class="tag lv-${d.lv}">${LV[d.lv]}</span>`);
 return `<article class="card${m===1?" known":""}" data-k="${esc(k)}">
-<div class="top">${art}<span class="w de">${esc(d.w)}</span><span class="tags">${tg.join("")}</span></div>
-${meta.length?`<div class="meta">${meta.join(" · ")}</div>`:""}${vf}
+<div class="top"><span class="hd">${art}<span class="w de">${esc(d.w)}</span></span><span class="tags">${tg.join("")}</span></div>
+${meta.length?`<div class="meta hd">${meta.join(" · ")}</div>`:""}${vf?`<div class="hd">${vf}</div>`:""}
 <div class="mean hid">${esc(d.zh)}${d.en?`<span class="en">${esc(d.en)}</span>`:""}</div>
-${d.ex?`<p class="ex"><span class="de" style="color:var(--ink);font-size:15px">${esc(d.ex)}</span>${d.exz?`<span class="hid">${esc(d.exz)}</span>`:""}</p>`:""}
+${d.ex?`<p class="ex"><span class="de hd" style="color:var(--ink);font-size:15px">${esc(d.ex)}</span>${d.exz?`<span class="hid">${esc(d.exz)}</span>`:""}</p>`:""}
 ${d.n?`<p class="note hid">${esc(d.n)}</p>`:""}
 <div class="btns"><button data-v="1" class="${m===1?"sel":""}">认识了</button><button data-v="0" class="${m===0?"sel":""}">还不熟</button><button data-x="w" class="wbtn">${wr?"移出错题本":"进错题本"}</button>${d.id?`<button data-x="e" class="ed" aria-label="修改">改</button>`:""}</div>
 </article>`}
@@ -340,10 +356,11 @@ else openForm(mine.find(m=>"mine|"+m.id===k));return}
 const b=e.target.closest("button[data-v]");
 if(b){const v=+b.dataset.v;if(mark[k]===v)delete mark[k];else mark[k]=v;save();
 c.classList.toggle("known",mark[k]===1);c.querySelectorAll("button[data-v]").forEach(y=>y.classList.toggle("sel",mark[k]===+y.dataset.v));stats();return}
-if(document.body.classList.contains("hide"))c.classList.toggle("open")});
+if(document.body.classList.contains("hide")||document.body.classList.contains("hideDe"))c.classList.toggle("open")});
 $("q").addEventListener("input",draw);
 $("onlyNo").addEventListener("change",draw);
-$("hide").addEventListener("change",e=>{document.body.classList.toggle("hide",e.target.checked);document.querySelectorAll(".card.open").forEach(c=>c.classList.remove("open"))});
+$("hide").addEventListener("change",e=>{document.body.classList.toggle("hide",e.target.checked);if(e.target.checked){$("hideDe").checked=false;document.body.classList.remove("hideDe")}document.querySelectorAll(".card.open").forEach(c=>c.classList.remove("open"))});
+$("hideDe").addEventListener("change",e=>{document.body.classList.toggle("hideDe",e.target.checked);if(e.target.checked){$("hide").checked=false;document.body.classList.remove("hide")}document.querySelectorAll(".card.open").forEach(c=>c.classList.remove("open"))});
 
 /* ---------- 底部抽屉 ---------- */
 let onClose=null;
@@ -394,7 +411,27 @@ if(!ed)setTimeout(()=>$("fW").focus(),280)}
 $("addBtn").addEventListener("click",()=>openForm(null));
 
 /* ---------- 小测 + 错题本 ---------- */
-let qcfg={sc:"cur",num:10};
+let qcfg={sc:"cur",num:10,ty:"mix",sn:1};
+try{const o=JSON.parse(localStorage.getItem("b1vocab-qcfg")||"null");if(o)qcfg=Object.assign(qcfg,o)}catch(e){}
+const qSave=()=>{try{localStorage.setItem("b1vocab-qcfg",JSON.stringify(qcfg))}catch(e){}};
+/* 判卷小工具 */
+const tokz=t=>String(t||"").replace(/[.,!?;:„“"»«()…–—]/g," ").trim().split(/\s+/).filter(Boolean);
+function lcsDiff(A,B,eq){const n=A.length,m=B.length,L=Array.from({length:n+1},()=>new Array(m+1).fill(0));
+for(let i=n-1;i>=0;i--)for(let j=m-1;j>=0;j--)L[i][j]=eq(A[i],B[j])?L[i+1][j+1]+1:Math.max(L[i+1][j],L[i][j+1]);
+const a=[],b=[];let i=0,j=0;while(i<n&&j<m){if(eq(A[i],B[j])){a.push([A[i],A[i]===B[j]?"":"c"]);b.push([B[j],A[i]===B[j]?"":"c"]);i++;j++}else if(L[i+1][j]>=L[i][j+1]){a.push([A[i],"m"]);i++}else{b.push([B[j],"x"]);j++}}
+while(i<n)a.push([A[i++],"m"]);while(j<m)b.push([B[j++],"x"]);return [a,b]}
+const dWords=arr=>arr.map(([t,c])=>c?`<span class="dm ${c}">${esc(t)}</span>`:esc(t)).join(" ");
+function wMatch(d,typed){const t=typed.trim().replace(/\s+/g," ");if(!t)return {ok:false,empty:true};
+const arts=(d.a||"").split("/").filter(Boolean),noun=arts.length>0;
+const forms=[];String(d.w).split("/").map(x=>x.trim()).filter(Boolean).forEach(x=>forms.push(x));if(forms.length>1)forms.push(String(d.w).trim());
+let ta="",tw=t;const mm=t.match(/^(der|die|das)\s+(.+)$/i);if(mm){ta=mm[1].toLowerCase();tw=mm[2]}
+const exact=forms.find(f=>f===tw),loose=exact||forms.find(f=>f.toLowerCase()===tw.toLowerCase());
+const r={ok:false,wordOk:!!loose,caseWarn:!exact&&!!loose,artOk:true,artMiss:false};
+if(noun){if(!ta){r.artOk=false;r.artMiss=true}else if(!arts.includes(ta))r.artOk=false}
+r.ok=r.wordOk&&r.artOk;return r}
+function zhHit(d,typed){const t=typed.replace(/\s+/g,"");if(!t)return false;
+const parts=String(d.zh).split(/[；;，,、\/（）()「」：:]/).map(x=>x.replace(/\s+/g,"")).filter(Boolean);
+return parts.some(p=>p===t||(t.length>=2&&p.includes(t))||(p.length>=2&&t.includes(p)))}
 const scopes=()=>{const A=ALL(),cur=tab==="all"?A:tab==="wrong"?A.filter(d=>wrong[key(d)]):A.filter(d=>d.s===tab);
 const tname=tab==="all"?"全部":tab==="wrong"?"错题本":SEC[tab];
 return [["cur","当前这组 · "+tname,cur],["wrong","错题本",A.filter(d=>wrong[key(d)])],["no","标了还不熟的",A.filter(d=>mark[key(d)]===0)],["new","还没标过的",A.filter(d=>mark[key(d)]===undefined)]]};
@@ -403,12 +440,16 @@ const S=scopes();
 openSheet("小测一轮",`<p class="hint" style="margin-top:0">答错的自动进错题本；错题本里的词连着答对两次，自动出本。</p>
 <p class="qk">考哪些</p><div class="chips" id="qS">${S.map(([k,l,a])=>`<button data-s="${k}" class="${qcfg.sc===k?"on":""}"${a.length?"":" disabled"}>${esc(l)} · ${a.length}</button>`).join("")}</div>
 <p class="qk">几道</p><div class="chips" id="qN">${[10,20,0].map(n=>`<button data-n="${n}" class="${qcfg.num===n?"on":""}">${n||"全部"}</button>`).join("")}</div>
+<p class="qk">考法</p><div class="chips" id="qTy">${[["mix","混着来"],["de","中→德 默写"],["zh","德→中"],["art","只考冠词"]].map(([k,l])=>`<button data-ty="${k}" class="${qcfg.ty===k?"on":""}">${l}</button>`).join("")}</div>
+<p class="qk">中→德 时连例句一起默写</p><div class="chips" id="qSnOn">${[[1,"默写例句"],[0,"只写单词"]].map(([k,l])=>`<button data-sn="${k}" class="${qcfg.sn===k?"on":""}">${l}</button>`).join("")}</div>
 <div class="qbtn"><button class="pri" id="qGo">开始</button></div>`);
 if(!S.find(s=>s[0]===qcfg.sc)[2].length){const f=S.find(s=>s[2].length);if(f){qcfg.sc=f[0];$("qS").querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.s===f[0]))}}
 $("qS").addEventListener("click",e=>{const b=e.target.closest("button[data-s]");if(!b||b.disabled)return;qcfg.sc=b.dataset.s;$("qS").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b))});
-$("qN").addEventListener("click",e=>{const b=e.target.closest("button[data-n]");if(!b)return;qcfg.num=+b.dataset.n;$("qN").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b))});
-$("qGo").addEventListener("click",()=>{const pool=scopes().find(s=>s[0]===qcfg.sc)[2].slice();
-if(!pool.length){$("qGo").textContent="这组是空的，换一组";return}
+$("qN").addEventListener("click",e=>{const b=e.target.closest("button[data-n]");if(!b)return;qcfg.num=+b.dataset.n;qSave();$("qN").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b))});
+$("qTy").addEventListener("click",e=>{const b=e.target.closest("button[data-ty]");if(!b)return;qcfg.ty=b.dataset.ty;qSave();$("qTy").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b))});
+$("qSnOn").addEventListener("click",e=>{const b=e.target.closest("button[data-sn]");if(!b)return;qcfg.sn=+b.dataset.sn;qSave();$("qSnOn").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b))});
+$("qGo").addEventListener("click",()=>{let pool=scopes().find(s=>s[0]===qcfg.sc)[2].slice();if(qcfg.ty==="art")pool=pool.filter(d=>NOUN((d.a||"").split("/")[0]));
+if(!pool.length){$("qGo").textContent=qcfg.ty==="art"?"这组没有名词，换一组":"这组是空的，换一组";return}
 for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]]}
 runQuiz(qcfg.num?pool.slice(0,qcfg.num):pool)});
 onClose=refresh}
@@ -423,8 +464,9 @@ return `<div class="qr"><div class="top">${d.a?`<span class="art de ${gcls(d.a)}
 const next=()=>{i++;i<items.length?show():end()};
 const nextBtn=t=>`<div class="qbtn"><button class="pri" id="qNx">${i+1<items.length?"下一题":"看结果"}</button></div>`;
 function show(){
-const d=items[i],wr=wrong[key(d)],types=["zh","de"];if(NOUN(d.a))types.push("art");
-const type=wr&&wr.art&&NOUN(d.a)?"art":types[Math.floor(Math.random()*types.length)];
+const d=items[i],wr=wrong[key(d)],isN=NOUN((d.a||"").split("/")[0]);let types=["zh","de","de"];if(isN)types.push("art");
+let type=wr&&wr.art&&isN&&qcfg.ty==="mix"?"art":types[Math.floor(Math.random()*types.length)];
+if(qcfg.ty==="de")type="de";else if(qcfg.ty==="zh")type="zh";else if(qcfg.ty==="art")type="art";
 const head=`<p class="qp">第 ${i+1} / ${items.length} 题 · 对 ${res.ok} · 错 ${res.no}${wr?" · 这个词错过 "+wr.n+" 次":""}</p>`;
 if(type==="art"){
 $("shB").innerHTML=head+`<p class="qk">选冠词</p><p class="qw de">___ ${esc(d.w)}</p><p class="qh">${esc(d.zh)}</p><div class="qa" id="qA">${["der","die","das"].map(a=>`<button data-a="${a}" class="de g-${a}">${a}</button>`).join("")}</div><div id="qF"></div>`;
@@ -432,13 +474,47 @@ $("qA").addEventListener("click",e=>{const b=e.target.closest("button[data-a]");
 const ok=b.dataset.a===d.a,extra=rec(d,ok,"art");
 $("qA").querySelectorAll("button").forEach(x=>{if(x.dataset.a===d.a)x.classList.add("right");else if(x===b)x.classList.add("bad")});
 $("qF").innerHTML=`<p class="qf ${ok?"ok":"no"}">${ok?"对了":"是 "+esc(d.a)+" "+esc(d.w)}${extra}</p>`+ans(d)+nextBtn();$("qNx").addEventListener("click",next)});
+}else if(type==="de"){
+const wantSn=qcfg.sn&&d.ex;
+$("shB").innerHTML=head+`<p class="qk">德语怎么说？${isN?"（冠词也要写上）":""}</p><p class="qw">${esc(d.zh)}</p>${d.en?`<p class="qh">${esc(d.en)}</p>`:""}
+<p class="qlab"><b>写单词</b>${isN?" · 冠词＋名词，中间空一格":""}</p><input id="qDk" class="qIn de" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="${wantSn?"next":"done"}">
+${wantSn?`<p class="qlab"><b>默写例句</b> · ${esc(d.exz||"（这句没有中文，凭印象写）")}</p><textarea id="qSn" class="qIn de" rows="3" autocomplete="off" autocapitalize="sentences" autocorrect="off" spellcheck="false"></textarea>`:""}
+<div class="uml" id="qU">${["ä","ö","ü","ß","Ä","Ö","Ü"].map(u=>`<button type="button" data-u="${u}">${u}</button>`).join("")}</div>
+<div id="qF"><div class="qbtn"><button id="qGiveUp">不会</button><button class="pri" id="qSub">交卷</button></div></div>`;
+let lastIn=$("qDk");[$("qDk"),$("qSn")].forEach(x=>x&&x.addEventListener("focus",()=>lastIn=x));
+$("qU").addEventListener("mousedown",e=>e.preventDefault());
+$("qU").addEventListener("click",e=>{const b=e.target.closest("button[data-u]");if(!b||!lastIn)return;const s0=lastIn.selectionStart??lastIn.value.length,t0=lastIn.selectionEnd??s0;lastIn.value=lastIn.value.slice(0,s0)+b.dataset.u+lastIn.value.slice(t0);lastIn.focus();lastIn.setSelectionRange(s0+1,s0+1)});
+$("qDk").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();if($("qSn"))$("qSn").focus();else $("qSub").click()}});
+const grade=giveUp=>{const typed=giveUp?"":$("qDk").value,sn=giveUp||!$("qSn")?"":$("qSn").value;
+$("qDk").readOnly=true;if($("qSn"))$("qSn").readOnly=true;$("qU").style.display="none";
+const w=wMatch(d,typed);let snOk=true,snHtml="";
+if(wantSn){const A=tokz(d.ex),B=tokz(sn);const [a,b]=lcsDiff(A,B,(x,y)=>x.toLowerCase()===y.toLowerCase());
+snOk=B.length>0&&a.every(x=>x[1]!=="m")&&b.every(x=>x[1]!=="x");
+const caseOnly=snOk&&a.some(x=>x[1]==="c");
+snHtml=`<div class="qyou"><small>你写的例句</small>${B.length?dWords(b):"<span class=\"dm m\">（没写）</span>"}</div><div class="qyou"><small>原句（红色＝漏了或写错的词）</small><span class="de">${dWords(a)}</span></div>${caseOnly?`<p class="qwarn">黄色是大小写不一样——名词首字母要大写，句首也要。</p>`:""}`}
+const wNote=giveUp?"":w.empty?"单词没写":!w.wordOk?`单词写成了「${esc(typed.trim())}」`:w.artMiss?"冠词没写":!w.artOk?"冠词错了":"";
+const ok=w.ok&&snOk;
+const canOv=!ok&&w.ok&&wantSn&&!giveUp;
+const fin=(ok2,ov)=>{const extra=rec(d,ok2,!w.artOk&&w.wordOk?"art":type);
+$("qF").innerHTML=`<p class="qf ${ok2?"ok":"no"}">${ok2?(ov?"好，算你对":"全对"):"进错题本了"}${extra}</p>${!ok2&&wNote?`<p class="qh">${wNote}</p>`:""}${w.caseWarn?`<p class="qwarn">单词大小写不对：德语名词首字母要大写。这次先算对。</p>`:""}${snHtml}`+ans(d)+nextBtn();
+$("qNx").addEventListener("click",next)};
+if(canOv){$("qF").innerHTML=`<p class="qf no">单词对了，例句没对上</p>${snHtml}<button class="qOv" id="qOv">我换了个说法，意思和语法都对——算我对</button><div class="qbtn"><button class="pri" id="qNoOv">确实没记住，进错题本</button></div>`;
+$("qOv").addEventListener("click",()=>fin(true,true));$("qNoOv").addEventListener("click",()=>fin(false,false))}
+else fin(ok,false)};
+$("qSub").addEventListener("click",()=>grade(false));$("qGiveUp").addEventListener("click",()=>grade(true));
+setTimeout(()=>$("qDk").focus(),300);
 }else{
-const zh=type==="zh";
-$("shB").innerHTML=head+(zh?`<p class="qk">这个词什么意思？</p><p class="qw de">${d.a?`<span class="${gcls(d.a)}">${esc(d.a)}</span> `:""}${esc(d.w)}</p>`:`<p class="qk">德语怎么说？${NOUN(d.a)?"（连冠词一起想）":""}</p><p class="qw">${esc(d.zh)}</p>${d.en?`<p class="qh">${esc(d.en)}</p>`:""}`)+
-`<div id="qF"><div class="qbtn"><button class="pri" id="qSee">想好了，看答案</button></div></div>`;
-$("qSee").addEventListener("click",()=>{$("qF").innerHTML=ans(d)+`<div class="qbtn"><button id="qNo">没想起来</button><button class="pri" id="qOk">想起来了</button></div>`;
-const done=ok=>{const extra=rec(d,ok,type);$("qF").innerHTML=`<p class="qf ${ok?"ok":"no"}">${ok?"记住了":"进错题本了"}${extra}</p>`+ans(d)+nextBtn();$("qNx").addEventListener("click",next)};
-$("qNo").addEventListener("click",()=>done(false));$("qOk").addEventListener("click",()=>done(true))})}
+$("shB").innerHTML=head+`<p class="qk">这个词什么意思？</p><p class="qw de">${d.a?`<span class="${gcls(d.a)}">${esc(d.a)}</span> `:""}${esc(d.w)}</p>${d.ex?`<p class="qh de">${esc(d.ex)}</p>`:""}
+<p class="qlab"><b>写中文意思</b></p><input id="qDk" class="qIn" autocomplete="off" enterkeyhint="done">
+<div id="qF"><div class="qbtn"><button id="qGiveUp">不会</button><button class="pri" id="qSub">交卷</button></div></div>`;
+const done=(ok,how)=>{const extra=rec(d,ok,type);$("qF").innerHTML=`<p class="qf ${ok?"ok":"no"}">${ok?(how||"对了"):"进错题本了"}${extra}</p>`+ans(d)+nextBtn();$("qNx").addEventListener("click",next)};
+const grade=giveUp=>{const t=giveUp?"":$("qDk").value.trim();$("qDk").readOnly=true;
+if(!t)return done(false);if(zhHit(d,t))return done(true,"对了");
+$("qF").innerHTML=`<p class="qh">你写的「${esc(t)}」跟词表的说法对不上，自己比一比：</p>`+ans(d)+`<div class="qbtn"><button id="qNo">确实错了</button><button class="pri" id="qOk">意思是对的</button></div>`;
+$("qNo").addEventListener("click",()=>done(false));$("qOk").addEventListener("click",()=>done(true,"意思对，算对"))};
+$("qDk").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();$("qSub").click()}});
+$("qSub").addEventListener("click",()=>grade(false));$("qGiveUp").addEventListener("click",()=>grade(true));
+setTimeout(()=>$("qDk").focus(),300)}
 $("sheet").scrollTop=0}
 function end(){
 $("shB").innerHTML=`<div class="qend"><p class="qk">这一轮</p><b>${res.ok} / ${items.length}</b><p class="qh">新进错题本 ${res.inn} 个 · 出本 ${res.out} 个 · 错题本现在 ${wCount()} 个</p></div>
