@@ -47,14 +47,15 @@ h1{font:600 clamp(30px,6vw,44px)/1.05 Literata,Georgia,serif;margin:0 0 6px;lett
 .legend span b{font-weight:600}
 main{max-width:1240px;margin:auto;padding:6px max(5vw,16px) calc(60px + env(safe-area-inset-bottom));display:grid;gap:12px;grid-template-columns:minmax(0,1fr)}
 @media(min-width:900px){main{grid-template-columns:repeat(2,minmax(0,1fr))}}
-.sec{grid-column:1/-1;font:600 15px/1.4 inherit;color:var(--mute);margin:14px 0 0;padding-bottom:6px;border-bottom:1px solid var(--line)}
+.sec{grid-column:1/-1;font-weight:600;font-size:15px;line-height:1.4;color:var(--mute);margin:14px 0 0;padding-bottom:6px;border-bottom:1px solid var(--line)}
 .card{background:var(--card);border-radius:14px;padding:16px 16px 12px;border:1px solid var(--line);position:relative}
 .card.known{opacity:.62}
 .top{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
 .art{font-weight:600;font-size:17px}
 .g-der{color:var(--der)}.g-die{color:var(--die)}.g-das{color:var(--das)}.g-x{color:var(--mute)}
 .w{font-size:22px;font-weight:600;line-height:1.2}
-.tag{margin-left:auto;font-size:12px;padding:3px 9px;border-radius:20px;white-space:nowrap;border:1px solid currentColor}
+.tags{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.tag{font-size:12px;padding:3px 9px;border-radius:20px;white-space:nowrap;border:1px solid currentColor}
 .lv-m{color:var(--die)}.lv-w{color:var(--acc)}.lv-r{color:var(--mute)}
 .meta{font-size:14px;color:var(--mute);margin-top:4px}
 .meta .de{color:var(--ink)}
@@ -73,6 +74,52 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--acc);outline-of
 .hide .card:not(.open) .hid{filter:blur(7px);user-select:none}
 .hide .card:not(.open){cursor:pointer}
 .empty{grid-column:1/-1;text-align:center;color:var(--mute);padding:40px 0}
+.wb{font-size:12px;padding:3px 9px;border-radius:20px;white-space:nowrap;background:light-dark(#f4e4e4,#3a2627);color:var(--die)}
+.btns button.wbtn{flex:1.15}.btns button.ed{flex:none;width:48px}
+.acts{display:flex;gap:8px;margin-top:8px}
+.acts button{flex:1;font:inherit;font-size:15px;min-height:44px;border-radius:10px;border:0;background:var(--ink);color:var(--card);cursor:pointer}
+.acts button+button{background:var(--acc)}
+footer{text-align:center;padding:0 16px calc(40px + env(safe-area-inset-bottom))}
+footer button{font:inherit;font-size:14px;color:var(--mute);background:none;border:1px solid var(--line);border-radius:10px;padding:8px 16px;min-height:40px;cursor:pointer}
+.ov{position:fixed;inset:0;background:rgba(20,24,22,.38);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);z-index:20;opacity:0;pointer-events:none;transition:opacity .2s}
+.ov.on{opacity:1;pointer-events:auto}
+.sh{position:fixed;left:0;right:0;bottom:0;z-index:21;max-width:640px;margin:auto;background:var(--card);border-radius:18px 18px 0 0;max-height:90vh;max-height:90dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:0 18px calc(20px + env(safe-area-inset-bottom));transform:translateY(105%);transition:transform .25s ease}
+.sh.on{transform:none}
+.sh .hd{position:sticky;top:0;background:var(--card);display:flex;align-items:center;padding:14px 0 10px;z-index:1}
+.sh .hd b{font-size:18px}
+.sh .hd button{margin-left:auto;font:inherit;font-size:14px;border:0;background:var(--tab);color:var(--ink);border-radius:10px;padding:8px 14px;min-height:40px;cursor:pointer}
+.fm label{display:block;font-size:13px;color:var(--mute);margin-top:10px}
+.fm input,.fm select,.fm textarea{display:block;width:100%;margin-top:4px;font:inherit;font-size:16px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);min-height:44px}
+.fm textarea{resize:vertical}
+.tri{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.uml{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.uml button{font:17px Literata,Georgia,serif;min-width:40px;min-height:38px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.dup{font-size:13px;color:var(--die);margin:6px 0 0;min-height:0}
+.dup:empty{display:none}
+.fbtn{display:flex;gap:8px;margin-top:16px}
+.fbtn button,.qbtn button{flex:1;font:inherit;font-size:15px;min-height:46px;border-radius:12px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+.fbtn button.pri,.qbtn button.pri{background:var(--ink);color:var(--card);border-color:var(--ink)}
+.fbtn button.danger{flex:none;padding:0 16px;color:var(--die)}
+.hint{font-size:13px;color:var(--mute);margin:10px 0 0}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 4px}
+.chips button{font:inherit;font-size:14px;min-height:42px;padding:0 14px;border-radius:21px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.chips button.on{background:var(--ink);color:var(--card);border-color:var(--ink)}
+.chips button:disabled{opacity:.4}
+.qp{font-size:13px;color:var(--mute);margin:2px 0 0}
+.qk{font-size:14px;color:var(--mute);margin:18px 0 4px}
+.qw{font-size:30px;font-weight:600;line-height:1.25;margin:0}
+.qh{color:var(--mute);margin:6px 0 0}
+.qr{margin-top:14px;padding:12px 14px;border-radius:12px;background:var(--bg)}
+.qr .mean{margin-top:0}
+.qbtn{display:flex;gap:8px;margin-top:16px}
+.qa{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}
+.qa button{font:600 20px Literata,Georgia,serif;min-height:56px;border-radius:12px;border:1px solid var(--line);background:var(--bg);cursor:pointer}
+.qa button.right{outline:3px solid var(--ok)}.qa button.bad{opacity:.45;text-decoration:line-through}
+.qf{margin-top:12px;font-size:15px;font-weight:600}
+.qf.ok{color:var(--ok)}.qf.no{color:var(--die)}
+.qend{text-align:center;padding:10px 0}
+.qend b{font-size:40px;font-family:Literata,Georgia,serif}
+.bk textarea{font-family:ui-monospace,Menlo,monospace;font-size:12px;word-break:break-all}
 @media(prefers-reduced-motion:reduce){.bar i{transition:none}}
 </style>
 </head>
@@ -90,9 +137,13 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--acc);outline-of
 <label class="tg"><input type="checkbox" id="hide">遮住释义</label>
 <label class="tg"><input type="checkbox" id="onlyNo">只看没背下的</label>
 </div>
+<div class="acts"><button id="addBtn">＋ 加生词</button><button id="quizBtn">小测一轮</button></div>
 <div class="legend"><span><b class="g-der">der</b> 阳性</span><span><b class="g-die">die</b> 阴性</span><span><b class="g-das">das</b> 中性</span><span><b class="lv-m">题干必会</b> 考卷上的指令</span><span><b class="lv-w">要会写</b> 作文用得上</span><span><b class="lv-r">认得就行</b> 阅读见了不懵</span></div>
 </div>
 <main id="list"></main>
+<footer><button id="bk">备份 / 恢复</button></footer>
+<div class="ov" id="ov"></div>
+<section class="sh" id="sheet" role="dialog" aria-modal="true" aria-labelledby="shT"><div class="hd"><b id="shT"></b><button id="shX">关闭</button></div><div id="shB"></div></section>
 <script>
 {
 /* s=节 a=冠词 w=词 pl=复数 full=全称 v=[现在时er,过去时,完成时] vt=动词说明 zh en ex exz n=提示 lv=m/w/r */
@@ -215,19 +266,26 @@ const D=[
 {s:"1.3",a:"",w:"übertragen",v:["überträgt","übertrug","hat übertragen"],vt:"不可分动词",zh:"誊写到，转抄到",en:"to transfer",ex:"Übertragen Sie Ihre Lösungen auf den Antwortbogen.",exz:"请把答案誊到答题卡上。",n:"不可分动词，所以完成时没有 ge-。考试只看答题卡，做完一定要誊。",lv:"m"},
 {s:"1.3",a:"",w:"zuordnen",v:["ordnet zu","ordnete zu","hat zugeordnet"],vt:"可分动词",zh:"匹配，归类",en:"to match, assign",ex:"Ordnen Sie die Anzeigen den Personen zu.",exz:"请把广告和人对应起来。",n:"结构：jemandem（第三格）etwas（第四格）zuordnen。",lv:"m"}
 ];
-const SEC={"1.1":"1.1 缩写","1.2":"1.2 外来词","1.3":"1.3 考试指令词"};
+const SEC={"1.1":"1.1 缩写","1.2":"1.2 外来词","1.3":"1.3 考试指令词","mine":"我的生词"};
 const LV={m:"题干必会",w:"要会写",r:"认得就行"};
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const key=d=>d.s+"|"+d.w;
-let mark={};
-try{mark=JSON.parse(localStorage.getItem("b1vocab-mark")||"{}")}catch(e){mark={}}
-const save=()=>{try{localStorage.setItem("b1vocab-mark",JSON.stringify(mark))}catch(e){}};
+const key=d=>d.id?("mine|"+d.id):(d.s+"|"+d.w);
+const ld=(k,f)=>{try{const v=JSON.parse(localStorage.getItem(k));return v==null?f:v}catch(e){return f}};
+const st=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+let mark=ld("b1vocab-mark",{});if(typeof mark!=="object"||Array.isArray(mark))mark={};
+let mine=ld("b1vocab-mine",[]);if(!Array.isArray(mine))mine=[];
+let wrong=ld("b1vocab-wrong",{});if(typeof wrong!=="object"||Array.isArray(wrong))wrong={};
+const save=()=>st("b1vocab-mark",mark),saveMine=()=>st("b1vocab-mine",mine),saveWrong=()=>st("b1vocab-wrong",wrong);
+const ALL=()=>D.concat(mine);
+const today=()=>{const t=new Date();return t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-"+String(t.getDate()).padStart(2,"0")};
+const NOUN=a=>a==="der"||a==="die"||a==="das";
 let tab="all";
 try{tab=localStorage.getItem("b1vocab-tab")||"all"}catch(e){}
+if(tab!=="all"&&tab!=="wrong"&&!SEC[tab])tab="all";
 const $=id=>document.getElementById(id);
 const gcls=a=>a?("g-"+a.split("/")[0]):"g-x";
 function card(d){
-const k=key(d),m=mark[k];
+const k=key(d),m=mark[k],wr=wrong[k];
 const art=d.a?`<span class="art de ${gcls(d.a)}">${esc(d.a)}</span>`:"";
 const meta=[];
 if(d.full)meta.push(`全称 <span class="de">${esc(d.full)}</span>`);
@@ -235,42 +293,177 @@ if(d.pl)meta.push(`复数 <span class="de">${esc(d.pl)}</span>`);
 if(d.fem)meta.push(`女性 <span class="de">${esc(d.fem)}</span>`);
 if(d.vt)meta.push(esc(d.vt));
 const vf=d.v?`<div class="vf"><div><small>现在时 er/sie</small><span class="de">${esc(d.v[0])}</span></div><div><small>过去时</small><span class="de">${esc(d.v[1])}</span></div><div><small>完成时</small><span class="de">${esc(d.v[2])}</span></div></div>`:"";
+const tg=[];
+if(wr)tg.push(`<span class="wb">错 ${wr.n} 次${wr.art?" · 冠词":""}${wr.s?` · 已连对 ${wr.s}`:""}</span>`);
+if(d.id)tg.push(`<span class="tag lv-r">我加的</span>`);
+if(d.lv)tg.push(`<span class="tag lv-${d.lv}">${LV[d.lv]}</span>`);
 return `<article class="card${m===1?" known":""}" data-k="${esc(k)}">
-<div class="top">${art}<span class="w de">${esc(d.w)}</span><span class="tag lv-${d.lv}">${LV[d.lv]}</span></div>
+<div class="top">${art}<span class="w de">${esc(d.w)}</span><span class="tags">${tg.join("")}</span></div>
 ${meta.length?`<div class="meta">${meta.join(" · ")}</div>`:""}${vf}
-<div class="mean hid">${esc(d.zh)}<span class="en">${esc(d.en)}</span></div>
-<p class="ex"><span class="de" style="color:var(--ink);font-size:15px">${esc(d.ex)}</span><span class="hid">${esc(d.exz)}</span></p>
+<div class="mean hid">${esc(d.zh)}${d.en?`<span class="en">${esc(d.en)}</span>`:""}</div>
+${d.ex?`<p class="ex"><span class="de" style="color:var(--ink);font-size:15px">${esc(d.ex)}</span>${d.exz?`<span class="hid">${esc(d.exz)}</span>`:""}</p>`:""}
 ${d.n?`<p class="note hid">${esc(d.n)}</p>`:""}
-<div class="btns"><button data-v="1" class="${m===1?"sel":""}">认识了</button><button data-v="0" class="${m===0?"sel":""}">还不熟</button></div>
+<div class="btns"><button data-v="1" class="${m===1?"sel":""}">认识了</button><button data-v="0" class="${m===0?"sel":""}">还不熟</button><button data-x="w" class="wbtn">${wr?"移出错题本":"进错题本"}</button>${d.id?`<button data-x="e" class="ed" aria-label="修改">改</button>`:""}</div>
 </article>`}
 function draw(){
 const q=$("q").value.trim().toLowerCase(),only=$("onlyNo").checked;
-let html="",last="",n=0;
-for(const d of D){
-if(tab!=="all"&&d.s!==tab)continue;
+let list=ALL(),html="",last="",n=0;
+if(tab==="wrong")list=list.filter(d=>wrong[key(d)]).sort((a,b)=>wrong[key(b)].n-wrong[key(a)].n);
+for(const d of list){
+if(tab!=="all"&&tab!=="wrong"&&d.s!==tab)continue;
 if(only&&mark[key(d)]===1)continue;
-if(q&&!(d.w+" "+d.zh+" "+(d.full||"")+" "+d.en).toLowerCase().includes(q))continue;
-if(d.s!==last){html+=`<h2 class="sec">${SEC[d.s]}</h2>`;last=d.s}
+if(q&&!(d.w+" "+d.zh+" "+(d.full||"")+" "+(d.en||"")).toLowerCase().includes(q))continue;
+if(tab==="wrong"){if(!last){html+=`<h2 class="sec">错题本 · 错得越多越靠前 · 小测里连对两次自动出本</h2>`;last="w"}}
+else if(d.s!==last){html+=`<h2 class="sec">${SEC[d.s]}</h2>`;last=d.s}
 html+=card(d);n++}
-$("list").innerHTML=n?html:`<p class="empty">${only?"这一组全认识了，换一组吧":"没有找到"}</p>`;
+let em=only?"这一组全认识了，换一组吧":"没有找到";
+if(!q&&!only&&tab==="mine")em="还没有自己加的词。点上面「＋ 加生词」，把今天碰到的第一个放进来";
+if(!q&&!only&&tab==="wrong")em="错题本是空的。做一轮小测，错的会自己跑进来";
+$("list").innerHTML=n?html:`<p class="empty">${em}</p>`;
 stats()}
 function stats(){
-const ok=D.filter(d=>mark[key(d)]===1).length,no=D.filter(d=>mark[key(d)]===0).length;
-$("nAll").textContent=D.length;$("nOk").textContent=ok;$("nNo").textContent=no;$("nNew").textContent=D.length-ok-no;
-$("pg").style.width=(ok/D.length*100)+"%"}
+const A=ALL(),ok=A.filter(d=>mark[key(d)]===1).length,no=A.filter(d=>mark[key(d)]===0).length;
+$("nAll").textContent=A.length;$("nOk").textContent=ok;$("nNo").textContent=no;$("nNew").textContent=A.length-ok-no;
+$("pg").style.width=(A.length?ok/A.length*100:0)+"%"}
+function wCount(){return ALL().filter(d=>wrong[key(d)]).length}
 function tabs(){
-const t=[["all","全部"],...Object.entries(SEC)];
+const t=[["all","全部"],...Object.entries(SEC).map(([k,v])=>[k,k==="mine"&&mine.length?v+" · "+mine.length:v]),["wrong","错题本"+(wCount()?" · "+wCount():"")]];
 $("tabs").innerHTML=t.map(([k,v])=>`<button data-t="${k}" class="${k===tab?"on":""}">${v}</button>`).join("")}
-$("tabs").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;tab=b.dataset.t;try{localStorage.setItem("b1vocab-tab",tab)}catch(x){}tabs();draw();window.scrollTo({top:0})});
+function refresh(){tabs();draw()}
+$("tabs").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;tab=b.dataset.t;try{localStorage.setItem("b1vocab-tab",tab)}catch(x){}refresh();window.scrollTo({top:0})});
 $("list").addEventListener("click",e=>{
 const c=e.target.closest(".card");if(!c)return;
+const k=c.dataset.k;
+const x=e.target.closest("button[data-x]");
+if(x){if(x.dataset.x==="w"){if(wrong[k])delete wrong[k];else wrong[k]={n:1,s:0,last:today()};saveWrong();refresh()}
+else openForm(mine.find(m=>"mine|"+m.id===k));return}
 const b=e.target.closest("button[data-v]");
-if(b){const v=+b.dataset.v,k=c.dataset.k;if(mark[k]===v)delete mark[k];else mark[k]=v;save();
-c.classList.toggle("known",mark[k]===1);c.querySelectorAll("button[data-v]").forEach(x=>x.classList.toggle("sel",mark[k]===+x.dataset.v));stats();return}
+if(b){const v=+b.dataset.v;if(mark[k]===v)delete mark[k];else mark[k]=v;save();
+c.classList.toggle("known",mark[k]===1);c.querySelectorAll("button[data-v]").forEach(y=>y.classList.toggle("sel",mark[k]===+y.dataset.v));stats();return}
 if(document.body.classList.contains("hide"))c.classList.toggle("open")});
 $("q").addEventListener("input",draw);
 $("onlyNo").addEventListener("change",draw);
 $("hide").addEventListener("change",e=>{document.body.classList.toggle("hide",e.target.checked);document.querySelectorAll(".card.open").forEach(c=>c.classList.remove("open"))});
+
+/* ---------- 底部抽屉 ---------- */
+let onClose=null;
+function openSheet(title,html){$("shT").textContent=title;$("shB").innerHTML=html;$("sheet").scrollTop=0;$("ov").classList.add("on");$("sheet").classList.add("on")}
+function closeSheet(){$("ov").classList.remove("on");$("sheet").classList.remove("on");const f=onClose;onClose=null;if(f)f()}
+$("ov").addEventListener("click",closeSheet);$("shX").addEventListener("click",closeSheet);
+
+/* ---------- 自己加生词 ---------- */
+function openForm(it){
+const ed=!!it,o=it||{};
+openSheet(ed?"改一下这个词":"加一个生词",`<div class="fm">
+<label>冠词<select id="fA"><option value="">无（动词、形容词、副词…）</option>${["der","die","das"].map(a=>`<option${o.a===a?" selected":""}>${a}</option>`).join("")}</select></label>
+<label>德语 *<input id="fW" class="de" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" value="${esc(o.w)}"></label>
+<div class="uml">${["ä","ö","ü","ß","Ä","Ö","Ü"].map(u=>`<button type="button" data-u="${u}">${u}</button>`).join("")}</div>
+<p class="dup" id="fDup"></p>
+<label>中文意思 *<input id="fZ" autocomplete="off" value="${esc(o.zh)}"></label>
+<label>英文<input id="fE" autocomplete="off" autocapitalize="off" value="${esc(o.en)}"></label>
+<label id="fPw">复数<input id="fP" class="de" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="die …" value="${esc(o.pl)}"></label>
+<div class="tri" id="fVw"><label>现在时 er/sie<input id="fV0" class="de" autocapitalize="off" spellcheck="false" value="${esc(o.v&&o.v[0])}"></label><label>过去时<input id="fV1" class="de" autocapitalize="off" spellcheck="false" value="${esc(o.v&&o.v[1])}"></label><label>完成时<input id="fV2" class="de" autocapitalize="off" spellcheck="false" placeholder="hat …" value="${esc(o.v&&o.v[2])}"></label></div>
+<label>例句<textarea id="fX" class="de" rows="2" autocapitalize="sentences" spellcheck="false">${esc(o.ex)}</textarea></label>
+<label>例句翻译<input id="fXZ" autocomplete="off" value="${esc(o.exz)}"></label>
+<label>备注（在哪碰到的、容易错在哪）<textarea id="fN" rows="2">${esc(o.n)}</textarea></label>
+<label>分类<select id="fL"><option value="">不标</option><option value="r"${o.lv==="r"?" selected":""}>认得就行</option><option value="w"${o.lv==="w"?" selected":""}>要会写</option></select></label>
+<div class="fbtn">${ed?`<button type="button" class="danger" id="fDel">删掉</button>`:""}<button type="button" class="pri" id="fOk">${ed?"改好了":"放进词盒"}</button></div>
+<p class="hint">只有德语和中文必填，别的空着也行。存在这台手机上，记得偶尔点页面最下面「备份」。</p></div>`);
+let lastIn=$("fW");
+$("shB").querySelectorAll("input,textarea").forEach(i=>i.addEventListener("focus",()=>lastIn=i));
+$("shB").querySelector(".uml").addEventListener("mousedown",e=>e.preventDefault());
+$("shB").querySelector(".uml").addEventListener("click",e=>{const b=e.target.closest("button[data-u]");if(!b||!lastIn)return;
+const s=lastIn.selectionStart??lastIn.value.length,t=lastIn.selectionEnd??s;lastIn.value=lastIn.value.slice(0,s)+b.dataset.u+lastIn.value.slice(t);lastIn.focus();lastIn.setSelectionRange(s+1,s+1);lastIn.dispatchEvent(new Event("input"))});
+const sync=()=>{const noun=$("fA").value!=="";$("fPw").style.display=noun?"":"none";$("fVw").style.display=noun?"none":""};
+$("fA").addEventListener("change",sync);sync();
+const dup=()=>{const v=$("fW").value.trim().toLowerCase();const h=v&&ALL().find(d=>d.w.toLowerCase()===v&&(!o.id||d.id!==o.id));
+$("fDup").textContent=h?`词盒里已经有了：${h.a?h.a+" ":""}${h.w}（${SEC[h.s]}）。还想再加一个也可以。`:""};
+$("fW").addEventListener("input",dup);dup();
+$("fOk").addEventListener("click",()=>{
+const g=id=>$(id).value.trim(),w=g("fW"),zh=g("fZ");
+if(!w){$("fW").focus();return}if(!zh){$("fZ").focus();return}
+const a=$("fA").value,r={id:o.id||(Date.now().toString(36)+Math.random().toString(36).slice(2,6)),s:"mine",a,w,zh,t:o.t||today()};
+const put=(f,v)=>{if(v)r[f]=v};
+put("en",g("fE"));put("ex",g("fX"));put("exz",g("fXZ"));put("n",g("fN"));put("lv",$("fL").value);
+if(a)put("pl",g("fP"));else{const v=[g("fV0"),g("fV1"),g("fV2")];if(v.some(Boolean))r.v=v}
+if(ed){const i=mine.findIndex(m=>m.id===o.id);if(i>=0)mine[i]=r}else mine.unshift(r);
+saveMine();onClose=refresh;closeSheet()});
+if(ed)$("fDel").addEventListener("click",()=>{if(!confirm(`删掉「${o.w}」？删了就找不回了。`))return;
+mine=mine.filter(m=>m.id!==o.id);const k="mine|"+o.id;delete mark[k];delete wrong[k];saveMine();save();saveWrong();onClose=refresh;closeSheet()});
+if(!ed)setTimeout(()=>$("fW").focus(),280)}
+$("addBtn").addEventListener("click",()=>openForm(null));
+
+/* ---------- 小测 + 错题本 ---------- */
+let qcfg={sc:"cur",num:10};
+const scopes=()=>{const A=ALL(),cur=tab==="all"?A:tab==="wrong"?A.filter(d=>wrong[key(d)]):A.filter(d=>d.s===tab);
+const tname=tab==="all"?"全部":tab==="wrong"?"错题本":SEC[tab];
+return [["cur","当前这组 · "+tname,cur],["wrong","错题本",A.filter(d=>wrong[key(d)])],["no","标了还不熟的",A.filter(d=>mark[key(d)]===0)],["new","还没标过的",A.filter(d=>mark[key(d)]===undefined)]]};
+function openQuiz(){
+const S=scopes();
+openSheet("小测一轮",`<p class="hint" style="margin-top:0">答错的自动进错题本；错题本里的词连着答对两次，自动出本。</p>
+<p class="qk">考哪些</p><div class="chips" id="qS">${S.map(([k,l,a])=>`<button data-s="${k}" class="${qcfg.sc===k?"on":""}"${a.length?"":" disabled"}>${esc(l)} · ${a.length}</button>`).join("")}</div>
+<p class="qk">几道</p><div class="chips" id="qN">${[10,20,0].map(n=>`<button data-n="${n}" class="${qcfg.num===n?"on":""}">${n||"全部"}</button>`).join("")}</div>
+<div class="qbtn"><button class="pri" id="qGo">开始</button></div>`);
+if(!S.find(s=>s[0]===qcfg.sc)[2].length){const f=S.find(s=>s[2].length);if(f){qcfg.sc=f[0];$("qS").querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.s===f[0]))}}
+$("qS").addEventListener("click",e=>{const b=e.target.closest("button[data-s]");if(!b||b.disabled)return;qcfg.sc=b.dataset.s;$("qS").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b))});
+$("qN").addEventListener("click",e=>{const b=e.target.closest("button[data-n]");if(!b)return;qcfg.num=+b.dataset.n;$("qN").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b))});
+$("qGo").addEventListener("click",()=>{const pool=scopes().find(s=>s[0]===qcfg.sc)[2].slice();
+if(!pool.length){$("qGo").textContent="这组是空的，换一组";return}
+for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]]}
+runQuiz(qcfg.num?pool.slice(0,qcfg.num):pool)});
+onClose=refresh}
+function runQuiz(items){
+let i=0;const res={ok:0,no:0,inn:0,out:0};
+const rec=(d,ok,type)=>{const k=key(d);
+if(!ok){res.no++;if(!wrong[k])res.inn++;const w=wrong[k]||{n:0,s:0};w.n++;w.s=0;w.last=today();if(type==="art")w.art=1;wrong[k]=w;saveWrong();return ""}
+res.ok++;if(wrong[k]){wrong[k].s=(wrong[k].s||0)+1;if(wrong[k].s>=2){delete wrong[k];res.out++;saveWrong();return " · 连对两次，出本了"}saveWrong();return " · 再对一次就出本"}return ""};
+const ans=d=>{const vf=d.v?`<div class="vf"><div><small>现在时</small><span class="de">${esc(d.v[0])}</span></div><div><small>过去时</small><span class="de">${esc(d.v[1])}</span></div><div><small>完成时</small><span class="de">${esc(d.v[2])}</span></div></div>`:"";
+return `<div class="qr"><div class="top">${d.a?`<span class="art de ${gcls(d.a)}">${esc(d.a)}</span>`:""}<span class="w de">${esc(d.w)}</span></div>${d.pl?`<div class="meta">复数 <span class="de">${esc(d.pl)}</span></div>`:""}${vf}
+<div class="mean" style="margin-top:8px">${esc(d.zh)}${d.en?`<span class="en">${esc(d.en)}</span>`:""}</div>${d.ex?`<p class="ex"><span class="de" style="color:var(--ink)">${esc(d.ex)}</span>${d.exz?`<span>${esc(d.exz)}</span>`:""}</p>`:""}${d.n?`<p class="note">${esc(d.n)}</p>`:""}</div>`};
+const next=()=>{i++;i<items.length?show():end()};
+const nextBtn=t=>`<div class="qbtn"><button class="pri" id="qNx">${i+1<items.length?"下一题":"看结果"}</button></div>`;
+function show(){
+const d=items[i],wr=wrong[key(d)],types=["zh","de"];if(NOUN(d.a))types.push("art");
+const type=wr&&wr.art&&NOUN(d.a)?"art":types[Math.floor(Math.random()*types.length)];
+const head=`<p class="qp">第 ${i+1} / ${items.length} 题 · 对 ${res.ok} · 错 ${res.no}${wr?" · 这个词错过 "+wr.n+" 次":""}</p>`;
+if(type==="art"){
+$("shB").innerHTML=head+`<p class="qk">选冠词</p><p class="qw de">___ ${esc(d.w)}</p><p class="qh">${esc(d.zh)}</p><div class="qa" id="qA">${["der","die","das"].map(a=>`<button data-a="${a}" class="de g-${a}">${a}</button>`).join("")}</div><div id="qF"></div>`;
+$("qA").addEventListener("click",e=>{const b=e.target.closest("button[data-a]");if(!b||$("qA").dataset.done)return;$("qA").dataset.done=1;
+const ok=b.dataset.a===d.a,extra=rec(d,ok,"art");
+$("qA").querySelectorAll("button").forEach(x=>{if(x.dataset.a===d.a)x.classList.add("right");else if(x===b)x.classList.add("bad")});
+$("qF").innerHTML=`<p class="qf ${ok?"ok":"no"}">${ok?"对了":"是 "+esc(d.a)+" "+esc(d.w)}${extra}</p>`+ans(d)+nextBtn();$("qNx").addEventListener("click",next)});
+}else{
+const zh=type==="zh";
+$("shB").innerHTML=head+(zh?`<p class="qk">这个词什么意思？</p><p class="qw de">${d.a?`<span class="${gcls(d.a)}">${esc(d.a)}</span> `:""}${esc(d.w)}</p>`:`<p class="qk">德语怎么说？${NOUN(d.a)?"（连冠词一起想）":""}</p><p class="qw">${esc(d.zh)}</p>${d.en?`<p class="qh">${esc(d.en)}</p>`:""}`)+
+`<div id="qF"><div class="qbtn"><button class="pri" id="qSee">想好了，看答案</button></div></div>`;
+$("qSee").addEventListener("click",()=>{$("qF").innerHTML=ans(d)+`<div class="qbtn"><button id="qNo">没想起来</button><button class="pri" id="qOk">想起来了</button></div>`;
+const done=ok=>{const extra=rec(d,ok,type);$("qF").innerHTML=`<p class="qf ${ok?"ok":"no"}">${ok?"记住了":"进错题本了"}${extra}</p>`+ans(d)+nextBtn();$("qNx").addEventListener("click",next)};
+$("qNo").addEventListener("click",()=>done(false));$("qOk").addEventListener("click",()=>done(true))})}
+$("sheet").scrollTop=0}
+function end(){
+$("shB").innerHTML=`<div class="qend"><p class="qk">这一轮</p><b>${res.ok} / ${items.length}</b><p class="qh">新进错题本 ${res.inn} 个 · 出本 ${res.out} 个 · 错题本现在 ${wCount()} 个</p></div>
+<div class="qbtn"><button id="qWb">去错题本</button><button class="pri" id="qAg">再来一轮</button></div>`;
+$("qAg").addEventListener("click",openQuiz);
+$("qWb").addEventListener("click",()=>{tab="wrong";try{localStorage.setItem("b1vocab-tab",tab)}catch(x){}onClose=()=>{refresh();window.scrollTo({top:0})};closeSheet()})}
+onClose=refresh;show()}
+$("quizBtn").addEventListener("click",openQuiz);
+
+/* ---------- 备份 ---------- */
+$("bk").addEventListener("click",()=>{
+let code="";try{code="B1V1:"+btoa(unescape(encodeURIComponent(JSON.stringify({mark,mine,wrong}))))}catch(e){}
+openSheet("备份 / 恢复",`<div class="fm bk"><p class="hint" style="margin-top:0">你的标记、自己加的词、错题本都只存在这台手机上。把下面这串整个复制，存进备忘录，换手机或数据丢了还能找回来。</p>
+<label>我的备份码<textarea id="bkO" rows="4" readonly>${esc(code)}</textarea></label>
+<div class="fbtn"><button type="button" class="pri" id="bkC">复制备份码</button></div>
+<label style="margin-top:22px">恢复：把以前存的备份码粘贴进来<textarea id="bkI" rows="4" spellcheck="false" autocapitalize="off"></textarea></label>
+<div class="fbtn"><button type="button" id="bkR">用这份恢复</button></div><p class="dup" id="bkM"></p></div>`);
+$("bkC").addEventListener("click",async()=>{const t=$("bkO");try{await navigator.clipboard.writeText(t.value);$("bkC").textContent="复制好了"}catch(e){t.focus();t.select();t.setSelectionRange(0,t.value.length);$("bkC").textContent="已全选，长按拷贝"}});
+$("bkR").addEventListener("click",()=>{const s=$("bkI").value.trim().replace(/^B1V1:/,"");let o;
+try{o=JSON.parse(decodeURIComponent(escape(atob(s))))}catch(e){$("bkM").textContent="这串码读不出来，检查一下是不是复制全了。";return}
+if(!o||typeof o!=="object"){$("bkM").textContent="这串码读不出来。";return}
+if(!confirm("会用这份备份替换现在的标记、生词和错题本，确定吗？"))return;
+mark=o.mark&&typeof o.mark==="object"?o.mark:{};mine=Array.isArray(o.mine)?o.mine:[];wrong=o.wrong&&typeof o.wrong==="object"?o.wrong:{};
+save();saveMine();saveWrong();onClose=refresh;closeSheet()})});
+
 tabs();draw();
 }
 </script>
